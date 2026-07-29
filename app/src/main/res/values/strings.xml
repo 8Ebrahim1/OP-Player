@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OP Player</string>
+    <string name="brand">OP Player</string>
+
+    <string name="tab_links">لینک‌ها</string>
+    <string name="tab_device">گوشی من</string>
+
+    <string name="library_title">کتابخانه</string>
+    <string name="section_library">همه</string>
+    <string name="section_favorites">علاقه‌مندی‌ها</string>
+    <string name="section_recent">اخیر</string>
+
+    <string name="add_link">افزودن لینک</string>
+    <string name="add_link_title">افزودن ویدیوی جدید</string>
+    <string name="field_name">نام ویدیو</string>
+    <string name="field_url">آدرس ویدیو (mp4، mkv، m3u8، mpd …)</string>
+    <string name="field_subtitle">آدرس زیرنویس (اختیاری)</string>
+    <string name="invalid_url">آدرس واردشده معتبر نیست</string>
+    <string name="save_and_play">ذخیره و پخش</string>
+    <string name="cancel">انصراف</string>
+    <string name="default_video_name">ویدیوی بدون نام</string>
+
+    <string name="link_mode_simple">ساده</string>
+    <string name="link_mode_advanced">پیشرفته</string>
+    <string name="advanced_link_hint">لینک دو قسمت پشت‌سرهم را وارد کنید؛ برنامه خودش تشخیص می‌دهد کدام بخش لینک تغییر می‌کند و بقیهٔ قسمت‌ها را می‌سازد.</string>
+    <string name="field_url_current">لینک قسمت فعلی</string>
+    <string name="field_url_next">لینک قسمت بعدی</string>
+    <string name="pattern_detected">الگو شناسایی شد — شمارهٔ فعلی: %1$s، گام: %2$s</string>
+    <string name="pattern_preview">قسمت بعدی: %1$s</string>
+    <string name="pattern_error_empty">هر دو لینک را وارد کنید</string>
+    <string name="pattern_error_identical">دو لینک کاملاً یکسان هستند</string>
+    <string name="pattern_error_numeric">بخش متغیر بین دو لینک عدد نیست یا بیش از یک قسمت تغییر کرده است</string>
+    <string name="pattern_error_increasing">عدد لینک دوم باید کمی بزرگ‌تر از لینک اول باشد</string>
+    <string name="pattern_error_too_long">عدد متغیر بیش از حد طولانی است</string>
+
+    <string name="empty_library_title">هنوز ویدیویی اضافه نکرده‌اید</string>
+    <string name="empty_library_body">یک لینک آنلاین اضافه کنید تا همین‌جا پخش شود.</string>
+    <string name="empty_favorites_title">لیست علاقه‌مندی خالی است</string>
+    <string name="empty_favorites_body">با زدن قلب روی هر ویدیو، اینجا ذخیره می‌شود.</string>
+    <string name="empty_recent_title">پخش اخیری وجود ندارد</string>
+    <string name="empty_recent_body">هر ویدیویی که پخش کنید اینجا نمایش داده می‌شود.</string>
+    <string name="add_first_video">افزودن اولین ویدیو</string>
+
+    <string name="continue_playback">ادامه از %1$s</string>
+    <string name="online_link">لینک آنلاین</string>
+    <string name="favorite">علاقه‌مندی</string>
+    <string name="delete">حذف</string>
+    <string name="play">پخش</string>
+    <string name="delete_dialog_title">حذف ویدیو</string>
+    <string name="delete_dialog_body">«%1$s» از کتابخانه حذف شود؟</string>
+
+    <string name="device_title">ویدیوهای گوشی</string>
+    <string name="permission_title">دسترسی به ویدیوها لازم است</string>
+    <string name="permission_body">برای نمایش ویدیوهای داخل گوشی به‌صورت پوشه‌بندی‌شده، به اجازهٔ دسترسی نیاز داریم.</string>
+    <string name="permission_grant">اجازه می‌دهم</string>
+    <string name="permission_settings">باز کردن تنظیمات</string>
+    <string name="no_local_videos">ویدیویی در گوشی پیدا نشد</string>
+    <string name="refresh">بارگذاری دوباره</string>
+    <string name="search_videos">جستجوی ویدیو…</string>
+    <string name="folder_summary">%1$s ویدیو</string>
+
+    <string name="back">بازگشت</string>
+    <string name="pip">تصویر در تصویر</string>
+    <string name="pip_unavailable">این دستگاه از حالت تصویر در تصویر پشتیبانی نمی‌کند</string>
+    <string name="fullscreen">تمام‌صفحه</string>
+    <string name="exit_fullscreen">خروج از تمام‌صفحه</string>
+    <string name="resize_mode">نسبت تصویر</string>
+    <string name="retry">تلاش دوباره</string>
+
+    <string name="settings_title">تنظیمات پخش</string>
+    <string name="speed_label">سرعت پخش</string>
+    <string name="speed_current">سرعت فعلی: %1$s×</string>
+    <string name="speed_custom_label">سرعت دلخواه</string>
+    <string name="speed_custom_hint">عددی بین ۰٫۱ تا ۶ مانند ۱٫۸</string>
+    <string name="speed_custom_invalid">عدد معتبر بین ۰٫۱ تا ۶ وارد کنید</string>
+    <string name="apply">اعمال</string>
+    <string name="aspect_fit">متناسب</string>
+    <string name="aspect_zoom">بزرگ‌نمایی</string>
+    <string name="aspect_fill">کشیده</string>
+
+    <string name="auto_rotate_label">چرخش خودکار صفحه</string>
+    <string name="auto_rotate_body">ویدیوی افقی (مثل ۱۹۲۰×۱۰۸۰) افقی و ویدیوی عمودی (مثل استوری و ریلز) عمودی پخش شود</string>
+    <string name="gestures_label">کنترل با کشیدن انگشت</string>
+    <string name="gestures_body">سمت راست صدا، سمت چپ روشنایی؛ دو ضربه برای جابه‌جایی ۱۵ ثانیه‌ای</string>
+    <string name="gesture_volume">صدا</string>
+    <string name="gesture_brightness">روشنایی</string>
+    <string name="seek_forward">۱۵ ثانیه جلو</string>
+    <string name="seek_backward">۱۵ ثانیه عقب</string>
+
+    <string name="next_episode">قسمت بعدی</string>
+    <string name="now_playing_episode">در حال پخش: %1$s</string>
+    <string name="next_episode_not_found">قسمت بعدی روی سرور پیدا نشد؛ احتمالاً این آخرین قسمت است</string>
+    <string name="episode_pattern_missing">در این لینک نشانهٔ قسمت یا فصل (مانند S01E02) پیدا نشد</string>
+    <string name="auto_next_label">پخش خودکار قسمت بعدی</string>
+    <string name="auto_next_body">پس از پایان ویدیو، خودکار برو به قسمت بعد</string>
+
+    <string name="error_network">اتصال به اینترنت برقرار نیست یا آدرس در دسترس نیست</string>
+    <string name="error_not_found">فایل یا لینک پیدا نشد</string>
+    <string name="error_format">این قالب یا کدک روی دستگاه شما پشتیبانی نمی‌شود</string>
+    <string name="error_drm">این محتوا دارای قفل DRM است و قابل پخش نیست</string>
+    <string name="error_unknown">خطای ناشناخته در پخش</string>
+    <string name="reset_progress">شروع از ابتدا</string>
+    <string name="current_episode">قسمت %1$s</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="op_background">#FF090B13</color>
+    <color name="op_surface">#FF111420</color>
+    <color name="op_primary">#FF83E7FF</color>
+</resources>
