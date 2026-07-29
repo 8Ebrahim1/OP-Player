@@ -7,7 +7,6 @@
 [فارسی](README.fa.md) · [Developer notes (FA)](docs/DEVELOPMENT-fa.md)
 
 ![version](https://img.shields.io/badge/version-1.3.1-blue)
-![ci](https://github.com/8Ebrahim1/OP-Player/actions/workflows/android.yml/badge.svg)
 ![minSdk](https://img.shields.io/badge/minSdk-26-green)
 ![targetSdk](https://img.shields.io/badge/targetSdk-35-green)
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
