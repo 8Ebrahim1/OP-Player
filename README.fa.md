@@ -6,8 +6,7 @@
 
 [English](README.md) · [یادداشت‌های توسعه](docs/DEVELOPMENT-fa.md)
 
-![version](https://img.shields.io/badge/version-1.3.0-blue)
-![ci](https://github.com/8Ebrahim1/OPPlayer/actions/workflows/android.yml/badge.svg)
+![version](https://img.shields.io/badge/version-1.3.1-blue)
 ![minSdk](https://img.shields.io/badge/minSdk-26-green)
 ![targetSdk](https://img.shields.io/badge/targetSdk-35-green)
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
