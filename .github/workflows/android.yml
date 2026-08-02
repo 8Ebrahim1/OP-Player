@@ -31,13 +31,13 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
-	with:
-	  gradle-version: '8.10.2'
+                with:
+                    gradle-version: '8.10.2'
 
       - name: Generate Gradle wrapper
         run: |
-	  gradle wrapper --gradle-version 8.10.2
-	  chmod +x ./gradlew
+                    gradle wrapper --gradle-version 8.10.2
+                    chmod +x ./gradlew
 
       - name: Wrapper sanity check
         run: ./gradlew --version
@@ -111,13 +111,13 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
-	with:
-	  gradle-version: '8.10.2'
+                with:
+                    gradle-version: '8.10.2'
 
       - name: Generate Gradle wrapper
         run: |
-	  gradle wrapper --gradle-version 8.10.2
-	  chmod +x ./gradlew
+                    gradle wrapper --gradle-version 8.10.2
+                    chmod +x ./gradlew
 
       - name: Enable KVM
         run: |
