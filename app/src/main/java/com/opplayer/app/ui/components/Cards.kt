@@ -34,17 +34,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.opplayer.app.R
 import com.opplayer.app.data.LocalVideo
 import com.opplayer.app.data.VideoFolder
 import com.opplayer.app.data.VideoItem
+import com.opplayer.app.ui.localization.usePersianDigits
 import com.opplayer.app.ui.theme.OpAccentPink
+import com.opplayer.app.util.formatCount
 import com.opplayer.app.util.formatDuration
 import com.opplayer.app.util.formatSize
 import com.opplayer.app.util.rememberVideoThumbnail
-import com.opplayer.app.util.toPersianDigits
 
 @Composable
 fun LibraryVideoCard(
@@ -55,6 +58,8 @@ fun LibraryVideoCard(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val persianDigits = usePersianDigits()
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -102,7 +107,12 @@ fun LibraryVideoCard(
                     ?.let { stringResource(R.string.current_episode, it) }
                 val progressText = item.positionMs
                     .takeIf { it > 0L }
-                    ?.let { stringResource(R.string.continue_playback, formatDuration(it)) }
+                    ?.let {
+                        stringResource(
+                            R.string.continue_playback,
+                            formatDuration(it, persianDigits)
+                        )
+                    }
 
                 Text(
                     text = listOfNotNull(episodeText, progressText)
@@ -116,10 +126,26 @@ fun LibraryVideoCard(
             }
         }
 
-        IconButton(onClick = onToggleFavorite) {
+        // The description used to be the static word "favourite", which told a
+        // screen reader nothing about the state or about what the tap does.
+        val favoriteAction = if (item.isFavorite) {
+            stringResource(R.string.remove_from_favorites)
+        } else {
+            stringResource(R.string.add_to_favorites)
+        }
+        val favoriteState = if (item.isFavorite) {
+            stringResource(R.string.favorite_state_on)
+        } else {
+            stringResource(R.string.favorite_state_off)
+        }
+
+        IconButton(
+            onClick = onToggleFavorite,
+            modifier = Modifier.semantics { stateDescription = favoriteState }
+        ) {
             Icon(
                 imageVector = if (item.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                contentDescription = stringResource(R.string.favorite),
+                contentDescription = favoriteAction,
                 tint = if (item.isFavorite) OpAccentPink else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -150,6 +176,8 @@ fun FolderCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val persianDigits = usePersianDigits()
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -177,8 +205,10 @@ fun FolderCard(
             )
 
             Text(
-                text = stringResource(R.string.folder_summary, folder.count.toPersianDigits()) +
-                    "  \u00b7  " + formatDuration(folder.totalDurationMs),
+                text = stringResource(
+                    R.string.folder_summary,
+                    formatCount(folder.count, persianDigits)
+                ) + "  \u00b7  " + formatDuration(folder.totalDurationMs, persianDigits),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -194,6 +224,7 @@ fun LocalVideoCard(
     modifier: Modifier = Modifier
 ) {
     val thumbnail by rememberVideoThumbnail(video)
+    val persianDigits = usePersianDigits()
 
     Row(
         modifier = modifier
@@ -228,7 +259,7 @@ fun LocalVideoCard(
             }
 
             Text(
-                text = formatDuration(video.durationMs),
+                text = formatDuration(video.durationMs, persianDigits),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White,
                 modifier = Modifier
@@ -257,7 +288,7 @@ fun LocalVideoCard(
             Text(
                 text = listOfNotNull(
                     video.extension.takeIf { it.isNotBlank() },
-                    formatSize(video.sizeBytes).takeIf { it.isNotBlank() }
+                    formatSize(video.sizeBytes, persianDigits).takeIf { it.isNotBlank() }
                 ).joinToString("  \u00b7  "),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -267,7 +298,7 @@ fun LocalVideoCard(
                 Text(
                     text = stringResource(
                         R.string.continue_playback,
-                        formatDuration(resumePositionMs)
+                        formatDuration(resumePositionMs, persianDigits)
                     ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary

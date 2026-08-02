@@ -1,19 +1,23 @@
 package com.opplayer.app.player
 
-import com.opplayer.app.BuildConfig
-
 import android.net.Uri
 import com.opplayer.app.data.EpisodePattern
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.net.HttpURLConnection
-import java.net.URL
 
+/**
+ * Reads and rewrites the season/episode marker inside a media URL.
+ *
+ * Availability checks are delegated to an [AvailabilityProbe], so the parsing
+ * rules here stay pure and unit testable, and a network failure keeps its own
+ * identity all the way up to the UI instead of collapsing into "not found".
+ */
 object EpisodeNavigator {
-    private val USER_AGENT: String = "OPPlayer/" + BuildConfig.VERSION_NAME + " (Android)"
-    private const val TIMEOUT_MS = 8_000
 
     private const val MAX_SEASON_LOOKAHEAD = 1
+
+    /** How far back the first episode of a season looks into the previous one. */
+    const val MAX_PREVIOUS_SEASON_EPISODE = 24
+
+    private val defaultProbe: AvailabilityProbe by lazy { HttpAvailabilityProbe() }
 
     data class Marker(
         val seasonRange: IntRange?,
@@ -29,6 +33,13 @@ object EpisodeNavigator {
         val season: Int?,
         val episode: Int
     )
+
+    /** Outcome of walking a list of candidates. */
+    sealed interface Resolution {
+        data class Found(val candidate: Candidate) : Resolution
+        data object NotFound : Resolution
+        data object NetworkUnavailable : Resolution
+    }
 
     // S01E02 / s1.e2 / S01 - E02
     private val seasonEpisodeRegex = Regex("""[Ss](\d{1,3})[._\-\s]{0,4}[Ee](\d{1,3})""")
@@ -120,34 +131,97 @@ object EpisodeNavigator {
         return candidates
     }
 
+    /**
+     * Candidates for the previous episode.
+     *
+     * The first episode of a season is no longer a dead end: S02E01 walks back
+     * into the last episode of season one, trying the highest plausible number
+     * first. The list is bounded by [MAX_PREVIOUS_SEASON_EPISODE] and probing
+     * stops at the first hit.
+     */
     fun previousCandidates(url: String): List<Candidate> {
         val marker = findMarker(url) ?: return emptyList()
-        if (marker.episodeValue <= 1) return emptyList()
 
-        return listOf(
-            Candidate(
-                url = buildUrl(url, marker, null, marker.episodeValue - 1),
-                season = marker.seasonValue,
-                episode = marker.episodeValue - 1
+        if (marker.episodeValue > 1) {
+            return listOf(
+                Candidate(
+                    url = buildUrl(url, marker, null, marker.episodeValue - 1),
+                    season = marker.seasonValue,
+                    episode = marker.episodeValue - 1
+                )
             )
-        )
-    }
-
-    suspend fun resolveNext(url: String): Candidate? = resolveFirstAvailable(nextCandidates(url))
-
-    suspend fun resolvePrevious(url: String): Candidate? =
-        resolveFirstAvailable(previousCandidates(url))
-
-    private suspend fun resolveFirstAvailable(candidates: List<Candidate>): Candidate? =
-        withContext(Dispatchers.IO) {
-            candidates.firstOrNull { exists(it.url) }
         }
 
-    suspend fun isAvailable(url: String): Boolean = withContext(Dispatchers.IO) { exists(url) }
+        val season = marker.seasonValue ?: return emptyList()
+        if (season <= 1 || marker.seasonRange == null) return emptyList()
 
-    suspend fun resolvePattern(pattern: EpisodePattern, forward: Boolean): EpisodePattern? {
-        val candidate = (if (forward) pattern.next() else pattern.previous()) ?: return null
-        return withContext(Dispatchers.IO) { if (exists(candidate.url)) candidate else null }
+        val previousSeason = season - 1
+        return (MAX_PREVIOUS_SEASON_EPISODE downTo 1).map { episode ->
+            Candidate(
+                url = buildUrl(url, marker, previousSeason, episode),
+                season = previousSeason,
+                episode = episode
+            )
+        }
+    }
+
+    suspend fun resolveNext(
+        url: String,
+        probe: AvailabilityProbe = defaultProbe
+    ): Resolution = resolveFirstAvailable(nextCandidates(url), probe)
+
+    suspend fun resolvePrevious(
+        url: String,
+        probe: AvailabilityProbe = defaultProbe
+    ): Resolution = resolveFirstAvailable(previousCandidates(url), probe)
+
+    /**
+     * Probes candidates in order.
+     *
+     * A network failure is remembered and reported only when no candidate could
+     * be confirmed, so one flaky URL does not mask a working one.
+     */
+    private suspend fun resolveFirstAvailable(
+        candidates: List<Candidate>,
+        probe: AvailabilityProbe
+    ): Resolution {
+        var offline = false
+
+        for (candidate in candidates) {
+            when (probe.probe(candidate.url)) {
+                AvailabilityResult.Available -> return Resolution.Found(candidate)
+                AvailabilityResult.NetworkUnavailable -> offline = true
+                AvailabilityResult.NotAvailable -> Unit
+            }
+        }
+
+        return if (offline) Resolution.NetworkUnavailable else Resolution.NotFound
+    }
+
+    suspend fun isAvailable(url: String, probe: AvailabilityProbe = defaultProbe): Boolean =
+        probe.probe(url) == AvailabilityResult.Available
+
+    /** Resolves the neighbouring episode of a stored [EpisodePattern]. */
+    suspend fun resolvePattern(
+        pattern: EpisodePattern,
+        forward: Boolean,
+        probe: AvailabilityProbe = defaultProbe
+    ): PatternResolution {
+        val candidate = (if (forward) pattern.next() else pattern.previous())
+            ?: return PatternResolution.NotFound
+
+        return when (probe.probe(candidate.url)) {
+            AvailabilityResult.Available -> PatternResolution.Found(candidate)
+            AvailabilityResult.NetworkUnavailable -> PatternResolution.NetworkUnavailable
+            AvailabilityResult.NotAvailable -> PatternResolution.NotFound
+        }
+    }
+
+    /** Outcome of [resolvePattern]. */
+    sealed interface PatternResolution {
+        data class Found(val pattern: EpisodePattern) : PatternResolution
+        data object NotFound : PatternResolution
+        data object NetworkUnavailable : PatternResolution
     }
 
     fun displayName(url: String): String {
@@ -165,50 +239,7 @@ object EpisodeNavigator {
             ?: "E$episode"
     }
 
-    private fun exists(url: String): Boolean {
-        if (!url.startsWith("http", ignoreCase = true)) return false
+    private fun IntRange.shift(offset: Int): IntRange = IntRange(first + offset, last + offset)
 
-        val headResult = runCatching {
-            val connection = openConnection(url, "HEAD")
-            val code = connection.responseCode
-            connection.disconnect()
-            code
-        }.getOrNull() ?: return probeWithRange(url)
-
-        return when {
-            headResult in 200..299 -> true
-            headResult == 403 || headResult == 405 || headResult == 501 -> probeWithRange(url)
-            else -> false
-        }
-    }
-
-    private fun probeWithRange(url: String): Boolean = runCatching {
-        val connection = openConnection(url, "GET").apply {
-            setRequestProperty("Range", "bytes=0-0")
-        }
-        val code = connection.responseCode
-        val readable = if (code in 200..299) {
-            runCatching { connection.inputStream.use { it.read() } }.isSuccess
-        } else {
-            false
-        }
-        connection.disconnect()
-        readable
-    }.getOrDefault(false)
-
-    private fun openConnection(url: String, method: String): HttpURLConnection =
-        (URL(url).openConnection() as HttpURLConnection).apply {
-            requestMethod = method
-            connectTimeout = TIMEOUT_MS
-            readTimeout = TIMEOUT_MS
-            instanceFollowRedirects = true
-            setRequestProperty("User-Agent", USER_AGENT)
-            setRequestProperty("Accept", "*/*")
-        }
-
-    private fun IntRange.shift(offset: Int): IntRange =
-        IntRange(first + offset, last + offset)
-
-    private fun Int.pad(width: Int): String =
-        toString().padStart(width.coerceAtLeast(1), '0')
+    private fun Int.pad(width: Int): String = toString().padStart(width.coerceAtLeast(1), '0')
 }

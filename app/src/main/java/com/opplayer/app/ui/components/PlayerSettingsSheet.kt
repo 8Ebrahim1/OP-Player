@@ -34,8 +34,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.media3.ui.AspectRatioFrameLayout
 import com.opplayer.app.R
+import com.opplayer.app.player.VideoScaleMode
+import com.opplayer.app.ui.localization.LocalizedWindow
+import com.opplayer.app.ui.localization.usePersianDigits
+import com.opplayer.app.util.localizeDigits
 import com.opplayer.app.util.toLatinDigits
 
 val speedPresets = listOf(0.25f, 0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f, 2.5f, 3f)
@@ -47,28 +50,33 @@ const val MAX_SPEED = 6f
 @Composable
 fun PlayerSettingsSheet(
     currentSpeed: Float,
-    resizeMode: Int,
+    scaleMode: VideoScaleMode,
     autoNextEnabled: Boolean,
     autoRotateEnabled: Boolean,
     gesturesEnabled: Boolean,
     showEpisodeOptions: Boolean,
     onSpeedChange: (Float) -> Unit,
-    onResizeModeChange: (Int) -> Unit,
+    onScaleModeChange: (VideoScaleMode) -> Unit,
     onAutoNextChange: (Boolean) -> Unit,
     onAutoRotateChange: (Boolean) -> Unit,
     onGesturesChange: (Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val persianDigits = usePersianDigits()
 
     var customSpeed by remember { mutableStateOf("") }
     var customError by remember { mutableStateOf(false) }
+    var showHelp by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface
     ) {
+        // A sheet is its own window, so the language chosen in the settings has
+        // to be restored here or its strings follow the device locale.
+        LocalizedWindow {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -77,11 +85,16 @@ fun PlayerSettingsSheet(
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 20.dp)
         ) {
-            Text(
-                text = stringResource(R.string.settings_title),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(R.string.settings_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+
+                HelpIconButton(onClick = { showHelp = true })
+            }
 
             Spacer(modifier = Modifier.height(18.dp))
 
@@ -92,7 +105,10 @@ fun PlayerSettingsSheet(
             )
 
             Text(
-                text = stringResource(R.string.speed_current, formatSpeed(currentSpeed)),
+                text = stringResource(
+                    R.string.speed_current,
+                    formatSpeed(currentSpeed, persianDigits)
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -108,7 +124,7 @@ fun PlayerSettingsSheet(
                     FilterChip(
                         selected = isSameSpeed(currentSpeed, preset),
                         onClick = { onSpeedChange(preset) },
-                        label = { Text("${formatSpeed(preset)}\u00d7") }
+                        label = { Text("${formatSpeed(preset, persianDigits)}\u00d7") }
                     )
                 }
             }
@@ -177,16 +193,16 @@ fun PlayerSettingsSheet(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 val modes = listOf(
-                    AspectRatioFrameLayout.RESIZE_MODE_FIT to R.string.aspect_fit,
-                    AspectRatioFrameLayout.RESIZE_MODE_ZOOM to R.string.aspect_zoom,
-                    AspectRatioFrameLayout.RESIZE_MODE_FILL to R.string.aspect_fill
+                    VideoScaleMode.FIT,
+                    VideoScaleMode.ZOOM,
+                    VideoScaleMode.FILL
                 )
 
-                modes.forEach { (mode, labelRes) ->
+                modes.forEach { mode ->
                     FilterChip(
-                        selected = resizeMode == mode,
-                        onClick = { onResizeModeChange(mode) },
-                        label = { Text(stringResource(labelRes)) }
+                        selected = scaleMode == mode,
+                        onClick = { onScaleModeChange(mode) },
+                        label = { Text(stringResource(mode.labelRes)) }
                     )
                 }
             }
@@ -226,6 +242,15 @@ fun PlayerSettingsSheet(
                 )
             }
         }
+        }
+    }
+
+    if (showHelp) {
+        HelpSheet(
+            title = stringResource(R.string.help_player_title),
+            entries = playerHelpEntries(),
+            onDismiss = { showHelp = false }
+        )
     }
 }
 
@@ -271,17 +296,21 @@ fun parseSpeed(input: String): Float? {
     return (Math.round(value * 100f) / 100f)
 }
 
-fun formatSpeed(speed: Float): String {
+/**
+ * Formats a playback speed such as `1٫25`.
+ *
+ * Digit shaping is opt in: the sheet passes the value of the active interface
+ * language, so the English interface no longer shows Persian numerals.
+ */
+fun formatSpeed(speed: Float, persianDigits: Boolean = false): String {
     val text = if (speed % 1f == 0f) {
         speed.toInt().toString()
     } else {
         speed.toString().trimEnd('0').trimEnd('.')
     }
-    return text.replace('.', '\u066b').toPersianSpeedDigits()
+    // Digit conversion lives in util.Formatters; this file used to carry its
+    // own private copy of the same mapping.
+    return text.localizeDigits(persianDigits)
 }
-
-private fun String.toPersianSpeedDigits(): String = map { ch ->
-    if (ch in '0'..'9') ('\u06f0' + (ch - '0')) else ch
-}.joinToString("")
 
 private fun isSameSpeed(a: Float, b: Float): Boolean = kotlin.math.abs(a - b) < 0.001f

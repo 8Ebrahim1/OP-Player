@@ -3,19 +3,19 @@ package com.opplayer.app.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Smartphone
+import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -26,14 +26,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.opplayer.app.R
 import com.opplayer.app.player.PlaybackRequest
+import com.opplayer.app.ui.components.AppSettingsSheet
 import com.opplayer.app.ui.components.GlassBackground
+import com.opplayer.app.ui.components.SubtitleSettingsSheet
+import com.opplayer.app.ui.localization.AppLocalization
+import com.opplayer.app.ui.onboarding.OnboardingScreen
 import com.opplayer.app.ui.screens.DeviceVideosScreen
 import com.opplayer.app.ui.screens.LibraryScreen
 import com.opplayer.app.ui.screens.PlayerScreen
@@ -44,13 +46,77 @@ import com.opplayer.app.ui.theme.OpSurface
 fun OPPlayerApp(
     initialRequest: PlaybackRequest? = null,
     onInitialRequestHandled: () -> Unit = {},
-    libraryViewModel: LibraryViewModel = viewModel()
+    libraryViewModel: LibraryViewModel = viewModel(),
+    subtitleStyleViewModel: SubtitleStyleViewModel = viewModel(),
+    appSettingsViewModel: AppSettingsViewModel = viewModel()
+) {
+    val appSettings by appSettingsViewModel.settings.collectAsStateWithLifecycle()
+    val settingsLoaded by appSettingsViewModel.loaded.collectAsStateWithLifecycle()
+    val subtitleStyle by subtitleStyleViewModel.settings.collectAsStateWithLifecycle()
+
+    // Language and layout direction are applied above everything else, so every
+    // screen, sheet and dialog below resolves its strings and its start/end
+    // edges from the user's choice instead of from the device locale only.
+    AppLocalization(
+        language = appSettings.language,
+        layoutDirection = appSettings.layoutDirection
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(OpBackground)
+        ) {
+            when {
+                // Until the stored settings are read, showing nothing is better
+                // than flashing the tour at a user who already completed it.
+                !settingsLoaded -> Unit
+
+                !appSettings.onboardingCompleted -> OnboardingScreen(
+                    settings = appSettings,
+                    subtitleStyle = subtitleStyle,
+                    onLanguageChange = appSettingsViewModel::setLanguage,
+                    onLayoutDirectionChange = appSettingsViewModel::setLayoutDirection,
+                    onSubtitleTextColorChange = { argb ->
+                        subtitleStyleViewModel.update { it.copy(textColorArgb = argb) }
+                    },
+                    onSubtitleBackgroundChange = { argb ->
+                        subtitleStyleViewModel.update { it.copy(backgroundArgb = argb) }
+                    },
+                    onFinish = appSettingsViewModel::completeOnboarding
+                )
+
+                else -> MainContent(
+                    initialRequest = initialRequest,
+                    onInitialRequestHandled = onInitialRequestHandled,
+                    libraryViewModel = libraryViewModel,
+                    subtitleStyleViewModel = subtitleStyleViewModel,
+                    appSettingsViewModel = appSettingsViewModel
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MainContent(
+    initialRequest: PlaybackRequest?,
+    onInitialRequestHandled: () -> Unit,
+    libraryViewModel: LibraryViewModel,
+    subtitleStyleViewModel: SubtitleStyleViewModel,
+    appSettingsViewModel: AppSettingsViewModel
 ) {
     val library by libraryViewModel.library.collectAsStateWithLifecycle()
     val localPositions by libraryViewModel.localPositions.collectAsStateWithLifecycle()
+    val subtitleStyle by subtitleStyleViewModel.settings.collectAsStateWithLifecycle()
+    val appSettings by appSettingsViewModel.settings.collectAsStateWithLifecycle()
 
     var selectedSection by rememberSaveable { mutableIntStateOf(0) }
-    var playback by remember { mutableStateOf(initialRequest) }
+
+    // PlaybackRequest is @Parcelize, so the current item, episode and resume
+    // position survive configuration changes and process death.
+    var playback by rememberSaveable { mutableStateOf(initialRequest) }
+    var showSubtitleStyleSheet by rememberSaveable { mutableStateOf(false) }
+    var showAppSettingsSheet by rememberSaveable { mutableStateOf(false) }
 
     val handledCallback by rememberUpdatedState(onInitialRequestHandled)
 
@@ -60,118 +126,145 @@ fun OPPlayerApp(
         handledCallback()
     }
 
-    val onSavePosition: (PlaybackRequest, Long) -> Unit = { request, position ->
-        when (request.source) {
-            PlaybackRequest.Source.LIBRARY ->
-                libraryViewModel.saveLibraryProgress(
-                    id = request.key,
-                    url = request.uri,
-                    pattern = request.pattern,
-                    episodeLabel = request.episodeLabel,
-                    positionMs = position
+    val onSavePosition: (PlaybackRequest, Long) -> Unit = remember(libraryViewModel) {
+        { request, position -> libraryViewModel.saveProgress(request, position) }
+    }
+
+    val currentPlayback = playback
+
+    if (currentPlayback != null) {
+        PlayerScreen(
+            request = currentPlayback,
+            onSavePosition = onSavePosition,
+            onClose = { playback = null }
+        )
+        return
+    }
+
+    GlassBackground()
+
+    Scaffold(
+        containerColor = Color.Transparent,
+        modifier = Modifier.statusBarsPadding(),
+        bottomBar = {
+            NavigationBar(
+                containerColor = OpSurface.copy(alpha = 0.92f)
+            ) {
+                NavigationBarItem(
+                    selected = selectedSection == 0,
+                    onClick = { selectedSection = 0 },
+                    icon = {
+                        Icon(Icons.Default.Link, contentDescription = null)
+                    },
+                    label = { Text(stringResource(R.string.tab_links)) }
                 )
 
-            PlaybackRequest.Source.DEVICE ->
-                libraryViewModel.saveDevicePosition(request.key, position)
+                NavigationBarItem(
+                    selected = selectedSection == 1,
+                    onClick = { selectedSection = 1 },
+                    icon = {
+                        Icon(Icons.Default.Smartphone, contentDescription = null)
+                    },
+                    label = { Text(stringResource(R.string.tab_device)) }
+                )
+
+                NavigationBarItem(
+                    selected = showSubtitleStyleSheet,
+                    onClick = { showSubtitleStyleSheet = true },
+                    icon = {
+                        Icon(Icons.Default.Subtitles, contentDescription = null)
+                    },
+                    label = { Text(stringResource(R.string.tab_subtitle)) }
+                )
+
+                NavigationBarItem(
+                    selected = showAppSettingsSheet,
+                    onClick = { showAppSettingsSheet = true },
+                    icon = {
+                        Icon(Icons.Default.Settings, contentDescription = null)
+                    },
+                    label = { Text(stringResource(R.string.tab_settings)) }
+                )
+            }
+        }
+    ) { innerPadding ->
+        Box(
+            // Scaffold already reports the navigation bar through
+            // innerPadding; adding navigationBarsPadding() to the bar and
+            // statusBarsPadding() here as well applied the insets twice.
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            when (selectedSection) {
+                0 -> LibraryScreen(
+                    videos = library,
+                    onPlay = { item ->
+                        val resumeUrl = item.currentUrl ?: item.url
+                        val resumePattern = if (item.currentUrl != null) {
+                            item.currentPattern ?: item.pattern
+                        } else {
+                            item.pattern
+                        }
+
+                        playback = PlaybackRequest(
+                            key = item.id,
+                            title = item.title,
+                            uri = resumeUrl,
+                            subtitleUrl = item.subtitleUrl,
+                            startPositionMs = item.positionMs,
+                            source = PlaybackRequest.Source.LIBRARY,
+                            pattern = resumePattern,
+                            episodeLabel = item.currentLabel
+                        )
+                    },
+                    onAdd = { title, url, subtitleUrl, pattern ->
+                        libraryViewModel.addVideo(title, url, subtitleUrl, pattern)
+                    },
+                    onToggleFavorite = libraryViewModel::toggleFavorite,
+                    onResetProgress = libraryViewModel::resetProgress,
+                    onDelete = libraryViewModel::removeVideo
+                )
+
+                else -> DeviceVideosScreen(
+                    localPositions = localPositions,
+                    onPlay = { video, resumePosition ->
+                        playback = PlaybackRequest(
+                            key = video.uri,
+                            title = video.name,
+                            uri = video.uri,
+                            startPositionMs = resumePosition,
+                            source = PlaybackRequest.Source.DEVICE
+                        )
+                    }
+                )
+            }
         }
     }
 
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(OpBackground)
-        ) {
-            val currentPlayback = playback
+    if (showSubtitleStyleSheet) {
+        SubtitleSettingsSheet(
+            settings = subtitleStyle,
+            onSettingsChange = { updated ->
+                subtitleStyleViewModel.update { updated }
+            },
+            onReset = { subtitleStyleViewModel.reset() },
+            onDismiss = { showSubtitleStyleSheet = false }
+        )
+    }
 
-            if (currentPlayback != null) {
-                PlayerScreen(
-                    request = currentPlayback,
-                    onSavePosition = onSavePosition,
-                    onClose = { playback = null }
-                )
-            } else {
-                GlassBackground()
-
-                Scaffold(
-                    containerColor = Color.Transparent,
-                    bottomBar = {
-                        NavigationBar(
-                            containerColor = OpSurface.copy(alpha = 0.92f),
-                            modifier = Modifier.navigationBarsPadding()
-                        ) {
-                            NavigationBarItem(
-                                selected = selectedSection == 0,
-                                onClick = { selectedSection = 0 },
-                                icon = {
-                                    Icon(Icons.Default.Link, contentDescription = null)
-                                },
-                                label = { Text(stringResource(R.string.tab_links)) }
-                            )
-
-                            NavigationBarItem(
-                                selected = selectedSection == 1,
-                                onClick = { selectedSection = 1 },
-                                icon = {
-                                    Icon(Icons.Default.Smartphone, contentDescription = null)
-                                },
-                                label = { Text(stringResource(R.string.tab_device)) }
-                            )
-                        }
-                    }
-                ) { innerPadding ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding)
-                            .statusBarsPadding()
-                    ) {
-                        when (selectedSection) {
-                            0 -> LibraryScreen(
-                                videos = library,
-                                onPlay = { item ->
-                                    val resumeUrl = item.currentUrl ?: item.url
-                                    val resumePattern = if (item.currentUrl != null) {
-                                        item.currentPattern ?: item.pattern
-                                    } else {
-                                        item.pattern
-                                    }
-
-                                    playback = PlaybackRequest(
-                                        key = item.id,
-                                        title = item.title,
-                                        uri = resumeUrl,
-                                        subtitleUrl = item.subtitleUrl,
-                                        startPositionMs = item.positionMs,
-                                        source = PlaybackRequest.Source.LIBRARY,
-                                        pattern = resumePattern,
-                                        episodeLabel = item.currentLabel
-                                    )
-                                },
-                                onAdd = { title, url, subtitleUrl, pattern ->
-                                    libraryViewModel.addVideo(title, url, subtitleUrl, pattern)
-                                },
-                                onToggleFavorite = libraryViewModel::toggleFavorite,
-                                onResetProgress = libraryViewModel::resetProgress,
-                                onDelete = libraryViewModel::removeVideo
-                            )
-
-                            else -> DeviceVideosScreen(
-                                localPositions = localPositions,
-                                onPlay = { video, resumePosition ->
-                                    playback = PlaybackRequest(
-                                        key = video.uri,
-                                        title = video.name,
-                                        uri = video.uri,
-                                        startPositionMs = resumePosition,
-                                        source = PlaybackRequest.Source.DEVICE
-                                    )
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        }
+    if (showAppSettingsSheet) {
+        AppSettingsSheet(
+            settings = appSettings,
+            onLanguageChange = appSettingsViewModel::setLanguage,
+            onLayoutDirectionChange = appSettingsViewModel::setLayoutDirection,
+            onReplayTour = {
+                // Closing the sheet first avoids leaving a modal scrim on top
+                // of the tour that replaces this screen.
+                showAppSettingsSheet = false
+                appSettingsViewModel.restartOnboarding()
+            },
+            onDismiss = { showAppSettingsSheet = false }
+        )
     }
 }

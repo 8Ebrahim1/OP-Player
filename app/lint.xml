@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!--
+        `abortOnError` is on, so anything listed here is a conscious, reviewed
+        decision rather than a silent suppression.
+    -->
+
+    <!-- The whole UI is Persian-only by product decision; no other locales ship. -->
+    <issue id="MissingTranslation" severity="ignore" />
+
+    <!-- Dependency freshness is handled by Dependabot, not by the build. -->
+    <issue id="GradleDependency" severity="warning" />
+    <issue id="AndroidGradlePluginVersion" severity="warning" />
+    <issue id="NewerVersionAvailable" severity="warning" />
+
+    <!-- Cleartext HTTP is required for user supplied direct-download links; see docs/DEVELOPMENT.md. -->
+    <issue id="UnusedAttribute" severity="warning" />
+</lint>

@@ -1,0 +1,50 @@
+name: Bug report
+description: Report a problem in OP Player
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the app
+        2. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      placeholder: "1.4.0"
+    validations:
+      required: true
+  - type: input
+    id: android
+    attributes:
+      label: Android version and device
+      placeholder: "Android 13, Galaxy A54"
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Video source
+      options:
+        - Online link
+        - Device video
+        - Both
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Paste any relevant logcat output.
+      render: text

@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.opplayer.app.R
 import com.opplayer.app.data.EpisodePattern
 import com.opplayer.app.player.LinkPatternDetector
+import com.opplayer.app.ui.localization.LocalizedWindow
 import com.opplayer.app.util.isValidMediaUrl
 
 @Composable
@@ -58,8 +59,12 @@ fun AddLinkDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.add_link_title)) },
+        // A dialog is its own window, so the language chosen in the settings
+        // has to be restored inside every slot or the strings follow the
+        // device locale instead.
+        title = { LocalizedWindow { Text(stringResource(R.string.add_link_title)) } },
         text = {
+            LocalizedWindow {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -146,8 +151,10 @@ fun AddLinkDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+            }
         },
         confirmButton = {
+            LocalizedWindow {
             TextButton(
                 onClick = {
                     val cleanSubtitle = subtitle.trim().ifBlank { null }
@@ -170,9 +177,12 @@ fun AddLinkDialog(
             ) {
                 Text(stringResource(R.string.save_and_play))
             }
+            }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+            LocalizedWindow {
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+            }
         }
     )
 }

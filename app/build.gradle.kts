@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 plugins {
@@ -5,6 +6,11 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    // Requested without a version on purpose: parcelize ships inside the Kotlin
+    // Gradle plugin jar, which is already on the build classpath via
+    // kotlin.android. Asking for it with a version makes Gradle fail with
+    // "already on the classpath with an unknown version".
+    id("org.jetbrains.kotlin.plugin.parcelize")
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -34,8 +40,8 @@ android {
         applicationId = "com.opplayer.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.3.1"
+        versionCode = 8
+        versionName = "1.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -81,14 +87,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs += listOf(
-            "-opt-in=androidx.media3.common.util.UnstableApi",
-            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
-        )
-    }
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -96,8 +94,34 @@ android {
     }
 
     lint {
+        // A lint error must break the build; warnings stay advisory until the
+        // whole project is warning free.
+        abortOnError = true
         warningsAsErrors = false
-        abortOnError = false
+        checkReleaseBuilds = true
+        checkDependencies = false
+        htmlReport = true
+        xmlReport = true
+        sarifReport = false
+        lintConfig = file("lint.xml")
+    }
+
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+        }
+    }
+}
+
+// Replaces the deprecated `android.kotlinOptions` block. The Kotlin Gradle
+// plugin 2.x exposes the compiler settings through `kotlin.compilerOptions`.
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        freeCompilerArgs.addAll(
+            "-opt-in=androidx.media3.common.util.UnstableApi",
+            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
+        )
     }
 }
 
@@ -128,6 +152,7 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.serialization.json)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.espresso.core)

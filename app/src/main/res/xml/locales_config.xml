@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Declares the locales the app actually ships. Used by Android 13+ (API 33) to
+  show OP Player in the system per-app language picker.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="fa" />
+</locale-config>

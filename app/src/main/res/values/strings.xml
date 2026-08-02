@@ -1,105 +1,291 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Default (fallback) locale: English.
+
+  Every locale that is not explicitly translated falls back to this file, so a
+  French, Turkish or German device now gets English instead of Persian.
+  Persian lives in values-fa/strings.xml.
+-->
 <resources>
     <string name="app_name">OP Player</string>
     <string name="brand">OP Player</string>
 
-    <string name="tab_links">لینک‌ها</string>
-    <string name="tab_device">گوشی من</string>
+    <string name="tab_links">Links</string>
+    <string name="tab_device">My device</string>
+    <string name="tab_subtitle">Subtitles</string>
+    <string name="tab_settings">Settings</string>
 
-    <string name="library_title">کتابخانه</string>
-    <string name="section_library">همه</string>
-    <string name="section_favorites">علاقه‌مندی‌ها</string>
-    <string name="section_recent">اخیر</string>
+    <string name="library_title">Library</string>
+    <string name="section_library">All</string>
+    <string name="section_favorites">Favourites</string>
+    <string name="section_recent">Recent</string>
 
-    <string name="add_link">افزودن لینک</string>
-    <string name="add_link_title">افزودن ویدیوی جدید</string>
-    <string name="field_name">نام ویدیو</string>
-    <string name="field_url">آدرس ویدیو (mp4، mkv، m3u8، mpd …)</string>
-    <string name="field_subtitle">آدرس زیرنویس (اختیاری)</string>
-    <string name="invalid_url">آدرس واردشده معتبر نیست</string>
-    <string name="save_and_play">ذخیره و پخش</string>
-    <string name="cancel">انصراف</string>
-    <string name="default_video_name">ویدیوی بدون نام</string>
+    <string name="add_link">Add link</string>
+    <string name="add_link_title">Add a new video</string>
+    <string name="field_name">Video name</string>
+    <string name="field_url">Video address (mp4, mkv, m3u8, mpd …)</string>
+    <string name="field_subtitle">Subtitle address (optional)</string>
+    <string name="invalid_url">That address is not valid</string>
+    <string name="save_and_play">Save and play</string>
+    <string name="cancel">Cancel</string>
+    <string name="default_video_name">Untitled video</string>
 
-    <string name="link_mode_simple">ساده</string>
-    <string name="link_mode_advanced">پیشرفته</string>
-    <string name="advanced_link_hint">لینک دو قسمت پشت‌سرهم را وارد کنید؛ برنامه خودش تشخیص می‌دهد کدام بخش لینک تغییر می‌کند و بقیهٔ قسمت‌ها را می‌سازد.</string>
-    <string name="field_url_current">لینک قسمت فعلی</string>
-    <string name="field_url_next">لینک قسمت بعدی</string>
-    <string name="pattern_detected">الگو شناسایی شد — شمارهٔ فعلی: %1$s، گام: %2$s</string>
-    <string name="pattern_preview">قسمت بعدی: %1$s</string>
-    <string name="pattern_error_empty">هر دو لینک را وارد کنید</string>
-    <string name="pattern_error_identical">دو لینک کاملاً یکسان هستند</string>
-    <string name="pattern_error_numeric">بخش متغیر بین دو لینک عدد نیست یا بیش از یک قسمت تغییر کرده است</string>
-    <string name="pattern_error_increasing">عدد لینک دوم باید کمی بزرگ‌تر از لینک اول باشد</string>
-    <string name="pattern_error_too_long">عدد متغیر بیش از حد طولانی است</string>
+    <string name="link_mode_simple">Simple</string>
+    <string name="link_mode_advanced">Advanced</string>
+    <string name="advanced_link_hint">Enter the links of two consecutive episodes. The app works out which part changes and builds the rest for you.</string>
+    <string name="field_url_current">Current episode link</string>
+    <string name="field_url_next">Next episode link</string>
+    <string name="pattern_detected">Pattern detected — current number: %1$s, step: %2$s</string>
+    <string name="pattern_preview">Next episode: %1$s</string>
+    <string name="pattern_error_empty">Enter both links</string>
+    <string name="pattern_error_identical">The two links are identical</string>
+    <string name="pattern_error_numeric">The part that differs is not a number, or more than one part changed</string>
+    <string name="pattern_error_increasing">The number in the second link must be slightly larger than in the first</string>
+    <string name="pattern_error_too_long">The changing number is too long</string>
 
-    <string name="empty_library_title">هنوز ویدیویی اضافه نکرده‌اید</string>
-    <string name="empty_library_body">یک لینک آنلاین اضافه کنید تا همین‌جا پخش شود.</string>
-    <string name="empty_favorites_title">لیست علاقه‌مندی خالی است</string>
-    <string name="empty_favorites_body">با زدن قلب روی هر ویدیو، اینجا ذخیره می‌شود.</string>
-    <string name="empty_recent_title">پخش اخیری وجود ندارد</string>
-    <string name="empty_recent_body">هر ویدیویی که پخش کنید اینجا نمایش داده می‌شود.</string>
-    <string name="add_first_video">افزودن اولین ویدیو</string>
+    <string name="empty_library_title">No videos yet</string>
+    <string name="empty_library_body">Add an online link and play it right here.</string>
+    <string name="empty_favorites_title">Your favourites are empty</string>
+    <string name="empty_favorites_body">Tap the heart on any video to keep it here.</string>
+    <string name="empty_recent_title">Nothing played recently</string>
+    <string name="empty_recent_body">Everything you play shows up here.</string>
+    <string name="add_first_video">Add your first video</string>
 
-    <string name="continue_playback">ادامه از %1$s</string>
-    <string name="online_link">لینک آنلاین</string>
-    <string name="favorite">علاقه‌مندی</string>
-    <string name="delete">حذف</string>
-    <string name="play">پخش</string>
-    <string name="delete_dialog_title">حذف ویدیو</string>
-    <string name="delete_dialog_body">«%1$s» از کتابخانه حذف شود؟</string>
+    <string name="continue_playback">Resume from %1$s</string>
+    <string name="online_link">Online link</string>
+    <string name="favorite">Favourite</string>
+    <string name="add_to_favorites">Add to favourites</string>
+    <string name="remove_from_favorites">Remove from favourites</string>
+    <string name="favorite_state_on">In favourites</string>
+    <string name="favorite_state_off">Not in favourites</string>
+    <string name="delete">Delete</string>
+    <string name="play">Play</string>
+    <string name="delete_dialog_title">Delete video</string>
+    <string name="delete_dialog_body">Remove \"%1$s\" from the library?</string>
 
-    <string name="device_title">ویدیوهای گوشی</string>
-    <string name="permission_title">دسترسی به ویدیوها لازم است</string>
-    <string name="permission_body">برای نمایش ویدیوهای داخل گوشی به‌صورت پوشه‌بندی‌شده، به اجازهٔ دسترسی نیاز داریم.</string>
-    <string name="permission_grant">اجازه می‌دهم</string>
-    <string name="permission_settings">باز کردن تنظیمات</string>
-    <string name="no_local_videos">ویدیویی در گوشی پیدا نشد</string>
-    <string name="refresh">بارگذاری دوباره</string>
-    <string name="search_videos">جستجوی ویدیو…</string>
-    <string name="folder_summary">%1$s ویدیو</string>
+    <string name="device_title">Videos on this device</string>
+    <string name="permission_title">Access to your videos is needed</string>
+    <string name="permission_body">To list the videos on your device by folder, the app needs permission to read them.</string>
+    <string name="permission_grant">Allow</string>
+    <string name="permission_settings">Open settings</string>
+    <string name="permission_partial_body">Only the videos you selected are visible. You can widen the selection to see everything.</string>
+    <string name="permission_partial_action">Manage selection</string>
+    <string name="no_local_videos">No videos found on this device</string>
+    <string name="refresh">Reload</string>
+    <string name="search_videos">Search videos…</string>
+    <string name="folder_summary">%1$s videos</string>
 
-    <string name="back">بازگشت</string>
-    <string name="pip">تصویر در تصویر</string>
-    <string name="pip_unavailable">این دستگاه از حالت تصویر در تصویر پشتیبانی نمی‌کند</string>
-    <string name="fullscreen">تمام‌صفحه</string>
-    <string name="exit_fullscreen">خروج از تمام‌صفحه</string>
-    <string name="resize_mode">نسبت تصویر</string>
-    <string name="retry">تلاش دوباره</string>
+    <string name="back">Back</string>
+    <string name="pip">Picture in picture</string>
+    <string name="pip_unavailable">This device does not support picture in picture</string>
+    <string name="fullscreen">Full screen</string>
+    <string name="exit_fullscreen">Exit full screen</string>
+    <string name="resize_mode">Aspect ratio</string>
+    <string name="retry">Try again</string>
 
-    <string name="settings_title">تنظیمات پخش</string>
-    <string name="speed_label">سرعت پخش</string>
-    <string name="speed_current">سرعت فعلی: %1$s×</string>
-    <string name="speed_custom_label">سرعت دلخواه</string>
-    <string name="speed_custom_hint">عددی بین ۰٫۱ تا ۶ مانند ۱٫۸</string>
-    <string name="speed_custom_invalid">عدد معتبر بین ۰٫۱ تا ۶ وارد کنید</string>
-    <string name="apply">اعمال</string>
-    <string name="aspect_fit">متناسب</string>
-    <string name="aspect_zoom">بزرگ‌نمایی</string>
-    <string name="aspect_fill">کشیده</string>
+    <string name="settings_title">Playback settings</string>
+    <string name="speed_label">Playback speed</string>
+    <string name="speed_current">Current speed: %1$s×</string>
+    <string name="speed_custom_label">Custom speed</string>
+    <string name="speed_custom_hint">A number between 0.1 and 6, such as 1.8</string>
+    <string name="speed_custom_invalid">Enter a valid number between 0.1 and 6</string>
+    <string name="apply">Apply</string>
+    <string name="aspect_fit">Fit</string>
+    <string name="aspect_zoom">Zoom</string>
+    <string name="aspect_fill">Stretch</string>
 
-    <string name="auto_rotate_label">چرخش خودکار صفحه</string>
-    <string name="auto_rotate_body">ویدیوی افقی (مثل ۱۹۲۰×۱۰۸۰) افقی و ویدیوی عمودی (مثل استوری و ریلز) عمودی پخش شود</string>
-    <string name="gestures_label">کنترل با کشیدن انگشت</string>
-    <string name="gestures_body">سمت راست صدا، سمت چپ روشنایی؛ دو ضربه برای جابه‌جایی ۱۵ ثانیه‌ای</string>
-    <string name="gesture_volume">صدا</string>
-    <string name="gesture_brightness">روشنایی</string>
-    <string name="seek_forward">۱۵ ثانیه جلو</string>
-    <string name="seek_backward">۱۵ ثانیه عقب</string>
+    <string name="auto_rotate_label">Rotate the screen automatically</string>
+    <string name="auto_rotate_body">Play landscape videos (such as 1920×1080) in landscape and portrait videos (stories, reels) in portrait</string>
+    <string name="gestures_label">Swipe controls</string>
+    <string name="gestures_body">Volume on the right, brightness on the left; double tap to jump 15 seconds</string>
+    <string name="gesture_volume">Volume</string>
+    <string name="gesture_brightness">Brightness</string>
+    <string name="seek_forward">15 seconds forward</string>
+    <string name="seek_backward">15 seconds back</string>
 
-    <string name="next_episode">قسمت بعدی</string>
-    <string name="now_playing_episode">در حال پخش: %1$s</string>
-    <string name="next_episode_not_found">قسمت بعدی روی سرور پیدا نشد؛ احتمالاً این آخرین قسمت است</string>
-    <string name="episode_pattern_missing">در این لینک نشانهٔ قسمت یا فصل (مانند S01E02) پیدا نشد</string>
-    <string name="auto_next_label">پخش خودکار قسمت بعدی</string>
-    <string name="auto_next_body">پس از پایان ویدیو، خودکار برو به قسمت بعد</string>
+    <string name="next_episode">Next episode</string>
+    <string name="now_playing_episode">Now playing: %1$s</string>
+    <string name="episode_resolve_timeout">Looking for the next episode took too long</string>
+    <string name="episode_network_unavailable">No network connection, so the next episode could not be checked</string>
+    <string name="next_episode_not_found">The next episode was not found on the server; this is probably the last one</string>
+    <string name="episode_pattern_missing">This link carries no episode or season marker (such as S01E02)</string>
+    <string name="auto_next_label">Play the next episode automatically</string>
+    <string name="auto_next_body">When a video ends, move straight on to the next episode</string>
 
-    <string name="error_network">اتصال به اینترنت برقرار نیست یا آدرس در دسترس نیست</string>
-    <string name="error_not_found">فایل یا لینک پیدا نشد</string>
-    <string name="error_format">این قالب یا کدک روی دستگاه شما پشتیبانی نمی‌شود</string>
-    <string name="error_drm">این محتوا دارای قفل DRM است و قابل پخش نیست</string>
-    <string name="error_unknown">خطای ناشناخته در پخش</string>
-    <string name="reset_progress">شروع از ابتدا</string>
-    <string name="current_episode">قسمت %1$s</string>
+    <string name="error_network">There is no internet connection, or the address is unreachable</string>
+    <string name="error_not_found">The file or link was not found</string>
+    <string name="error_format">This container or codec is not supported on your device</string>
+    <string name="error_drm">This content is DRM protected and cannot be played</string>
+    <string name="error_unknown">Unknown playback error</string>
+    <string name="reset_progress">Start from the beginning</string>
+    <string name="current_episode">Episode %1$s</string>
+
+    <string name="subtitle_settings">Subtitle settings</string>
+    <string name="subtitle_enabled">Show subtitles</string>
+    <string name="subtitle_off">No subtitles</string>
+    <string name="subtitle_track">Active subtitle</string>
+    <string name="subtitle_embedded_track">Embedded subtitle</string>
+    <string name="subtitle_pick_file">Pick a subtitle file from storage</string>
+    <string name="subtitle_loaded">Subtitle loaded: %1$s</string>
+    <string name="subtitle_load_failed">That subtitle file could not be read</string>
+    <string name="subtitle_none_found">No subtitle was found for this video</string>
+    <string name="subtitle_sync">Subtitle sync</string>
+    <string name="subtitle_sync_value">Offset: %1$s seconds</string>
+    <string name="subtitle_sync_reset">Reset the offset</string>
+    <string name="subtitle_sync_hint">A positive number shows the subtitle later, a negative one shows it earlier.</string>
+    <string name="subtitle_delay_only_hint">For subtitles embedded in the file, only a delay (a positive number) can be applied.</string>
+    <string name="subtitle_text_color">Text colour</string>
+    <string name="subtitle_background">Text background colour</string>
+    <string name="subtitle_size_value">Text size: %1$s</string>
+    <string name="subtitle_position_value">Distance from the bottom: %1$s</string>
+    <string name="subtitle_bold">Bold text</string>
+    <string name="subtitle_outline">Text outline</string>
+    <string name="subtitle_style_reset">Back to the default</string>
+    <string name="subtitle_preview_text">Subtitle preview text</string>
+
+    <!-- Colour names, used as accessibility labels for the swatch buttons. -->
+    <string name="color_white">White</string>
+    <string name="color_yellow">Yellow</string>
+    <string name="color_cyan">Cyan</string>
+    <string name="color_green">Green</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_pink">Pink</string>
+    <string name="color_black">Black</string>
+    <string name="color_transparent">No background</string>
+    <string name="color_black_light">Light black</string>
+    <string name="color_black_medium">Medium black</string>
+    <string name="color_black_strong">Strong black</string>
+    <string name="color_white_box">Light box</string>
+    <string name="color_selected">Selected</string>
+
+    <!-- Application settings -->
+    <string name="app_settings_title">App settings</string>
+    <string name="language_label">App language</string>
+    <string name="language_body">Choose the language of the interface. \"System\" follows your device setting.</string>
+    <string name="language_system">System</string>
+    <string name="language_persian">فارسی</string>
+    <string name="language_english">English</string>
+    <string name="direction_label">Layout direction</string>
+    <string name="direction_body">\"Automatic\" follows the language: right to left for Persian, left to right for English.</string>
+    <string name="direction_auto">Automatic</string>
+    <string name="direction_rtl">Right to left</string>
+    <string name="direction_ltr">Left to right</string>
+    <string name="replay_tour">Show the intro tour again</string>
+    <string name="replay_tour_body">Walk through the slides and set the language and subtitle colours once more.</string>
+    <string name="close">Close</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_previous">Previous</string>
+    <string name="onboarding_finish">Start using the app</string>
+    <string name="onboarding_step">Step %1$s of %2$s</string>
+
+    <string name="onboarding_welcome_title">Welcome to OP Player</string>
+    <string name="onboarding_welcome_body">A player for online links and for the videos already on your phone, with full control over subtitles. The next few slides set the app up exactly the way you like it.</string>
+
+    <string name="onboarding_language_title">Pick your language</string>
+    <string name="onboarding_language_body">The whole interface switches immediately. You can change this later in Settings.</string>
+
+    <string name="onboarding_direction_title">Layout direction</string>
+    <string name="onboarding_direction_body">Persian reads right to left and English left to right. \"Automatic\" picks the right one for you; override it only if you prefer the other.</string>
+
+    <string name="onboarding_library_title">Links library</string>
+    <string name="onboarding_library_body">Add any direct link (mp4, mkv, m3u8, mpd) and play it straight away. Advanced mode learns the numbering of a series from two consecutive links and builds the following episodes for you.</string>
+
+    <string name="onboarding_device_title">Videos on your device</string>
+    <string name="onboarding_device_body">Your local videos are grouped by folder, with thumbnails, duration, size and a resume point. Only the read permission for videos is used.</string>
+
+    <string name="onboarding_player_title">A player built for gestures</string>
+    <string name="onboarding_player_body">Swipe up and down on the right for volume and on the left for brightness, double tap to jump 15 seconds, and use picture in picture, zoom modes, playback speed and auto rotation from the top bar.</string>
+
+    <string name="onboarding_subtitle_color_title">Subtitle colour</string>
+    <string name="onboarding_subtitle_color_body">Pick the text colour. The preview below updates as you choose.</string>
+
+    <string name="onboarding_subtitle_background_title">Subtitle background</string>
+    <string name="onboarding_subtitle_background_body">A background box makes subtitles readable over bright scenes. Pick the one that suits you; you can fine tune size and position later.</string>
+
+    <string name="onboarding_ready_title">You are all set</string>
+    <string name="onboarding_ready_body">Every screen has a question mark button that explains each icon and option. You can reopen this tour any time from Settings.</string>
+
+    <!-- Contextual help -->
+    <string name="help">Help</string>
+    <string name="help_library_title">Guide to the links library</string>
+    <string name="help_device_title">Guide to device videos</string>
+    <string name="help_player_title">Guide to the player</string>
+    <string name="help_subtitle_title">Guide to subtitles</string>
+    <string name="help_settings_title">Guide to settings</string>
+
+    <string name="help_library_add_title">\"Add link\" button</string>
+    <string name="help_library_add_body">Opens the dialog where you enter a name and a direct video address. Supported schemes are http, https, rtsp, content and file.</string>
+    <string name="help_library_tabs_title">All / Favourites / Recent tabs</string>
+    <string name="help_library_tabs_body">\"All\" is sorted by the date you added the video, \"Favourites\" shows what you starred, and \"Recent\" is sorted by the last time you played something.</string>
+    <string name="help_library_play_title">Tapping a card</string>
+    <string name="help_library_play_body">Plays the video and resumes at the saved position. For a series it resumes at the episode you were last watching.</string>
+    <string name="help_library_favorite_title">Heart icon</string>
+    <string name="help_library_favorite_body">Adds the video to favourites or removes it. A filled heart means it is already there.</string>
+    <string name="help_library_reset_title">Restart icon</string>
+    <string name="help_library_reset_body">Clears the saved position so the video starts from the beginning. It only appears once there is progress to clear.</string>
+    <string name="help_library_delete_title">Bin icon</string>
+    <string name="help_library_delete_body">Removes the item from the library after a confirmation. Nothing is downloaded, so nothing is deleted from the server.</string>
+    <string name="help_library_advanced_title">Advanced mode</string>
+    <string name="help_library_advanced_body">Give the links of two consecutive episodes. The app finds the number that changes and the step between them, then builds the next episodes itself and shows a preview before you save.</string>
+
+    <string name="help_device_permission_title">Video permission</string>
+    <string name="help_device_permission_body">Needed to list local videos. On Android 14 and later you can share only some videos; that partial state is supported and can be widened at any time.</string>
+    <string name="help_device_folders_title">Folder list</string>
+    <string name="help_device_folders_body">Videos are grouped by the folder they live in, with the number of items and total duration. Two folders with the same name stay separate.</string>
+    <string name="help_device_search_title">Search box</string>
+    <string name="help_device_search_body">Filters by file name inside the folder you opened.</string>
+    <string name="help_device_refresh_title">Reload icon</string>
+    <string name="help_device_refresh_body">Rescans the device, which is useful after downloading or deleting a video.</string>
+    <string name="help_device_back_title">Back icon</string>
+    <string name="help_device_back_body">Returns from a folder to the folder list. The system Back button does the same.</string>
+    <string name="help_device_resume_title">Resume line</string>
+    <string name="help_device_resume_body">When a card shows a resume time, playback continues from exactly that point.</string>
+
+    <string name="help_player_back_title">Back icon</string>
+    <string name="help_player_back_body">Leaves full screen first; if you are already windowed it closes the player and saves your position.</string>
+    <string name="help_player_next_title">Double arrow icon</string>
+    <string name="help_player_next_body">Jumps to the next episode. It only appears for links with a detected pattern, and the spinner means the next episode is being checked on the server.</string>
+    <string name="help_player_scale_title">Aspect ratio icon</string>
+    <string name="help_player_scale_body">Cycles between Fit (whole image), Zoom (fills the screen and crops) and Stretch (fills the screen and distorts).</string>
+    <string name="help_player_pip_title">Picture in picture icon</string>
+    <string name="help_player_pip_body">Shrinks the video into a floating window so you can use other apps. Leaving the app while playing does the same automatically.</string>
+    <string name="help_player_fullscreen_title">Full screen icon</string>
+    <string name="help_player_fullscreen_body">Hides the system bars. Swipe from the edge to bring them back temporarily.</string>
+    <string name="help_player_subtitles_title">Subtitles icon</string>
+    <string name="help_player_subtitles_body">Opens subtitle settings: choose a track, load a file, adjust the timing and change the appearance.</string>
+    <string name="help_player_settings_title">Settings icon</string>
+    <string name="help_player_settings_body">Playback speed, aspect ratio, auto rotation, swipe controls and automatic next episode.</string>
+    <string name="help_player_gestures_title">Swipe controls</string>
+    <string name="help_player_gestures_body">Drag vertically on the right half for volume and on the left half for brightness. Double tap the right or left side to jump 15 seconds. One tap shows or hides the controls.</string>
+    <string name="help_player_speed_title">Playback speed</string>
+    <string name="help_player_speed_body">Pick a preset or type any value between 0.1 and 6 and press Apply.</string>
+    <string name="help_player_rotate_title">Automatic rotation</string>
+    <string name="help_player_rotate_body">Landscape videos rotate to landscape and portrait videos stay portrait, based on the real aspect ratio of the file.</string>
+    <string name="help_player_autonext_title">Automatic next episode</string>
+    <string name="help_player_autonext_body">When a video ends, the next episode of the pattern starts on its own.</string>
+
+    <string name="help_subtitle_enable_title">Show subtitles</string>
+    <string name="help_subtitle_enable_body">The master switch. When it is off no subtitle is drawn, even if a track is loaded.</string>
+    <string name="help_subtitle_sync_title">Subtitle sync</string>
+    <string name="help_subtitle_sync_body">Shifts the subtitle in steps of 0.1 and 0.5 seconds. A positive value shows it later, a negative one earlier. For subtitles embedded in the video only a delay can be applied.</string>
+    <string name="help_subtitle_track_title">Active subtitle</string>
+    <string name="help_subtitle_track_body">Lists the subtitles found next to the video and the tracks embedded in the file, plus an option to turn subtitles off. Your choice survives episode changes.</string>
+    <string name="help_subtitle_file_title">Pick a subtitle file</string>
+    <string name="help_subtitle_file_body">Loads an SRT or VTT file from storage. Access to the file is kept, so it still works after a restart.</string>
+    <string name="help_subtitle_color_title">Text and background colour</string>
+    <string name="help_subtitle_color_body">The first row is the text colour, the second the colour of the box behind it. The preview above shows the result immediately.</string>
+    <string name="help_subtitle_size_title">Size and position</string>
+    <string name="help_subtitle_size_body">The first slider sets the text size, the second how far the subtitle sits from the bottom of the screen.</string>
+    <string name="help_subtitle_style_title">Bold and outline</string>
+    <string name="help_subtitle_style_body">Bold thickens the text; the outline adds a dark shadow that keeps it readable over bright scenes.</string>
+
+    <string name="help_settings_language_title">App language</string>
+    <string name="help_settings_language_body">Switches the interface between Persian and English without restarting the app. \"System\" follows the device language.</string>
+    <string name="help_settings_direction_title">Layout direction</string>
+    <string name="help_settings_direction_body">Sets whether the layout runs right to left or left to right. \"Automatic\" derives it from the chosen language.</string>
+    <string name="help_settings_tour_title">Intro tour</string>
+    <string name="help_settings_tour_body">Replays the first run slides so you can set the language and the subtitle colours again.</string>
 </resources>

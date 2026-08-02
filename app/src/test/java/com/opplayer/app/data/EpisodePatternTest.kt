@@ -4,6 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertNotNull
 import org.junit.Test
+import kotlinx.serialization.json.Json
 
 class EpisodePatternTest {
 
@@ -59,5 +60,70 @@ class EpisodePatternTest {
     fun labelIsTwoDigits() {
         assertEquals("E06", pattern.label())
         assertEquals("E124", pattern.copy(episode = 124).label())
+    }
+}
+
+/**
+ * Validation and legacy repair of [EpisodePattern].
+ *
+ * A pattern with `step = 0` used to be accepted, and `next()` then returned the
+ * very same episode, so "next episode" silently replayed the current one.
+ */
+class EpisodePatternValidationTest {
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `a zero step is rejected`() {
+        EpisodePattern(prefix = "a", suffix = "b", episode = 1, pad = 2, step = 0)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `a negative episode is rejected`() {
+        EpisodePattern(prefix = "a", suffix = "b", episode = -1)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `a zero padding is rejected`() {
+        EpisodePattern(prefix = "a", suffix = "b", episode = 1, pad = 0)
+    }
+
+    @Test
+    fun `normalized repairs invalid legacy values`() {
+        val pattern = EpisodePattern.normalized(
+            prefix = "a",
+            suffix = "b",
+            episode = -5,
+            pad = 0,
+            step = 0
+        )
+
+        assertEquals(0, pattern.episode)
+        assertEquals(1, pattern.pad)
+        assertEquals(1, pattern.step)
+    }
+
+    @Test
+    fun `a valid pattern always moves forward`() {
+        val pattern = EpisodePattern(prefix = "a", suffix = "b", episode = 3, step = 2)
+
+        assertEquals(5, pattern.next()?.episode)
+        assertEquals(1, pattern.previous()?.episode)
+    }
+
+    @Test
+    fun `a serialized round trip keeps the values`() {
+        val pattern = EpisodePattern(prefix = "a", suffix = "b", episode = 4, pad = 3, step = 2)
+        val json = Json.encodeToString(EpisodePattern.serializer(), pattern)
+
+        assertEquals(pattern, Json.decodeFromString(EpisodePattern.serializer(), json))
+    }
+
+    @Test
+    fun `decoding a legacy zero step does not throw`() {
+        val json = """{"prefix":"a","suffix":"b","episode":1,"pad":0,"step":0}"""
+
+        val pattern = Json.decodeFromString(EpisodePattern.serializer(), json)
+
+        assertEquals(1, pattern.step)
+        assertEquals(2, pattern.next()?.episode)
     }
 }

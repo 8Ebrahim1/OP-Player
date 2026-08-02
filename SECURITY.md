@@ -28,6 +28,16 @@ is local:
 All of it lives in the app private DataStore directory. No credentials or tokens
 are stored, and nothing is uploaded anywhere.
 
+## Cleartext HTTP traffic
+
+The app ships with `cleartextTrafficPermitted="true"` in
+`app/src/main/res/xml/network_security_config.xml`. Users add arbitrary direct
+video links and many of those hosts are HTTP only, so the permission cannot be
+restricted to a domain list. OPPlayer has no backend, no accounts, no tokens and
+no telemetry, so no credential is ever sent over the network, and only system
+trust anchors are accepted. Traffic to any authenticated service added in the
+future must be declared in a `domain-config` with cleartext disabled.
+
 ## Cloud backup
 
 `android:allowBackup` is enabled, but both `backup_rules.xml` and

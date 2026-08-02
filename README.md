@@ -2,11 +2,11 @@
 
 # OP Player
 
-**یک پخش‌کنندهٔ ویدیوی مدرن برای اندروید؛ ساخته‌شده با Jetpack Compose و Media3، با ظاهر تیره و پشتیبانی کامل از راست‌به‌چپ.**
+**A modern video player that keeps your series rolling — it finds the next episode of an online link on its own.**
 
-[English](README.en.md) · [یادداشت‌های توسعه](docs/DEVELOPMENT-fa.md)
+[فارسی](README.fa.md) · [Developer notes](docs/DEVELOPMENT.md)
 
-![version](https://img.shields.io/badge/version-1.3.0-blue)
+![version](https://img.shields.io/badge/version-1.4.0-blue)
 ![minSdk](https://img.shields.io/badge/minSdk-26-green)
 ![targetSdk](https://img.shields.io/badge/targetSdk-35-green)
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
@@ -15,70 +15,73 @@
 
 ---
 
-## درباره
+## About
 
-با OP Player خیلی راحت می‌تونی هم **لینک‌های ویدیوی آنلاین** رو پخش کنی و هم **ویدیوهای داخل گوشی** رو ببینی. کل برنامه با Kotlin،‏ Jetpack Compose و AndroidX Media3 (ExoPlayer) ساخته شده و یک رابط تیره و شیشه‌ای با پشتیبانی کامل از راست‌به‌چپ داره.
+OP Player is for the way people actually watch shows: you paste a link, you watch, and when the episode ends you want the next one — not a trip back to the browser.
 
-یکی از کاربردی‌ترین قابلیت‌های برنامه، **رفتن خودکار به قسمت بعدی در لینک‌های آنلاین**ه. برنامه شمارهٔ فصل و قسمت رو از آدرس پیدا می‌کنه، قسمت بعدی رو می‌سازه، وجود فایل رو روی سرور چک می‌کنه و اگر فصل تموم شده باشه سراغ فصل بعدی می‌ره — همهٔ این کارها بدون دانلود فایل انجام می‌شه.
+That is the part the app takes care of for you. It reads the season and episode number straight from the link, builds the address of the next episode, quietly checks that the file is really there on the server, and starts playing it. When a season runs out, it moves on to the first episode of the next one. Nothing is downloaded to make that happen.
 
-## قابلیت‌ها
+The rest is what you would expect from a player you keep on your phone: it plays just about any format you throw at it, remembers where you left off in every video, handles subtitles, and also organizes the videos already stored on your device.
 
-### پخش
+## Features
 
-- پخش فرمت‌های مختلف مثل **MKV**، WebM، MP4، M4V، MOV، AVI، FLV، TS/M2TS، MPEG، 3GP و OGV
-- پشتیبانی از **HLS** (`.m3u8`)، **DASH** (`.mpd`)، **SmoothStreaming** و **RTSP**
-- استفادهٔ خودکار از دیکدر نرم‌افزاری وقتی دیکدر سخت‌افزاری جواب نمی‌ده
-- پشتیبانی از زیرنویس خارجی با تشخیص خودکار فرمت‌های SRT،‏ VTT،‏ ASS/SSA و TTML
-- حالت تصویر در تصویر (PiP)، همراه با بررسی سازگاری دستگاه تا روی گوشی‌های پشتیبانی‌نشده مشکلی پیش نیاد
-- مدیریت audio focus و توقف خودکار پخش وقتی هندزفری قطع می‌شه
-- یادآوری آخرین موقعیت پخش و ذخیرهٔ منظم پیشرفت تماشا
-- روشن نگه داشتن صفحه هنگام تماشا و توقف پخش وقتی برنامه به پس‌زمینه می‌ره
+### Next episode, without leaving the player
 
-### رفتن به قسمت بعدی در لینک‌های آنلاین
+Whenever the app spots an episode number in the current link, a double-arrow button appears in the player controls. One tap and you are in the next episode.
 
-هر وقت برنامه شمارهٔ قسمت رو داخل لینک تشخیص بده، یک دکمهٔ دو فلش در کنترل‌های پخش می‌بینی.
+- Understands the naming people actually use: `S01E02`, `s1e2`, `S01.E02`, `S01 - E02`, `Episode 07`, `EP05`, `E05`
+- Reads **only the file name**, so a number in the domain or folder path never gets mistaken for an episode
+- Respects zero padding, so `E02 → E03`, `E09 → E10`, and `E9 → E10` all come out right
+- Confirms the next file exists with a `HEAD` request, and falls back to `Range: bytes=0-0` for servers that block `HEAD`
+- Rolls over to the next season on its own: if `S01E25` is not there, it tries `S02E01`
+- Optional auto-play, so the next episode starts the moment the current one ends
 
-- تشخیص الگوهایی مثل `S01E02`، `s1e2`، `S01.E02`، `S01 - E02`، `Episode 07`، `EP05` و `E05`
-- بررسی **فقط نام فایل** تا عددهای داخل دامنه یا مسیر با شمارهٔ قسمت اشتباه نشن
-- حفظ صفرهای اول شماره: `E02 → E03`، `E09 → E10` و `E9 → E10`
-- بررسی وجود فایل بعدی با درخواست `HEAD` و استفاده از `Range: bytes=0-0` برای سرورهایی که `HEAD` رو مسدود می‌کنن
-- رفتن خودکار به فصل بعد؛ مثلاً اگر `S01E25` پیدا نشه، برنامه `S02E01` رو امتحان می‌کنه
-- امکان پخش خودکار قسمت بعدی وقتی قسمت فعلی تموم می‌شه
-
-مثلاً:
+For example:
 
 ```text
 …/Black.Torch.S01E02.720p.WEB-DL.x264.SoftSub.mkv
 → …/Black.Torch.S01E03.720p.WEB-DL.x264.SoftSub.mkv
 ```
 
-بخش‌هایی مثل `WEB-DL` و `x264` درست نادیده گرفته می‌شن و تشخیص شمارهٔ قسمت رو به‌هم نمی‌زنن.
+Tags like `WEB-DL` and `x264` are ignored safely and never throw the detection off.
 
-### ویدیوهای داخل گوشی
+### Playback
 
-- خواندن ویدیوها از `MediaStore` و مرتب کردن‌شون **بر اساس پوشه**
-- نمایش تصویر بندانگشتی، مدت‌زمان، حجم و پسوند فایل بدون نیاز به کتابخانهٔ تصویر خارجی
-- جست‌وجوی نام فایل داخل هر پوشه
-- مدیریت مجوز `READ_MEDIA_VIDEO` در اندروید ۱۳ به بالا و `READ_EXTERNAL_STORAGE` در اندروید ۱۲ و پایین‌تر، همراه با راه ورود به تنظیمات برنامه اگر مجوز برای همیشه رد شده باشه
-- باز کردن ویدیوهایی که از برنامه‌های دیگه با `ACTION_VIEW` فرستاده می‌شن
+- Plays a wide range of formats, including **MKV**, WebM, MP4, M4V, MOV, AVI, FLV, TS/M2TS, MPEG, 3GP, and OGV
+- Handles streaming links too: **HLS** (`.m3u8`), **DASH** (`.mpd`), **SmoothStreaming**, and **RTSP**
+- Falls back to software decoding by itself when hardware decoding cannot handle a file
+- Loads external subtitles and detects the format for you: SRT, VTT, ASS/SSA, and TTML
+- Picture-in-Picture for watching while you do something else, with a compatibility check so nothing breaks on devices that do not support it
+- Pauses politely: it respects audio focus and stops when your headphones are unplugged
+- Picks up exactly where you stopped, with progress saved as you watch
+- Keeps the screen awake during playback and pauses when the app goes to the background
+- Brightness and volume follow your finger with simple swipe gestures
 
-### کتابخانهٔ لینک‌ها
+### Videos on your phone
 
-- اضافه کردن لینک با عنوان دلخواه و آدرس اختیاری زیرنویس
-- نگه داشتن علاقه‌مندی‌ها، مواردی که تازگی پخش شدن و موقعیت ادامهٔ تماشای هر ویدیو
-- ذخیرهٔ همه‌چیز به‌صورت محلی با DataStore و kotlinx.serialization، بدون درگیر کردن ترد اصلی
+- Finds the videos on your device and groups them **by folder**
+- Shows a thumbnail, duration, file size, and format for every video
+- Search by file name inside any folder
+- Asks for storage permission the right way on every Android version, and offers a shortcut to settings if you denied it for good
+- Opens videos shared from other apps
 
-### تنظیمات پخش
+### Your link library
 
-همهٔ تنظیمات رو زیر آیکن چرخ‌دنده پیدا می‌کنی:
+- Save a link with your own title, and a subtitle address if you have one
+- Favorites, recently played, and a separate resume point for every video
+- Everything is stored locally on your phone, and the app stays smooth while it does it
 
-- سرعت‌های آماده از ۰٫۲۵× تا ۳×
-- **سرعت دلخواه** از ۰٫۱× تا ۶×، با پشتیبانی از رقم‌های لاتین، فارسی و عربی
-- حالت‌های نسبت تصویر: متناسب، بزرگ‌نمایی و کشیده
-- کلید پخش خودکار قسمت بعدی
+### Player settings
 
-## حریم خصوصی و پشتیبان‌گیری
+Everything lives behind the gear icon:
 
-OP Player سرور، ابزار تحلیل رفتار کاربر یا حساب کاربری نداره. لینک‌ها و موقعیت پخش فقط روی گوشی خودت و داخل DataStore ذخیره می‌شن.
+- Ready-made speeds from 0.25× to 3×
+- A **custom speed** anywhere from 0.1× to 6×, and you can type it with Latin, Persian, or Arabic digits
+- Aspect-ratio modes: fit, zoom, and fill
+- A switch for auto-playing the next episode
 
-پشتیبان‌گیری ابری فقط برای پوشهٔ `datastore/` فعاله تا وقتی گوشی‌ات رو عوض می‌کنی، کتابخانه و پیشرفت تماشات برگرده. اگر دوست نداری از اطلاعات پشتیبان گرفته بشه، مقدار `android:allowBackup="false"` رو در فایل `app/src/main/AndroidManifest.xml` قرار بده.
+## Privacy and backup
+
+OP Player has no servers, no analytics, and no accounts. Your links and playback positions never leave your phone.
+
+Cloud backup covers only the `datastore/` folder, so your library and watch progress come back with you when you switch phones. If you would rather keep even that local, set `android:allowBackup="false"` in `app/src/main/AndroidManifest.xml`.

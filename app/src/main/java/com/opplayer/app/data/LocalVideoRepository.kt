@@ -8,15 +8,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
+/**
+ * Reads the device video library through MediaStore.
+ *
+ * Folders are identified by their MediaStore bucket id, never by their display
+ * name: two different directories may share a name, and grouping by name merged
+ * their contents and produced duplicate keys in the folder list.
+ */
 class LocalVideoRepository(private val context: Context) {
+
     suspend fun loadFolders(): List<VideoFolder> = withContext(Dispatchers.IO) {
         val videos = queryVideos()
 
         videos
-            .groupBy { it.folderName }
-            .map { (folder, items) ->
+            .groupBy { it.bucketId }
+            .map { (bucketId, items) ->
                 VideoFolder(
-                    name = folder,
+                    id = bucketId,
+                    name = items.first().folderName,
                     videos = items.sortedByDescending { it.dateAddedSec }
                 )
             }
@@ -38,6 +47,7 @@ class LocalVideoRepository(private val context: Context) {
             add(MediaStore.Video.Media.DATE_ADDED)
             add(MediaStore.Video.Media.MIME_TYPE)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                add(MediaStore.Video.Media.BUCKET_ID)
                 add(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
             } else {
                 @Suppress("DEPRECATION")
@@ -61,7 +71,13 @@ class LocalVideoRepository(private val context: Context) {
             val dateCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED)
             val mimeCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE)
 
-            val bucketCol = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val bucketIdCol = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                cursor.getColumnIndex(MediaStore.Video.Media.BUCKET_ID)
+            } else {
+                -1
+            }
+
+            val bucketNameCol = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 cursor.getColumnIndex(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
             } else {
                 @Suppress("DEPRECATION")
@@ -72,14 +88,28 @@ class LocalVideoRepository(private val context: Context) {
                 val id = cursor.getLong(idCol)
                 val name = cursor.getString(nameCol) ?: continue
 
-                val folder = when {
-                    bucketCol < 0 -> UNKNOWN_FOLDER
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ->
-                        cursor.getString(bucketCol) ?: UNKNOWN_FOLDER
+                // Pre-Q has no bucket id, so the parent path stands in for it.
+                val parentPath = if (
+                    Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && bucketNameCol >= 0
+                ) {
+                    cursor.getString(bucketNameCol)?.let { File(it).parent }
+                } else {
+                    null
+                }
 
-                    else -> cursor.getString(bucketCol)
-                        ?.let { path -> File(path).parentFile?.name }
-                        ?: UNKNOWN_FOLDER
+                val folder = when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ->
+                        bucketNameCol.takeIf { it >= 0 }
+                            ?.let { cursor.getString(it) }
+                            ?: UNKNOWN_FOLDER
+
+                    else -> parentPath?.let { File(it).name } ?: UNKNOWN_FOLDER
+                }
+
+                val bucketId = when {
+                    bucketIdCol >= 0 && !cursor.isNull(bucketIdCol) -> cursor.getLong(bucketIdCol)
+                    parentPath != null -> parentPath.lowercase().hashCode().toLong()
+                    else -> UNKNOWN_BUCKET_ID
                 }
 
                 result += LocalVideo(
@@ -88,6 +118,7 @@ class LocalVideoRepository(private val context: Context) {
                     name = name,
                     durationMs = cursor.getLong(durationCol),
                     sizeBytes = cursor.getLong(sizeCol),
+                    bucketId = bucketId,
                     folderName = folder,
                     dateAddedSec = cursor.getLong(dateCol),
                     mimeType = cursor.getString(mimeCol)
@@ -100,5 +131,6 @@ class LocalVideoRepository(private val context: Context) {
 
     private companion object {
         const val UNKNOWN_FOLDER = "\u0633\u0627\u06cc\u0631"
+        const val UNKNOWN_BUCKET_ID = -1L
     }
 }

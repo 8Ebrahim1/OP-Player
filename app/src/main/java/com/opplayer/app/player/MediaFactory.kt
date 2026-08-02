@@ -47,10 +47,12 @@ object MediaFactory {
         if (subtitle != null) {
             builder.setSubtitleConfigurations(
                 listOf(
+                    // No hardcoded language and no forced selection: the file
+                    // may be in any language, and the user's own subtitle choice
+                    // must win over a track flagged as default.
                     MediaItem.SubtitleConfiguration.Builder(android.net.Uri.parse(subtitle))
                         .setMimeType(subtitleMimeType(subtitle))
-                        .setLanguage("fa")
-                        .setSelectionFlags(androidx.media3.common.C.SELECTION_FLAG_DEFAULT)
+                        .setLanguage(subtitleLanguage(subtitle))
                         .build()
                 )
             )
@@ -74,6 +76,19 @@ object MediaFactory {
         "m4a", "aac" -> MimeTypes.AUDIO_AAC
         "flac" -> MimeTypes.AUDIO_FLAC
         else -> null
+    }
+
+    /**
+     * Best effort language tag taken from the file name, for example
+     * `show.S01E01.fa.srt`. Null when nothing recognisable is present, which is
+     * better than claiming a language the file may not be in.
+     */
+    private fun subtitleLanguage(uri: String): String? {
+        val name = uri.substringBefore('?').substringBefore('#').substringAfterLast('/')
+        val parts = name.substringBeforeLast('.', name).split('.', '_', '-')
+        val tag = parts.lastOrNull()?.lowercase() ?: return null
+
+        return tag.takeIf { it.length in 2..3 && it.all { char -> char in 'a'..'z' } }
     }
 
     private fun subtitleMimeType(uri: String): String = when (extensionOf(uri)) {

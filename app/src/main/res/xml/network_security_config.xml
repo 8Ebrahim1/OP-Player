@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     
+    <!--
+        Cleartext HTTP is allowed on purpose: the user supplies arbitrary video
+        links and many of those servers are HTTP only, so the permission cannot
+        be narrowed to a host list. The app has no backend, no accounts and no
+        tokens, so no credentials are ever sent. Only system trust anchors are
+        trusted. See docs/DEVELOPMENT.md, section "Network security".
+    -->
     <base-config cleartextTrafficPermitted="true">
         <trust-anchors>
             <certificates src="system" />

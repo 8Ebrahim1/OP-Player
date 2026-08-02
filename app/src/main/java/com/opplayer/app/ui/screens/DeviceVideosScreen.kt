@@ -1,10 +1,7 @@
 package com.opplayer.app.ui.screens
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -13,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,7 +28,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,24 +40,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.opplayer.app.R
 import com.opplayer.app.data.LocalVideo
+import com.opplayer.app.data.MediaAccess
+import com.opplayer.app.data.currentMediaAccess
+import com.opplayer.app.data.mediaPermissionRequest
 import com.opplayer.app.ui.DeviceVideosViewModel
 import com.opplayer.app.ui.components.EmptyState
 import com.opplayer.app.ui.components.FolderCard
+import com.opplayer.app.ui.components.HelpIconButton
+import com.opplayer.app.ui.components.HelpSheet
 import com.opplayer.app.ui.components.LocalVideoCard
 import com.opplayer.app.ui.components.ScreenHeader
+import com.opplayer.app.ui.components.deviceHelpEntries
 
-private val requiredPermission: String
-    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        Manifest.permission.READ_MEDIA_VIDEO
-    } else {
-        Manifest.permission.READ_EXTERNAL_STORAGE
-    }
-
+/**
+ * Browses the videos stored on the device.
+ *
+ * Media access is re-evaluated on every ON_RESUME, so granting the permission in
+ * system settings and coming back shows the library immediately instead of
+ * leaving a permanently empty screen. Partial access (Android 14+) is a first
+ * class state: the videos the user shared are listed, with a way to widen the
+ * selection.
+ */
 @Composable
 fun DeviceVideosScreen(
     localPositions: Map<String, Long>,
@@ -68,31 +78,58 @@ fun DeviceVideosScreen(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    var hasPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(context, requiredPermission) ==
-                PackageManager.PERMISSION_GRANTED
-        )
-    }
+    var access by remember { mutableStateOf(context.currentMediaAccess()) }
     var permissionRequested by remember { mutableStateOf(false) }
-    var openFolder by remember { mutableStateOf<String?>(null) }
+    var openFolderId by remember { mutableStateOf<Long?>(null) }
     var query by remember { mutableStateOf("") }
+    var showHelp by remember { mutableStateOf(false) }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event != Lifecycle.Event.ON_RESUME) return@LifecycleEventObserver
+
+            val current = context.currentMediaAccess()
+            if (current != access) {
+                access = current
+            } else if (current != MediaAccess.DENIED) {
+                // Partial selections can change without the level changing.
+                viewModel.refresh()
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        hasPermission = granted
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) {
         permissionRequested = true
-        if (granted) viewModel.refresh()
+        access = context.currentMediaAccess()
     }
 
-    LaunchedEffect(hasPermission) {
-        if (hasPermission && !uiState.hasLoadedOnce) viewModel.refresh()
+    LaunchedEffect(access) {
+        if (access.canReadAnything) viewModel.refresh()
     }
 
-    BackHandler(enabled = openFolder != null) {
-        openFolder = null
+    BackHandler(enabled = openFolderId != null) {
+        openFolderId = null
         query = ""
+    }
+
+    val currentFolder = remember(uiState.folders, openFolderId) {
+        openFolderId?.let { id -> uiState.folders.firstOrNull { it.id == id } }
+    }
+
+    // Filtering runs only when the folder or the query really changes.
+    val visibleVideos by remember(currentFolder, query) {
+        derivedStateOf {
+            currentFolder?.videos.orEmpty().filter {
+                query.isBlank() || it.name.contains(query, ignoreCase = true)
+            }
+        }
     }
 
     Column(
@@ -100,37 +137,39 @@ fun DeviceVideosScreen(
             .fillMaxSize()
             .padding(horizontal = 14.dp)
     ) {
-        val currentFolder = openFolder
-
         ScreenHeader(
             brand = stringResource(R.string.brand),
-            title = currentFolder ?: stringResource(R.string.device_title),
+            title = currentFolder?.name ?: stringResource(R.string.device_title),
             action = {
-                if (currentFolder != null) {
-                    IconButton(
-                        onClick = {
-                            openFolder = null
-                            query = ""
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (currentFolder != null) {
+                        IconButton(
+                            onClick = {
+                                openFolderId = null
+                                query = ""
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back)
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
-                        )
+                    } else if (access.canReadAnything) {
+                        IconButton(onClick = { viewModel.refresh() }) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = stringResource(R.string.refresh)
+                            )
+                        }
                     }
-                } else if (hasPermission) {
-                    IconButton(onClick = { viewModel.refresh() }) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = stringResource(R.string.refresh)
-                        )
-                    }
+
+                    HelpIconButton(onClick = { showHelp = true })
                 }
             }
         )
 
         when {
-            !hasPermission -> {
+            access == MediaAccess.DENIED -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     EmptyState(
                         icon = Icons.Default.Lock,
@@ -143,14 +182,9 @@ fun DeviceVideosScreen(
                         },
                         onAction = {
                             if (permissionRequested) {
-                                context.startActivity(
-                                    Intent(
-                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                        Uri.fromParts("package", context.packageName, null)
-                                    ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                )
+                                context.openAppSettings()
                             } else {
-                                permissionLauncher.launch(requiredPermission)
+                                permissionLauncher.launch(mediaPermissionRequest)
                             }
                         }
                     )
@@ -168,30 +202,46 @@ fun DeviceVideosScreen(
                     EmptyState(
                         icon = Icons.Default.VideocamOff,
                         title = stringResource(R.string.no_local_videos),
-                        body = stringResource(R.string.permission_body),
-                        actionLabel = stringResource(R.string.refresh),
-                        onAction = { viewModel.refresh() }
+                        body = if (access == MediaAccess.PARTIAL) {
+                            stringResource(R.string.permission_partial_body)
+                        } else {
+                            stringResource(R.string.permission_body)
+                        },
+                        actionLabel = if (access == MediaAccess.PARTIAL) {
+                            stringResource(R.string.permission_partial_action)
+                        } else {
+                            stringResource(R.string.refresh)
+                        },
+                        onAction = {
+                            if (access == MediaAccess.PARTIAL) {
+                                permissionLauncher.launch(mediaPermissionRequest)
+                            } else {
+                                viewModel.refresh()
+                            }
+                        }
                     )
                 }
             }
 
             currentFolder == null -> {
+                if (access == MediaAccess.PARTIAL) {
+                    PartialAccessNotice(
+                        onManage = { permissionLauncher.launch(mediaPermissionRequest) }
+                    )
+                }
+
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     contentPadding = PaddingValues(bottom = 24.dp)
                 ) {
-                    items(uiState.folders, key = { it.name }) { folder ->
-                        FolderCard(folder = folder, onClick = { openFolder = folder.name })
+                    // Keyed by bucket id: two folders may share a display name.
+                    items(uiState.folders, key = { it.id }) { folder ->
+                        FolderCard(folder = folder, onClick = { openFolderId = folder.id })
                     }
                 }
             }
 
             else -> {
-                val folder = uiState.folders.firstOrNull { it.name == currentFolder }
-                val videos = folder?.videos.orEmpty().filter {
-                    query.isBlank() || it.name.contains(query, ignoreCase = true)
-                }
-
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
@@ -202,7 +252,7 @@ fun DeviceVideosScreen(
                         .padding(bottom = 10.dp)
                 )
 
-                if (videos.isEmpty()) {
+                if (visibleVideos.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         EmptyState(
                             icon = Icons.Default.Folder,
@@ -215,7 +265,7 @@ fun DeviceVideosScreen(
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                         contentPadding = PaddingValues(bottom = 24.dp)
                     ) {
-                        items(videos, key = { it.id }) { video ->
+                        items(visibleVideos, key = { it.id }) { video ->
                             val resume = localPositions[video.uri] ?: 0L
                             LocalVideoCard(
                                 video = video,
@@ -228,4 +278,36 @@ fun DeviceVideosScreen(
             }
         }
     }
+
+    // Anchored at screen level so help stays reachable in every state,
+    // including while the permission prompt is showing.
+    if (showHelp) {
+        HelpSheet(
+            title = stringResource(R.string.help_device_title),
+            entries = deviceHelpEntries(),
+            onDismiss = { showHelp = false }
+        )
+    }
+}
+
+/** Banner shown when only a hand picked set of videos is visible. */
+@Composable
+private fun PartialAccessNotice(onManage: () -> Unit) {
+    com.opplayer.app.ui.components.InfoBanner(
+        text = stringResource(R.string.permission_partial_body),
+        actionLabel = stringResource(R.string.permission_partial_action),
+        onAction = onManage,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 10.dp)
+    )
+}
+
+private fun android.content.Context.openAppSettings() {
+    startActivity(
+        Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.fromParts("package", packageName, null)
+        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    )
 }

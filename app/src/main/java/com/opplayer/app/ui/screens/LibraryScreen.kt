@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -35,8 +37,12 @@ import com.opplayer.app.data.VideoItem
 import com.opplayer.app.ui.components.AddLinkDialog
 import com.opplayer.app.ui.components.EmptyState
 import com.opplayer.app.ui.components.GlassTabs
+import com.opplayer.app.ui.components.HelpIconButton
+import com.opplayer.app.ui.components.HelpSheet
 import com.opplayer.app.ui.components.LibraryVideoCard
 import com.opplayer.app.ui.components.ScreenHeader
+import com.opplayer.app.ui.components.libraryHelpEntries
+import com.opplayer.app.ui.localization.LocalizedWindow
 
 @Composable
 fun LibraryScreen(
@@ -50,6 +56,7 @@ fun LibraryScreen(
 ) {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     var showAddDialog by remember { mutableStateOf(false) }
+    var showHelp by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<VideoItem?>(null) }
 
     val tabTitles = listOf(
@@ -58,10 +65,18 @@ fun LibraryScreen(
         stringResource(R.string.section_recent)
     )
 
-    val visibleVideos = when (selectedTab) {
-        1 -> videos.filter { it.isFavorite }
-        2 -> videos.filter { it.lastPlayedAt > 0 }.sortedByDescending { it.lastPlayedAt }
-        else -> videos.sortedByDescending { it.addedAt }
+    // Sorting and filtering are recomputed only when the list or the tab
+    // changes, instead of on every recomposition.
+    val visibleVideos by remember(videos, selectedTab) {
+        derivedStateOf {
+            when (selectedTab) {
+                1 -> videos.filter { it.isFavorite }
+                2 -> videos.filter { it.lastPlayedAt > 0 }
+                    .sortedByDescending { it.lastPlayedAt }
+
+                else -> videos.sortedByDescending { it.addedAt }
+            }
+        }
     }
 
     Column(
@@ -73,12 +88,16 @@ fun LibraryScreen(
             brand = stringResource(R.string.brand),
             title = stringResource(R.string.library_title),
             action = {
-                FilledTonalButton(onClick = { showAddDialog = true }) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = null)
-                    Text(
-                        text = stringResource(R.string.add_link),
-                        modifier = Modifier.padding(start = 6.dp)
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    FilledTonalButton(onClick = { showAddDialog = true }) {
+                        Icon(imageVector = Icons.Default.Add, contentDescription = null)
+                        Text(
+                            text = stringResource(R.string.add_link),
+                            modifier = Modifier.padding(start = 6.dp)
+                        )
+                    }
+
+                    HelpIconButton(onClick = { showHelp = true })
                 }
             }
         )
@@ -132,6 +151,14 @@ fun LibraryScreen(
         }
     }
 
+    if (showHelp) {
+        HelpSheet(
+            title = stringResource(R.string.help_library_title),
+            entries = libraryHelpEntries(),
+            onDismiss = { showHelp = false }
+        )
+    }
+
     if (showAddDialog) {
         AddLinkDialog(
             onDismiss = { showAddDialog = false },
@@ -146,21 +173,36 @@ fun LibraryScreen(
     if (deleteTarget != null) {
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            title = { Text(stringResource(R.string.delete_dialog_title)) },
-            text = { Text(stringResource(R.string.delete_dialog_body, deleteTarget.title)) },
+            // A dialog is its own window, so the language chosen in the
+            // settings has to be restored inside every slot or the strings
+            // follow the device locale instead.
+            title = {
+                LocalizedWindow {
+                    Text(stringResource(R.string.delete_dialog_title))
+                }
+            },
+            text = {
+                LocalizedWindow {
+                    Text(stringResource(R.string.delete_dialog_body, deleteTarget.title))
+                }
+            },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDelete(deleteTarget.id)
-                        pendingDelete = null
+                LocalizedWindow {
+                    TextButton(
+                        onClick = {
+                            onDelete(deleteTarget.id)
+                            pendingDelete = null
+                        }
+                    ) {
+                        Text(stringResource(R.string.delete))
                     }
-                ) {
-                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { pendingDelete = null }) {
-                    Text(stringResource(R.string.cancel))
+                LocalizedWindow {
+                    TextButton(onClick = { pendingDelete = null }) {
+                        Text(stringResource(R.string.cancel))
+                    }
                 }
             }
         )

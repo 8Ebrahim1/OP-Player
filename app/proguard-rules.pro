@@ -17,7 +17,22 @@
 
 # ---- Media3 / ExoPlayer ----
 -dontwarn androidx.media3.**
--keep class androidx.media3.exoplayer.** { *; }
+-dontnote androidx.media3.**
+
+# Media source factories are resolved by name from DefaultMediaSourceFactory,
+# so only their constructors have to survive shrinking.
+-keep class androidx.media3.exoplayer.dash.DashMediaSource$Factory { <init>(...); }
+-keep class androidx.media3.exoplayer.hls.HlsMediaSource$Factory { <init>(...); }
+-keep class androidx.media3.exoplayer.smoothstreaming.SsMediaSource$Factory { <init>(...); }
+-keep class androidx.media3.exoplayer.rtsp.RtspMediaSource$Factory { <init>(...); }
+
+# Optional software decoders are instantiated reflectively by DefaultRenderersFactory.
+-keep class androidx.media3.decoder.**Renderer { <init>(...); }
+
+# ---- Parcelable (@Parcelize on PlaybackRequest / EpisodePattern) ----
+-keepclassmembers class * implements android.os.Parcelable {
+    public static final ** CREATOR;
+}
 
 # ---- Compose ----
 -dontwarn org.jetbrains.annotations.**

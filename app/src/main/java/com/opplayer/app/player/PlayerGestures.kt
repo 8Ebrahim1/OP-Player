@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.media.AudioManager
+import android.os.SystemClock
 import android.provider.Settings
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -27,7 +28,15 @@ class PlayerGestures(
     private val isEnabled: () -> Boolean,
     private val onTap: () -> Unit,
     private val onSeek: (forward: Boolean) -> Unit,
-    private val onIndicator: (PlayerGestureKind, Float) -> Unit
+    private val onIndicator: (PlayerGestureKind, Float) -> Unit,
+    /**
+     * Monotonic time source for the double tap chain.
+     *
+     * `System.currentTimeMillis()` can jump backwards or forwards when the clock
+     * is corrected or the time zone changes, which either froze the chain or
+     * kept it open forever. Elapsed realtime cannot.
+     */
+    private val elapsedRealtimeMs: () -> Long = { SystemClock.elapsedRealtime() }
 ) : View.OnTouchListener {
 
     private val audioManager = context.getSystemService(AudioManager::class.java)
@@ -42,6 +51,9 @@ class PlayerGestures(
     private var activeKind = PlayerGestureKind.VOLUME
     private var startValue = 0f
     private var lastSeekAt = 0L
+
+    /** Set once a gesture actually changes the brightness of this window. */
+    private var brightnessTouched = false
 
     private val detector = GestureDetector(
         context,
@@ -139,18 +151,26 @@ class PlayerGestures(
         return true
     }
 
+    /**
+     * Hands the screen brightness back to the system, but only if a gesture ever
+     * took it over. Resetting unconditionally undid a brightness the user had
+     * set elsewhere every time the player closed.
+     */
     fun release() {
+        if (!brightnessTouched) return
+
         val window = activity?.window ?: return
         val attributes = window.attributes
         attributes.screenBrightness = SYSTEM_BRIGHTNESS_DEFAULT
         window.attributes = attributes
+        brightnessTouched = false
     }
 
     private fun withinSeekChain(): Boolean =
-        System.currentTimeMillis() - lastSeekAt < SEEK_CHAIN_WINDOW_MS
+        elapsedRealtimeMs() - lastSeekAt < SEEK_CHAIN_WINDOW_MS
 
     private fun triggerSeek(x: Float) {
-        lastSeekAt = System.currentTimeMillis()
+        lastSeekAt = elapsedRealtimeMs()
         onSeek(x > viewWidth / 2f)
     }
 
@@ -183,5 +203,6 @@ class PlayerGestures(
         val attributes = window.attributes
         attributes.screenBrightness = fraction.coerceIn(MIN_BRIGHTNESS, 1f)
         window.attributes = attributes
+        brightnessTouched = true
     }
 }

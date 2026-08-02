@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ترجمهٔ فارسی. زبان پیش‌فرض (fallback) در values/strings.xml انگلیسی است.
+-->
+<resources>
+    <string name="app_name">OP Player</string>
+    <string name="brand">OP Player</string>
+
+    <string name="tab_links">لینک‌ها</string>
+    <string name="tab_device">گوشی من</string>
+    <string name="tab_subtitle">زیرنویس</string>
+    <string name="tab_settings">تنظیمات</string>
+
+    <string name="library_title">کتابخانه</string>
+    <string name="section_library">همه</string>
+    <string name="section_favorites">علاقه‌مندی‌ها</string>
+    <string name="section_recent">اخیر</string>
+
+    <string name="add_link">افزودن لینک</string>
+    <string name="add_link_title">افزودن ویدیوی جدید</string>
+    <string name="field_name">نام ویدیو</string>
+    <string name="field_url">آدرس ویدیو (mp4، mkv، m3u8، mpd …)</string>
+    <string name="field_subtitle">آدرس زیرنویس (اختیاری)</string>
+    <string name="invalid_url">آدرس واردشده معتبر نیست</string>
+    <string name="save_and_play">ذخیره و پخش</string>
+    <string name="cancel">انصراف</string>
+    <string name="default_video_name">ویدیوی بدون نام</string>
+
+    <string name="link_mode_simple">ساده</string>
+    <string name="link_mode_advanced">پیشرفته</string>
+    <string name="advanced_link_hint">لینک دو قسمت پشت‌سرهم را وارد کنید؛ برنامه خودش تشخیص می‌دهد کدام بخش لینک تغییر می‌کند و بقیهٔ قسمت‌ها را می‌سازد.</string>
+    <string name="field_url_current">لینک قسمت فعلی</string>
+    <string name="field_url_next">لینک قسمت بعدی</string>
+    <string name="pattern_detected">الگو شناسایی شد — شمارهٔ فعلی: %1$s، گام: %2$s</string>
+    <string name="pattern_preview">قسمت بعدی: %1$s</string>
+    <string name="pattern_error_empty">هر دو لینک را وارد کنید</string>
+    <string name="pattern_error_identical">دو لینک کاملاً یکسان هستند</string>
+    <string name="pattern_error_numeric">بخش متغیر بین دو لینک عدد نیست یا بیش از یک قسمت تغییر کرده است</string>
+    <string name="pattern_error_increasing">عدد لینک دوم باید کمی بزرگ‌تر از لینک اول باشد</string>
+    <string name="pattern_error_too_long">عدد متغیر بیش از حد طولانی است</string>
+
+    <string name="empty_library_title">هنوز ویدیویی اضافه نکرده‌اید</string>
+    <string name="empty_library_body">یک لینک آنلاین اضافه کنید تا همین‌جا پخش شود.</string>
+    <string name="empty_favorites_title">لیست علاقه‌مندی خالی است</string>
+    <string name="empty_favorites_body">با زدن قلب روی هر ویدیو، اینجا ذخیره می‌شود.</string>
+    <string name="empty_recent_title">پخش اخیری وجود ندارد</string>
+    <string name="empty_recent_body">هر ویدیویی که پخش کنید اینجا نمایش داده می‌شود.</string>
+    <string name="add_first_video">افزودن اولین ویدیو</string>
+
+    <string name="continue_playback">ادامه از %1$s</string>
+    <string name="online_link">لینک آنلاین</string>
+    <string name="favorite">علاقه‌مندی</string>
+    <string name="add_to_favorites">افزودن به علاقه‌مندی‌ها</string>
+    <string name="remove_from_favorites">حذف از علاقه‌مندی‌ها</string>
+    <string name="favorite_state_on">در علاقه‌مندی‌ها</string>
+    <string name="favorite_state_off">خارج از علاقه‌مندی‌ها</string>
+    <string name="delete">حذف</string>
+    <string name="play">پخش</string>
+    <string name="delete_dialog_title">حذف ویدیو</string>
+    <string name="delete_dialog_body">«%1$s» از کتابخانه حذف شود؟</string>
+
+    <string name="device_title">ویدیوهای گوشی</string>
+    <string name="permission_title">دسترسی به ویدیوها لازم است</string>
+    <string name="permission_body">برای نمایش ویدیوهای داخل گوشی به‌صورت پوشه‌بندی‌شده، به اجازهٔ دسترسی نیاز داریم.</string>
+    <string name="permission_grant">اجازه می‌دهم</string>
+    <string name="permission_settings">باز کردن تنظیمات</string>
+    <string name="permission_partial_body">فقط به ویدیوهای انتخاب‌شده دسترسی داریم. برای دیدن همهٔ ویدیوها می‌توانید انتخاب را گسترش دهید.</string>
+    <string name="permission_partial_action">مدیریت انتخاب</string>
+    <string name="no_local_videos">ویدیویی در گوشی پیدا نشد</string>
+    <string name="refresh">بارگذاری دوباره</string>
+    <string name="search_videos">جستجوی ویدیو…</string>
+    <string name="folder_summary">%1$s ویدیو</string>
+
+    <string name="back">بازگشت</string>
+    <string name="pip">تصویر در تصویر</string>
+    <string name="pip_unavailable">این دستگاه از حالت تصویر در تصویر پشتیبانی نمی‌کند</string>
+    <string name="fullscreen">تمام‌صفحه</string>
+    <string name="exit_fullscreen">خروج از تمام‌صفحه</string>
+    <string name="resize_mode">نسبت تصویر</string>
+    <string name="retry">تلاش دوباره</string>
+
+    <string name="settings_title">تنظیمات پخش</string>
+    <string name="speed_label">سرعت پخش</string>
+    <string name="speed_current">سرعت فعلی: %1$s×</string>
+    <string name="speed_custom_label">سرعت دلخواه</string>
+    <string name="speed_custom_hint">عددی بین ۰٫۱ تا ۶ مانند ۱٫۸</string>
+    <string name="speed_custom_invalid">عدد معتبر بین ۰٫۱ تا ۶ وارد کنید</string>
+    <string name="apply">اعمال</string>
+    <string name="aspect_fit">متناسب</string>
+    <string name="aspect_zoom">بزرگ‌نمایی</string>
+    <string name="aspect_fill">کشیده</string>
+
+    <string name="auto_rotate_label">چرخش خودکار صفحه</string>
+    <string name="auto_rotate_body">ویدیوی افقی (مثل ۱۹۲۰×۱۰۸۰) افقی و ویدیوی عمودی (مثل استوری و ریلز) عمودی پخش شود</string>
+    <string name="gestures_label">کنترل با کشیدن انگشت</string>
+    <string name="gestures_body">سمت راست صدا، سمت چپ روشنایی؛ دو ضربه برای جابه‌جایی ۱۵ ثانیه‌ای</string>
+    <string name="gesture_volume">صدا</string>
+    <string name="gesture_brightness">روشنایی</string>
+    <string name="seek_forward">۱۵ ثانیه جلو</string>
+    <string name="seek_backward">۱۵ ثانیه عقب</string>
+
+    <string name="next_episode">قسمت بعدی</string>
+    <string name="now_playing_episode">در حال پخش: %1$s</string>
+    <string name="episode_resolve_timeout">جست‌وجوی قسمت بعد بیش از حد طول کشید</string>
+    <string name="episode_network_unavailable">اتصال شبکه برقرار نیست؛ قسمت بعد بررسی نشد</string>
+    <string name="next_episode_not_found">قسمت بعدی روی سرور پیدا نشد؛ احتمالاً این آخرین قسمت است</string>
+    <string name="episode_pattern_missing">در این لینک نشانهٔ قسمت یا فصل (مانند S01E02) پیدا نشد</string>
+    <string name="auto_next_label">پخش خودکار قسمت بعدی</string>
+    <string name="auto_next_body">پس از پایان ویدیو، خودکار برو به قسمت بعد</string>
+
+    <string name="error_network">اتصال به اینترنت برقرار نیست یا آدرس در دسترس نیست</string>
+    <string name="error_not_found">فایل یا لینک پیدا نشد</string>
+    <string name="error_format">این قالب یا کدک روی دستگاه شما پشتیبانی نمی‌شود</string>
+    <string name="error_drm">این محتوا دارای قفل DRM است و قابل پخش نیست</string>
+    <string name="error_unknown">خطای ناشناخته در پخش</string>
+    <string name="reset_progress">شروع از ابتدا</string>
+    <string name="current_episode">قسمت %1$s</string>
+
+    <string name="subtitle_settings">تنظیمات زیرنویس</string>
+    <string name="subtitle_enabled">نمایش زیرنویس</string>
+    <string name="subtitle_off">بدون زیرنویس</string>
+    <string name="subtitle_track">زیرنویس فعال</string>
+    <string name="subtitle_embedded_track">زیرنویس داخلی</string>
+    <string name="subtitle_pick_file">انتخاب فایل زیرنویس از حافظه</string>
+    <string name="subtitle_loaded">زیرنویس بارگذاری شد: %1$s</string>
+    <string name="subtitle_load_failed">خواندن فایل زیرنویس ممکن نشد</string>
+    <string name="subtitle_none_found">زیرنویسی برای این ویدیو پیدا نشد</string>
+    <string name="subtitle_sync">هم‌زمان‌سازی زیرنویس</string>
+    <string name="subtitle_sync_value">اختلاف زمانی: %1$s ثانیه</string>
+    <string name="subtitle_sync_reset">صفر کردن اختلاف زمانی</string>
+    <string name="subtitle_sync_hint">عدد مثبت زیرنویس را دیرتر و عدد منفی آن را زودتر نشان می‌دهد.</string>
+    <string name="subtitle_delay_only_hint">برای زیرنویس داخلی فایل، فقط تأخیر (عدد مثبت) قابل اعمال است.</string>
+    <string name="subtitle_text_color">رنگ متن</string>
+    <string name="subtitle_background">رنگ پس‌زمینهٔ متن</string>
+    <string name="subtitle_size_value">اندازهٔ متن: %1$s</string>
+    <string name="subtitle_position_value">فاصله از پایین: %1$s</string>
+    <string name="subtitle_bold">متن ضخیم</string>
+    <string name="subtitle_outline">سایهٔ دور متن</string>
+    <string name="subtitle_style_reset">بازگشت به حالت پیش‌فرض</string>
+    <string name="subtitle_preview_text">نمونهٔ متن زیرنویس</string>
+
+    <!-- نام رنگ‌ها برای دسترس‌پذیری -->
+    <string name="color_white">سفید</string>
+    <string name="color_yellow">زرد</string>
+    <string name="color_cyan">فیروزه‌ای</string>
+    <string name="color_green">سبز</string>
+    <string name="color_orange">نارنجی</string>
+    <string name="color_pink">صورتی</string>
+    <string name="color_black">مشکی</string>
+    <string name="color_transparent">بدون پس‌زمینه</string>
+    <string name="color_black_light">مشکی کمرنگ</string>
+    <string name="color_black_medium">مشکی متوسط</string>
+    <string name="color_black_strong">مشکی پررنگ</string>
+    <string name="color_white_box">کادر روشن</string>
+    <string name="color_selected">انتخاب‌شده</string>
+
+    <!-- تنظیمات برنامه -->
+    <string name="app_settings_title">تنظیمات برنامه</string>
+    <string name="language_label">زبان برنامه</string>
+    <string name="language_body">زبان محیط برنامه را انتخاب کنید. گزینهٔ «سیستم» از تنظیم دستگاه پیروی می‌کند.</string>
+    <string name="language_system">سیستم</string>
+    <string name="language_persian">فارسی</string>
+    <string name="language_english">English</string>
+    <string name="direction_label">جهت چیدمان</string>
+    <string name="direction_body">گزینهٔ «خودکار» از زبان پیروی می‌کند: راست‌به‌چپ برای فارسی و چپ‌به‌راست برای انگلیسی.</string>
+    <string name="direction_auto">خودکار</string>
+    <string name="direction_rtl">راست به چپ</string>
+    <string name="direction_ltr">چپ به راست</string>
+    <string name="replay_tour">نمایش دوبارهٔ اسلایدهای معرفی</string>
+    <string name="replay_tour_body">اسلایدها را دوباره ببینید و زبان و رنگ زیرنویس را دوباره تنظیم کنید.</string>
+    <string name="close">بستن</string>
+
+    <!-- اسلایدهای معرفی -->
+    <string name="onboarding_skip">رد کردن</string>
+    <string name="onboarding_next">بعدی</string>
+    <string name="onboarding_previous">قبلی</string>
+    <string name="onboarding_finish">شروع کار با برنامه</string>
+    <string name="onboarding_step">مرحلهٔ %1$s از %2$s</string>
+
+    <string name="onboarding_welcome_title">به OP Player خوش آمدید</string>
+    <string name="onboarding_welcome_body">پخش‌کننده‌ای برای لینک‌های آنلاین و ویدیوهای خود گوشی، با کنترل کامل روی زیرنویس. در چند اسلاید بعدی برنامه را دقیقاً مطابق سلیقهٔ خودتان تنظیم می‌کنید.</string>
+
+    <string name="onboarding_language_title">زبان خود را انتخاب کنید</string>
+    <string name="onboarding_language_body">کل محیط برنامه بلافاصله تغییر می‌کند. بعداً هم از بخش تنظیمات قابل تغییر است.</string>
+
+    <string name="onboarding_direction_title">جهت چیدمان</string>
+    <string name="onboarding_direction_body">فارسی راست‌به‌چپ و انگلیسی چپ‌به‌راست خوانده می‌شود. گزینهٔ «خودکار» حالت درست را خودش انتخاب می‌کند؛ فقط اگر حالت دیگر را ترجیح می‌دهید آن را تغییر دهید.</string>
+
+    <string name="onboarding_library_title">کتابخانهٔ لینک‌ها</string>
+    <string name="onboarding_library_body">هر لینک مستقیمی (mp4، mkv، m3u8، mpd) را اضافه کنید و همان‌جا پخش کنید. حالت پیشرفته از روی دو لینک پشت‌سرهم، الگوی شماره‌گذاری سریال را یاد می‌گیرد و قسمت‌های بعدی را خودش می‌سازد.</string>
+
+    <string name="onboarding_device_title">ویدیوهای گوشی</string>
+    <string name="onboarding_device_body">ویدیوهای داخل گوشی پوشه‌بندی می‌شوند و همراه با تصویر بندانگشتی، مدت زمان، حجم و نقطهٔ ادامهٔ پخش نمایش داده می‌شوند. فقط از اجازهٔ خواندن ویدیوها استفاده می‌شود.</string>
+
+    <string name="onboarding_player_title">پخش‌کننده‌ای برای کنترل با انگشت</string>
+    <string name="onboarding_player_body">در نیمهٔ راست برای صدا و در نیمهٔ چپ برای روشنایی انگشت را بالا و پایین بکشید، با دو ضربه ۱۵ ثانیه جلو یا عقب بروید، و از نوار بالا به تصویر در تصویر، حالت‌های بزرگ‌نمایی، سرعت پخش و چرخش خودکار دسترسی داشته باشید.</string>
+
+    <string name="onboarding_subtitle_color_title">رنگ زیرنویس</string>
+    <string name="onboarding_subtitle_color_body">رنگ متن زیرنویس را انتخاب کنید. پیش‌نمایش پایین همزمان به‌روز می‌شود.</string>
+
+    <string name="onboarding_subtitle_background_title">پس‌زمینهٔ زیرنویس</string>
+    <string name="onboarding_subtitle_background_body">کادر پس‌زمینه باعث می‌شود زیرنویس روی صحنه‌های روشن هم خوانا بماند. اندازه و موقعیت را بعداً هم می‌توانید دقیق کنید.</string>
+
+    <string name="onboarding_ready_title">همه‌چیز آماده است</string>
+    <string name="onboarding_ready_body">در هر صفحه دکمهٔ علامت سوال وجود دارد که کاربرد هر آیکون و هر گزینه را توضیح می‌دهد. این اسلایدها را هر وقت بخواهید از تنظیمات دوباره می‌بینید.</string>
+
+    <!-- راهنمای هر بخش -->
+    <string name="help">راهنما</string>
+    <string name="help_library_title">راهنمای کتابخانهٔ لینک‌ها</string>
+    <string name="help_device_title">راهنمای ویدیوهای گوشی</string>
+    <string name="help_player_title">راهنمای پخش‌کننده</string>
+    <string name="help_subtitle_title">راهنمای زیرنویس</string>
+    <string name="help_settings_title">راهنمای تنظیمات</string>
+
+    <string name="help_library_add_title">دکمهٔ «افزودن لینک»</string>
+    <string name="help_library_add_body">پنجره‌ای باز می‌کند که در آن نام و آدرس مستقیم ویدیو را وارد می‌کنید. طرح‌های مجاز: http، https، rtsp، content و file.</string>
+    <string name="help_library_tabs_title">تب‌های همه / علاقه‌مندی‌ها / اخیر</string>
+    <string name="help_library_tabs_body">«همه» براساس تاریخ افزودن، «علاقه‌مندی‌ها» موارد ستاره‌دار و «اخیر» براساس آخرین پخش مرتب می‌شود.</string>
+    <string name="help_library_play_title">لمس کارت ویدیو</string>
+    <string name="help_library_play_body">ویدیو را از محل ذخیره‌شده ادامه می‌دهد. برای سریال، از همان قسمتی که در حال تماشایش بودید شروع می‌کند.</string>
+    <string name="help_library_favorite_title">آیکون قلب</string>
+    <string name="help_library_favorite_body">ویدیو را به علاقه‌مندی‌ها اضافه یا از آن حذف می‌کند. قلب پررنگ یعنی قبلاً اضافه شده است.</string>
+    <string name="help_library_reset_title">آیکون شروع دوباره</string>
+    <string name="help_library_reset_body">محل ذخیره‌شدهٔ پخش را پاک می‌کند تا ویدیو از ابتدا پخش شود. فقط وقتی نمایش داده می‌شود که پیشرفتی ثبت شده باشد.</string>
+    <string name="help_library_delete_title">آیکون سطل زباله</string>
+    <string name="help_library_delete_body">پس از تأیید، مورد را از کتابخانه حذف می‌کند. چیزی دانلود نشده، پس چیزی از سرور حذف نمی‌شود.</string>
+    <string name="help_library_advanced_title">حالت پیشرفته</string>
+    <string name="help_library_advanced_body">لینک دو قسمت پشت‌سرهم را بدهید. برنامه عدد متغیر و گام بین آن دو را پیدا می‌کند، قسمت‌های بعدی را خودش می‌سازد و پیش از ذخیره، پیش‌نمایش نشان می‌دهد.</string>
+
+    <string name="help_device_permission_title">اجازهٔ دسترسی به ویدیوها</string>
+    <string name="help_device_permission_body">برای فهرست کردن ویدیوهای محلی لازم است. در اندروید ۱۴ به بعد می‌توانید فقط بعضی ویدیوها را به اشتراک بگذارید؛ این حالت جزئی پشتیبانی می‌شود و هر زمان قابل گسترش است.</string>
+    <string name="help_device_folders_title">فهرست پوشه‌ها</string>
+    <string name="help_device_folders_body">ویدیوها براساس پوشهٔ محل ذخیره، همراه با تعداد و مجموع مدت زمان، گروه‌بندی می‌شوند. دو پوشهٔ هم‌نام جدا باقی می‌مانند.</string>
+    <string name="help_device_search_title">کادر جستجو</string>
+    <string name="help_device_search_body">درون پوشهٔ بازشده، براساس نام فایل فیلتر می‌کند.</string>
+    <string name="help_device_refresh_title">آیکون بارگذاری دوباره</string>
+    <string name="help_device_refresh_body">دستگاه را دوباره اسکن می‌کند؛ پس از دانلود یا حذف یک ویدیو مفید است.</string>
+    <string name="help_device_back_title">آیکون بازگشت</string>
+    <string name="help_device_back_body">از داخل پوشه به فهرست پوشه‌ها برمی‌گردد. دکمهٔ بازگشت خود گوشی هم همین کار را می‌کند.</string>
+    <string name="help_device_resume_title">خط ادامهٔ پخش</string>
+    <string name="help_device_resume_body">اگر روی کارت زمان ادامه نوشته شده باشد، پخش دقیقاً از همان نقطه ادامه پیدا می‌کند.</string>
+
+    <string name="help_player_back_title">آیکون بازگشت</string>
+    <string name="help_player_back_body">اول از حالت تمام‌صفحه خارج می‌شود؛ اگر قبلاً خارج شده باشید، پخش‌کننده را می‌بندد و محل پخش را ذخیره می‌کند.</string>
+    <string name="help_player_next_title">آیکون دو پیکانی</string>
+    <string name="help_player_next_body">به قسمت بعدی می‌رود. فقط برای لینک‌هایی که الگویشان شناسایی شده نمایش داده می‌شود و حلقهٔ چرخان یعنی قسمت بعدی روی سرور در حال بررسی است.</string>
+    <string name="help_player_scale_title">آیکون نسبت تصویر</string>
+    <string name="help_player_scale_body">بین متناسب (کل تصویر)، بزرگ‌نمایی (پر کردن صفحه با برش) و کشیده (پر کردن صفحه با تغییر نسبت) می‌چرخد.</string>
+    <string name="help_player_pip_title">آیکون تصویر در تصویر</string>
+    <string name="help_player_pip_body">ویدیو را در یک پنجرهٔ کوچک شناور نگه می‌دارد تا از برنامه‌های دیگر استفاده کنید. خروج از برنامه حین پخش هم خودکار همین کار را می‌کند.</string>
+    <string name="help_player_fullscreen_title">آیکون تمام‌صفحه</string>
+    <string name="help_player_fullscreen_body">نوارهای سیستم را پنهان می‌کند. با کشیدن انگشت از لبه، موقتاً برمی‌گردند.</string>
+    <string name="help_player_subtitles_title">آیکون زیرنویس</string>
+    <string name="help_player_subtitles_body">تنظیمات زیرنویس را باز می‌کند: انتخاب ترک، بارگذاری فایل، تنظیم زمان‌بندی و تغییر ظاهر.</string>
+    <string name="help_player_settings_title">آیکون تنظیمات</string>
+    <string name="help_player_settings_body">سرعت پخش، نسبت تصویر، چرخش خودکار، کنترل با انگشت و پخش خودکار قسمت بعدی.</string>
+    <string name="help_player_gestures_title">کنترل با انگشت</string>
+    <string name="help_player_gestures_body">در نیمهٔ راست برای صدا و در نیمهٔ چپ برای روشنایی، عمودی بکشید. دو ضربه روی سمت راست یا چپ، ۱۵ ثانیه جلو یا عقب می‌برد و یک ضربه کنترل‌ها را نشان یا پنهان می‌کند.</string>
+    <string name="help_player_speed_title">سرعت پخش</string>
+    <string name="help_player_speed_body">یکی از مقادیر آماده را انتخاب کنید یا هر عددی بین ۰٫۱ تا ۶ را بنویسید و دکمهٔ اعمال را بزنید.</string>
+    <string name="help_player_rotate_title">چرخش خودکار</string>
+    <string name="help_player_rotate_body">براساس نسبت واقعی فایل، ویدیوی افقی به حالت افقی می‌چرخد و ویدیوی عمودی عمودی می‌ماند.</string>
+    <string name="help_player_autonext_title">پخش خودکار قسمت بعدی</string>
+    <string name="help_player_autonext_body">با تمام شدن ویدیو، قسمت بعدی الگو خودبه‌خود شروع می‌شود.</string>
+
+    <string name="help_subtitle_enable_title">نمایش زیرنویس</string>
+    <string name="help_subtitle_enable_body">کلید اصلی. وقتی خاموش باشد، حتی با وجود ترک بارگذاری‌شده هیچ زیرنویسی رسم نمی‌شود.</string>
+    <string name="help_subtitle_sync_title">هم‌زمان‌سازی</string>
+    <string name="help_subtitle_sync_body">زیرنویس را با گام‌های ۰٫۱ و ۰٫۵ ثانیه جابه‌جا می‌کند. عدد مثبت دیرتر و عدد منفی زودتر نشان می‌دهد. برای زیرنویس داخل ویدیو فقط تأخیر قابل اعمال است.</string>
+    <string name="help_subtitle_track_title">زیرنویس فعال</string>
+    <string name="help_subtitle_track_body">زیرنویس‌های کنار ویدیو و ترک‌های داخل فایل را فهرست می‌کند، به‌علاوهٔ گزینهٔ خاموش کردن زیرنویس. انتخاب شما با تغییر قسمت هم حفظ می‌شود.</string>
+    <string name="help_subtitle_file_title">انتخاب فایل زیرنویس</string>
+    <string name="help_subtitle_file_body">فایل SRT یا VTT را از حافظه بارگذاری می‌کند. دسترسی به فایل حفظ می‌شود، پس پس از راه‌اندازی مجدد هم کار می‌کند.</string>
+    <string name="help_subtitle_color_title">رنگ متن و پس‌زمینه</string>
+    <string name="help_subtitle_color_body">ردیف اول رنگ متن و ردیف دوم رنگ کادر پشت آن است. پیش‌نمایش بالا نتیجه را بلافاصله نشان می‌دهد.</string>
+    <string name="help_subtitle_size_title">اندازه و موقعیت</string>
+    <string name="help_subtitle_size_body">لغزندهٔ اول اندازهٔ متن و لغزندهٔ دوم فاصلهٔ زیرنویس از پایین صفحه را تعیین می‌کند.</string>
+    <string name="help_subtitle_style_title">متن ضخیم و سایه</string>
+    <string name="help_subtitle_style_body">حالت ضخیم متن را پررنگ‌تر می‌کند و سایهٔ دور متن، خوانایی را روی صحنه‌های روشن حفظ می‌کند.</string>
+
+    <string name="help_settings_language_title">زبان برنامه</string>
+    <string name="help_settings_language_body">محیط برنامه را بدون نیاز به راه‌اندازی مجدد بین فارسی و انگلیسی جابه‌جا می‌کند. گزینهٔ «سیستم» از زبان دستگاه پیروی می‌کند.</string>
+    <string name="help_settings_direction_title">جهت چیدمان</string>
+    <string name="help_settings_direction_body">مشخص می‌کند چیدمان راست‌به‌چپ باشد یا چپ‌به‌راست. گزینهٔ «خودکار» آن را از زبان انتخابی می‌گیرد.</string>
+    <string name="help_settings_tour_title">اسلایدهای معرفی</string>
+    <string name="help_settings_tour_body">اسلایدهای اجرای اول را دوباره نشان می‌دهد تا زبان و رنگ زیرنویس را دوباره تنظیم کنید.</string>
+</resources>
