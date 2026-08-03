@@ -2,7 +2,7 @@
 
 # OP Player
 
-**A modern video player that keeps your series rolling — it finds the next episode of an online link on its own.**
+**A Modern player with the ability to skip to the next video in online links**
 
 [فارسی](README.fa.md) · [Developer notes](docs/DEVELOPMENT.md)
 
