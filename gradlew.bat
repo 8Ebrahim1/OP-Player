@@ -13,6 +13,8 @@
 @rem See the License for the specific language governing permissions and
 @rem limitations under the License.
 @rem
+@rem SPDX-License-Identifier: Apache-2.0
+@rem
 
 @if "%DEBUG%"=="" @echo off
 @rem ##########################################################################
@@ -34,7 +36,7 @@ set APP_HOME=%DIRNAME%
 for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
-set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+set DEFAULT_JVM_OPTS=-Dfile.encoding=UTF-8 "-Xmx64m" "-Xms64m"
 
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome
@@ -70,34 +72,6 @@ goto fail
 
 set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
 
-@rem Self-healing bootstrap: restore gradle-wrapper.jar when it is missing.
-if exist "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" goto runGradle
-
-set WRAPPER_VERSION=8.10.2
-echo gradle-wrapper.jar is missing, restoring it for Gradle %WRAPPER_VERSION% ... 1>&2
-
-where gradle >NUL 2>&1
-if %ERRORLEVEL% equ 0 (
-    pushd "%APP_HOME%"
-    call gradle wrapper --gradle-version %WRAPPER_VERSION%
-    popd
-    goto runGradle
-)
-
-where curl >NUL 2>&1
-if %ERRORLEVEL% equ 0 (
-    curl -fsSL -o "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" "https://raw.githubusercontent.com/gradle/gradle/v%WRAPPER_VERSION%/gradle/wrapper/gradle-wrapper.jar"
-    goto runGradle
-)
-
-powershell -NoProfile -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/gradle/gradle/v%WRAPPER_VERSION%/gradle/wrapper/gradle-wrapper.jar' -OutFile '%APP_HOME%\gradle\wrapper\gradle-wrapper.jar'"
-if %ERRORLEVEL% neq 0 (
-    echo ERROR: gradle-wrapper.jar is missing and could not be restored. 1>&2
-    echo Run 'gradle wrapper --gradle-version %WRAPPER_VERSION%' once on a machine that has Gradle installed. 1>&2
-    goto fail
-)
-
-:runGradle
 
 @rem Execute Gradle
 "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*

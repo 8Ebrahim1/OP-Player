@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 
 ##############################################################################
 #
@@ -84,7 +86,8 @@ done
 # shellcheck disable=SC2034
 APP_BASE_NAME=${0##*/}
 # Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25036)
-APP_HOME=$( cd -P "${APP_HOME:-./}" > /dev/null && printf '%s\n' "$PWD" ) || exit
+APP_HOME=$( cd -P "${APP_HOME:-./}" > /dev/null && printf '%s
+' "$PWD" ) || exit
 
 # Use the maximum available, or set MAX_FD != -1 to use that value.
 MAX_FD=maximum
@@ -137,43 +140,6 @@ else
 
 Please set the JAVA_HOME variable in your environment to match the
 location of your Java installation."
-    fi
-fi
-
-# ----------------------------------------------------------------------------
-# Self-healing bootstrap.
-#
-# gradle-wrapper.jar is a binary and can be lost by archive exports, aggressive
-# .gitignore rules or "download as zip" workflows. When that happens the wrapper
-# is restored automatically instead of failing with an unhelpful
-# "ClassNotFoundException: org.gradle.wrapper.GradleWrapperMain".
-# ----------------------------------------------------------------------------
-if [ ! -f "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" ] ; then
-    wrapper_version=$(
-        sed -n 's#.*/gradle-\([0-9][0-9.]*\)-\(bin\|all\)\.zip.*#\1#p' \
-            "$APP_HOME/gradle/wrapper/gradle-wrapper.properties" 2>/dev/null | head -n 1
-    )
-    [ -n "$wrapper_version" ] || wrapper_version=8.10.2
-
-    warn "gradle-wrapper.jar is missing, restoring it for Gradle $wrapper_version ..."
-
-    if command -v gradle >/dev/null 2>&1 ; then
-        ( cd "$APP_HOME" && gradle wrapper --gradle-version "$wrapper_version" ) || \
-            die "ERROR: could not regenerate the Gradle wrapper with the installed Gradle."
-    else
-        wrapper_url="https://raw.githubusercontent.com/gradle/gradle/v$wrapper_version/gradle/wrapper/gradle-wrapper.jar"
-        mkdir -p "$APP_HOME/gradle/wrapper"
-        if command -v curl >/dev/null 2>&1 ; then
-            curl -fsSL -o "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" "$wrapper_url" || \
-                die "ERROR: could not download $wrapper_url"
-        elif command -v wget >/dev/null 2>&1 ; then
-            wget -qO "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" "$wrapper_url" || \
-                die "ERROR: could not download $wrapper_url"
-        else
-            die "ERROR: gradle-wrapper.jar is missing and neither gradle, curl nor wget is available.
-
-Run 'gradle wrapper --gradle-version $wrapper_version' once on a machine that has Gradle installed."
-        fi
     fi
 fi
 
@@ -237,7 +203,7 @@ fi
 
 
 # Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
-DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+DEFAULT_JVM_OPTS='-Dfile.encoding=UTF-8 "-Xmx64m" "-Xms64m"'
 
 # Collect all arguments for the java command:
 #   * DEFAULT_JVM_OPTS, JAVA_OPTS, JAVA_OPTS, and optsEnvironmentVar are not allowed to contain shell fragments,
