@@ -6,13 +6,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Episode resolution over a probe, without a network.
- *
- * These cover the path the fake resolver could never reach: an offline probe
- * must surface as [EpisodeResolutionResult.NetworkUnavailable], not as
- * "there is no next episode".
- */
 class AvailabilityProbeTest {
 
     private val request = PlaybackRequest(

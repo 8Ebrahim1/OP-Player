@@ -9,7 +9,6 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
-/** Reads a subtitle file from any supported location and parses it into cues. */
 object SubtitleLoader {
 
     private const val MAX_BYTES = 8 * 1024 * 1024

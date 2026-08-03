@@ -54,19 +54,12 @@ import androidx.compose.ui.unit.dp
 import com.opplayer.app.R
 import com.opplayer.app.ui.localization.LocalizedWindow
 
-/** One documented control: its icon, its name and what it does. */
 data class HelpEntry(
     val icon: ImageVector,
     val title: String,
     val body: String
 )
 
-/**
- * Bottom sheet that explains every control of a screen.
- *
- * The same sheet is reused everywhere so the guide always looks and behaves the
- * same, and so a new screen only has to supply its own list of entries.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HelpSheet(
@@ -83,8 +76,7 @@ fun HelpSheet(
         containerColor = MaterialTheme.colorScheme.surface,
         modifier = modifier
     ) {
-        // A sheet is its own window, so the language chosen in the settings has
-        // to be restored here or its strings follow the device locale.
+
         LocalizedWindow {
             Column(
                 modifier = Modifier
@@ -118,8 +110,7 @@ private fun HelpRow(entry: HelpEntry) {
             imageVector = entry.icon,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
-            // The icon repeats the title next to it; muting it keeps the
-            // screen reader from announcing the same item twice.
+
             modifier = Modifier
                 .size(24.dp)
                 .clearAndSetSemantics { }
@@ -141,7 +132,6 @@ private fun HelpRow(entry: HelpEntry) {
     }
 }
 
-/** Guide for the links library screen. */
 @Composable
 fun libraryHelpEntries(): List<HelpEntry> = listOf(
     HelpEntry(
@@ -181,7 +171,6 @@ fun libraryHelpEntries(): List<HelpEntry> = listOf(
     )
 )
 
-/** Guide for the device videos screen. */
 @Composable
 fun deviceHelpEntries(): List<HelpEntry> = listOf(
     HelpEntry(
@@ -216,7 +205,6 @@ fun deviceHelpEntries(): List<HelpEntry> = listOf(
     )
 )
 
-/** Guide for the player screen and its settings sheet. */
 @Composable
 fun playerHelpEntries(): List<HelpEntry> = listOf(
     HelpEntry(
@@ -276,7 +264,6 @@ fun playerHelpEntries(): List<HelpEntry> = listOf(
     )
 )
 
-/** Guide for the subtitle sheet. */
 @Composable
 fun subtitleHelpEntries(): List<HelpEntry> = listOf(
     HelpEntry(
@@ -316,7 +303,6 @@ fun subtitleHelpEntries(): List<HelpEntry> = listOf(
     )
 )
 
-/** Guide for the application settings sheet. */
 @Composable
 fun settingsHelpEntries(): List<HelpEntry> = listOf(
     HelpEntry(

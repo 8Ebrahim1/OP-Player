@@ -63,12 +63,6 @@ class EpisodePatternTest {
     }
 }
 
-/**
- * Validation and legacy repair of [EpisodePattern].
- *
- * A pattern with `step = 0` used to be accepted, and `next()` then returned the
- * very same episode, so "next episode" silently replayed the current one.
- */
 class EpisodePatternValidationTest {
 
     @Test(expected = IllegalArgumentException::class)

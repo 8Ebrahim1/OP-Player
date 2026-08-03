@@ -59,9 +59,7 @@ fun AddLinkDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        // A dialog is its own window, so the language chosen in the settings
-        // has to be restored inside every slot or the strings follow the
-        // device locale instead.
+
         title = { LocalizedWindow { Text(stringResource(R.string.add_link_title)) } },
         text = {
             LocalizedWindow {

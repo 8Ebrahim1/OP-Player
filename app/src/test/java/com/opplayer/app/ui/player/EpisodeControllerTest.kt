@@ -87,6 +87,6 @@ class EpisodeControllerTest {
         val controller = EpisodeController(FakeEpisodeResolver())
 
         assertTrue(controller.supports(request))
-        assertFalse(controller.supports(request.copy(pattern = null)))
+        assertFalse(controller.supports(request.copy(pattern = null, uri = "https://cdn.test/movie.mp4")))
     }
 }

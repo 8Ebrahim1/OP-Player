@@ -67,34 +67,12 @@ import kotlinx.coroutines.delay
 private const val SEEK_HINT_TIMEOUT_MS = 800L
 private const val HUD_TIMEOUT_MS = 900L
 
-/** Volume or brightness indicator shown while a vertical drag is in progress. */
 private data class GestureHudState(val kind: PlayerGestureKind, val value: Float)
 
-/**
- * Retained owner of the player's [ViewModelStore].
- *
- * The store used to be created inside the composition and cleared from a
- * `DisposableEffect`. If a composition is abandoned before it is committed the
- * effect never runs, so nothing was guaranteed to clear it. This host is itself
- * a [ViewModel] scoped to the Activity, so the framework owns it: its store is
- * cleared in [onCleared] when the Activity really goes away, and the screen can
- * still clear it earlier for a prompt release. The player can therefore never
- * outlive the Activity, whatever the composition does.
- *
- * The behaviour this owner has to honour is covered by tests:
- *
- * - `PlayerViewModelTest.releasing saves the last position and frees the engine
- *   exactly once` covers "the player is released exactly once".
- * - `PlayerViewModelTest.a detached screen is never called back into` covers the
- *   dispose path below.
- * - `PlayerEngineInstrumentationTest.openingAndClosingThePlayerRepeatedlyReleasesIt`
- *   and scenario 1 of `docs/DEVICE_TEST_PLAN.md` confirm it on a device.
- */
 class PlayerViewModelHost : ViewModel(), ViewModelStoreOwner {
 
     override val viewModelStore = ViewModelStore()
 
-    /** Releases the player now, without waiting for the Activity to be destroyed. */
     fun clear() {
         viewModelStore.clear()
     }
@@ -105,12 +83,6 @@ class PlayerViewModelHost : ViewModel(), ViewModelStoreOwner {
     }
 }
 
-/**
- * Video playback screen.
- *
- * This composable only wires state to UI: playback, subtitles, episodes and
- * orientation all live in [PlayerViewModel].
- */
 @Composable
 fun PlayerScreen(
     request: PlaybackRequest,
@@ -124,8 +96,6 @@ fun PlayerScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val application = context.applicationContext as Application
 
-    // Scoped to the Activity, so the store survives an abandoned composition and
-    // is cleared by the framework at the latest when the Activity is destroyed.
     val storeOwner: PlayerViewModelHost = viewModel()
 
     DisposableEffect(storeOwner) {
@@ -154,9 +124,6 @@ fun PlayerScreen(
     var hudState by remember { mutableStateOf<GestureHudState?>(null) }
     var hudTick by remember { mutableIntStateOf(0) }
 
-    // The saver is bound once per view model and detached on dispose, instead of
-    // being re-registered on every recomposition. `rememberUpdatedState` keeps the
-    // latest lambda reachable without restarting the effect.
     val currentProgressSaver by rememberUpdatedState(onSavePosition)
 
     DisposableEffect(playerViewModel) {
@@ -288,8 +255,6 @@ fun PlayerScreen(
         }
     }
 
-    // System Back and the top bar Back button must behave identically: leave
-    // fullscreen first, close the screen only when already windowed.
     val handleBack = {
         if (state.isFullscreen) playerViewModel.setFullscreen(false) else onClose()
     }

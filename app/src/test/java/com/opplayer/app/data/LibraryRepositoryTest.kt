@@ -24,13 +24,6 @@ import org.junit.Test
 import java.io.File
 import java.nio.file.Files
 
-/**
- * Repository tests against a real DataStore backed by a temporary file.
- *
- * These exist because the most dangerous bug in this layer was silent: a
- * corrupt blob decoded to an empty list and the next write made the loss
- * permanent. That can only be caught by driving the store itself.
- */
 class LibraryRepositoryTest {
 
     private val dispatcher = StandardTestDispatcher()
@@ -296,7 +289,6 @@ class LibraryRepositoryTest {
         assertEquals("not json", dataStore.data.first()[libraryKey])
         assertNull(dataStore.data.first()[migrationKey])
 
-        // The next launch must try again, so the marker cannot hide the damage.
         dataStore.edit {
             it[libraryKey] = """[{
                 "id":"item-1",

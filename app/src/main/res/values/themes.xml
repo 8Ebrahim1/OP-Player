@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--
-      android:statusBarColor and android:navigationBarColor are deprecated from
-      API 35 onwards and are ignored under edge-to-edge. MainActivity already
-      calls enableEdgeToEdge(), which draws behind both system bars, so the two
-      items were removed instead of being kept as dead configuration.
-    -->
+
     <style name="Theme.OPPlayer" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/op_background</item>
         <item name="android:windowLightStatusBar">false</item>

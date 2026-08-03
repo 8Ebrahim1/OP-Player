@@ -3,7 +3,6 @@ package com.opplayer.app.player.fakes
 import com.opplayer.app.player.PlaybackRequest
 import com.opplayer.app.player.ProgressSaver
 
-/** Progress saver that records every write instead of persisting it. */
 class FakeProgressSaver : ProgressSaver {
 
     val saved = mutableListOf<Pair<PlaybackRequest, Long>>()

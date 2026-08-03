@@ -2,13 +2,6 @@ package com.opplayer.app.data
 
 import com.opplayer.app.player.PlaybackRequest
 
-/**
- * Applies a playback position to a library item.
- *
- * Pure on purpose: the clock is passed in as [nowMs] so the rules around
- * "is this still the same episode?" can be unit tested deterministically,
- * without reaching for `System.currentTimeMillis()`.
- */
 object LibraryProgressUpdater {
 
     fun apply(
@@ -28,7 +21,6 @@ object LibraryProgressUpdater {
         )
     }
 
-    /** Applies [apply] to the matching item only, leaving the rest of the list untouched. */
     fun applyTo(
         items: List<VideoItem>,
         request: PlaybackRequest,
@@ -38,12 +30,6 @@ object LibraryProgressUpdater {
         if (item.id == request.key) apply(item, request, positionMs, nowMs) else item
     }
 
-    /**
-     * Applies a position to the standalone progress record of an item.
-     *
-     * Same rules as [apply], but it touches only the progress store, so an
-     * autosave never rewrites the whole library.
-     */
     fun applyProgress(
         current: LibraryProgress?,
         request: PlaybackRequest,
@@ -62,7 +48,6 @@ object LibraryProgressUpdater {
         )
     }
 
-    /** Clears every trace of progress for [id]. */
     fun reset(items: List<VideoItem>, id: String): List<VideoItem> = items.map { item ->
         if (item.id != id) {
             item

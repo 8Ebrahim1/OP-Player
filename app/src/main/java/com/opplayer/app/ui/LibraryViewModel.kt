@@ -14,18 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/**
- * The secondary constructor below is required, not cosmetic.
- *
- * `viewModel()` builds this class reflectively through
- * `AndroidViewModelFactory`, which calls `getConstructor(Application::class)`.
- * A Kotlin default argument does not produce that constructor: the bytecode
- * only carries `(Application, Clock)` plus a synthetic bridge that takes a
- * bitmask, so the lookup fails with `NoSuchMethodException` and the app dies on
- * the first frame. The overload is declared explicitly rather than through
- * `@JvmOverloads` so it is visible in the source and survives any refactor.
- * Tests keep injecting a fake [Clock] through the primary constructor.
- */
 class LibraryViewModel(
     application: Application,
     private val clock: Clock
@@ -36,8 +24,7 @@ class LibraryViewModel(
     private val repository = LibraryRepository(application)
 
     init {
-        // One-off repair of data written by older versions, recorded under its
-        // own key so it runs exactly once and never depends on another write.
+
         viewModelScope.launch { repository.migrateLegacyDataIfNeeded() }
     }
 
@@ -77,18 +64,11 @@ class LibraryViewModel(
     fun removeVideo(id: String) {
         viewModelScope.launch {
             repository.updateLibrary { current -> current.filterNot { it.id == id } }
-            // The progress store is separate now, so it has to be cleaned up too,
-            // otherwise a re-added URL would inherit a stale position.
+
             repository.forgetLibraryProgress(setOf(id))
         }
     }
 
-    /**
-     * Stores the resume position of a library item.
-     *
-     * Writes only the small progress map; the merge rules live in
-     * [LibraryProgressUpdater].
-     */
     fun saveLibraryProgress(request: PlaybackRequest, positionMs: Long) {
         val nowMs = clock.currentTimeMillis()
         viewModelScope.launch {
@@ -104,7 +84,6 @@ class LibraryViewModel(
         viewModelScope.launch { repository.saveLocalPosition(uri, positionMs) }
     }
 
-    /** Routes a saved position to the right store based on where the item came from. */
     fun saveProgress(request: PlaybackRequest, positionMs: Long) {
         when (request.source) {
             PlaybackRequest.Source.LIBRARY -> saveLibraryProgress(request, positionMs)

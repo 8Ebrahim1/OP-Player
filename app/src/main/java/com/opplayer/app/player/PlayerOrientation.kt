@@ -1,19 +1,11 @@
 package com.opplayer.app.player
 
-/** Screen orientation requested by the player, free of Android framework constants. */
 enum class PlayerOrientation { UNSPECIFIED, SENSOR_PORTRAIT, SENSOR_LANDSCAPE }
 
-/**
- * Decides how the screen should be oriented for the video that is playing.
- *
- * Kept as pure functions so the rules can be unit tested without an Activity.
- */
 object OrientationPolicy {
 
-    /** Anything wider than this is treated as a landscape video. */
     const val LANDSCAPE_ASPECT_MIN = 1.2f
 
-    /** Anything narrower than this is treated as a portrait video (stories, reels). */
     const val PORTRAIT_ASPECT_MAX = 0.9f
 
     fun resolve(
@@ -36,7 +28,6 @@ object OrientationPolicy {
         else -> PlayerOrientation.UNSPECIFIED
     }
 
-    /** Display aspect ratio of a decoded frame, or 0 when the size is not known yet. */
     fun aspectOf(width: Int, height: Int, pixelWidthHeightRatio: Float): Float {
         val ratio = if (pixelWidthHeightRatio > 0f) pixelWidthHeightRatio else 1f
         val scaledWidth = width * ratio

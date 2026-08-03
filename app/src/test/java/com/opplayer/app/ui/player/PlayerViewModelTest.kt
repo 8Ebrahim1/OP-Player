@@ -33,12 +33,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/**
- * Coordination tests for the player.
- *
- * Everything the view model talks to is a fake, so these run on the JVM without
- * an emulator and without a real ExoPlayer.
- */
 class PlayerViewModelTest {
 
     private val dispatcher = UnconfinedTestDispatcher()

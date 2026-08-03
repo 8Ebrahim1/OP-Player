@@ -4,13 +4,6 @@ import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import java.nio.charset.CodingErrorAction
 
-/**
- * Parser for external subtitle files (SRT, WebVTT, ASS/SSA).
- *
- * Handles the two things that break Persian subtitles most often:
- * - non UTF-8 encodings (windows-1256 is very common for Farsi .srt files)
- * - centisecond timestamps used by ASS/SSA
- */
 object SubtitleParser {
 
     private val LONG_TIME = Regex("""(\d{1,3}):(\d{1,2}):(\d{1,2})[.,](\d{1,3})""")
@@ -36,7 +29,6 @@ object SubtitleParser {
             .sortedBy { it.startMs }
     }
 
-    /** Best-effort charset detection: BOM, then strict UTF-8, then Persian/Arabic legacy pages. */
     fun decode(bytes: ByteArray): String {
         if (bytes.size >= 3 &&
             bytes[0] == 0xEF.toByte() && bytes[1] == 0xBB.toByte() && bytes[2] == 0xBF.toByte()

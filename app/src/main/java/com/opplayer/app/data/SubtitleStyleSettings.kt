@@ -9,7 +9,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-/** User controlled look of the subtitle text. */
 data class SubtitleStyleSettings(
     val enabled: Boolean = true,
     val textSizeSp: Float = 20f,
@@ -26,21 +25,21 @@ data class SubtitleStyleSettings(
         const val MAX_BOTTOM_MARGIN_DP = 140f
 
         val TEXT_COLORS = listOf(
-            0xFFFFFFFFL, // white
-            0xFFFFEB3BL, // yellow
-            0xFF00E5FFL, // cyan
-            0xFF69F0AEL, // green
-            0xFFFFAB40L, // orange
-            0xFFFF80ABL, // pink
-            0xFF000000L  // black
+            0xFFFFFFFFL,
+            0xFFFFEB3BL,
+            0xFF00E5FFL,
+            0xFF69F0AEL,
+            0xFFFFAB40L,
+            0xFFFF80ABL,
+            0xFF000000L
         )
 
         val BACKGROUND_COLORS = listOf(
-            0x00000000L, // none
-            0x59000000L, // 35% black
-            0x99000000L, // 60% black
-            0xE0000000L, // 88% black
-            0xB3FFFFFFL  // light box
+            0x00000000L,
+            0x59000000L,
+            0x99000000L,
+            0xE0000000L,
+            0xB3FFFFFFL
         )
     }
 }

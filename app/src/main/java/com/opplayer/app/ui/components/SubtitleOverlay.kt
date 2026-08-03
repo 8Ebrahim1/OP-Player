@@ -18,12 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opplayer.app.data.SubtitleStyleSettings
 
-/**
- * Draws the current subtitle line on top of the video surface.
- *
- * Rendering the cues ourselves (instead of using the ExoPlayer subtitle view)
- * is what makes colour, size, background and timing offset adjustable.
- */
 @Composable
 fun SubtitleOverlay(
     text: String?,

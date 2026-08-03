@@ -17,19 +17,12 @@ import com.opplayer.app.player.VideoScaleMode
 
 private const val CONTROLLER_TIMEOUT_MS = 4_000
 
-/** media3 resize mode for a [VideoScaleMode]. */
 fun VideoScaleMode.toResizeMode(): Int = when (this) {
     VideoScaleMode.ZOOM -> AspectRatioFrameLayout.RESIZE_MODE_ZOOM
     VideoScaleMode.FIT -> AspectRatioFrameLayout.RESIZE_MODE_FIT
     VideoScaleMode.FILL -> AspectRatioFrameLayout.RESIZE_MODE_FILL
 }
 
-/**
- * Visibility of the media3 transport controls, hoisted out of the view.
- *
- * The screen needs to know whether the controls are on screen (the custom top
- * bar follows them) and needs to be able to show or toggle them from gestures.
- */
 @Stable
 class PlayerControlsState {
 
@@ -51,7 +44,6 @@ class PlayerControlsState {
 @Composable
 fun rememberPlayerControlsState(): PlayerControlsState = remember { PlayerControlsState() }
 
-/** The video surface plus the built in media3 transport controls. */
 @Composable
 fun PlayerSurface(
     player: Player,
@@ -69,7 +61,7 @@ fun PlayerSurface(
                 controllerAutoShow = true
                 controllerShowTimeoutMs = CONTROLLER_TIMEOUT_MS
                 keepScreenOn = true
-                // Cues are drawn by SubtitleOverlay so styling and sync stay adjustable.
+
                 subtitleView?.visibility = View.GONE
                 setShowNextButton(false)
                 setShowPreviousButton(false)

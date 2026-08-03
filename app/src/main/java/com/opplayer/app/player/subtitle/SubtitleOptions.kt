@@ -1,20 +1,17 @@
 package com.opplayer.app.player.subtitle
 
-/** An embedded text track exposed by the media container. */
 data class EmbeddedTrackInfo(
     val index: Int,
     val language: String?,
     val selected: Boolean
 )
 
-/** One row of the subtitle picker. */
 data class SubtitleOptionItem(
     val id: String,
     val label: String,
     val selected: Boolean
 )
 
-/** What the user picked in the subtitle sheet, parsed back from an option id. */
 sealed interface SubtitleChoice {
     data object Off : SubtitleChoice
     data object CurrentExternal : SubtitleChoice
@@ -22,7 +19,6 @@ sealed interface SubtitleChoice {
     data class EmbeddedTrack(val index: Int) : SubtitleChoice
 }
 
-/** Builds the subtitle picker rows and parses the selection back. Pure, so it is unit tested. */
 object SubtitleOptions {
 
     const val ID_OFF = "off"

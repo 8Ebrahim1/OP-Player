@@ -1,16 +1,7 @@
 package com.opplayer.app.player.subtitle
 
-/** How many overlapping cues are scanned back through before giving up. */
 private const val OVERLAP_SCAN_LIMIT = 8
 
-/**
- * Text that should be visible at [positionMs], or null when nothing is due.
- *
- * [offsetMs] shifts the subtitles in time: a positive value shows them later.
- * The receiver must be sorted by [SubtitleCue.startMs] (see [sortedForPlayback]);
- * the lookup is a binary search, so files with thousands of lines stay cheap to
- * query on every position tick.
- */
 fun List<SubtitleCue>.textAt(positionMs: Long, offsetMs: Long = 0L): String? {
     if (isEmpty()) return null
 
@@ -44,5 +35,4 @@ fun List<SubtitleCue>.textAt(positionMs: Long, offsetMs: Long = 0L): String? {
     return null
 }
 
-/** Sorts cues so [textAt] can binary search them. */
 fun List<SubtitleCue>.sortedForPlayback(): List<SubtitleCue> = sortedBy { it.startMs }

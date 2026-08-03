@@ -6,12 +6,6 @@ import com.opplayer.app.player.PlayerEngine
 import com.opplayer.app.player.PlayerEngineListener
 import com.opplayer.app.player.subtitle.EmbeddedTrackInfo
 
-/**
- * In-memory [PlayerEngine].
- *
- * Records everything the view model asks of it so coordination can be asserted
- * on the JVM, without an emulator or a real ExoPlayer.
- */
 class FakePlayerEngine : PlayerEngine {
 
     data class Prepared(val request: PlaybackRequest, val startPositionMs: Long)
@@ -87,8 +81,6 @@ class FakePlayerEngine : PlayerEngine {
         releaseCount++
         listener = null
     }
-
-    // ------------------------------------------------------------- test hooks
 
     fun emitStatus(status: PlaybackStatus) {
         listener?.onStatusChanged(status)

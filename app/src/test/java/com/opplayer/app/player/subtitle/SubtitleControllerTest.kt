@@ -82,10 +82,6 @@ class SubtitleControllerTest {
         scope.cancel()
     }
 
-    /**
-     * The scenario that motivated the request identity guard: a lookup for video
-     * A that ignores cancellation must never overwrite video B's subtitles.
-     */
     @Test
     fun `a slow lookup for the previous video is discarded`() = runTest {
         val gate = CompletableDeferred<Unit>()
@@ -95,7 +91,7 @@ class SubtitleControllerTest {
             loaded = source().loaded
         ) {
             override suspend fun findCandidates(videoUri: String): List<SubtitleFileCandidate> {
-                // NonCancellable models an I/O call that does not observe cancellation.
+
                 if (videoUri == videoA.uri) withContext(NonCancellable) { gate.await() }
                 return super.findCandidates(videoUri)
             }
@@ -107,11 +103,9 @@ class SubtitleControllerTest {
         controller.onOpen(videoA)
         advanceUntilIdle()
 
-        // The user gets bored and opens another video while A is still searching.
         controller.onOpen(videoB)
         advanceUntilIdle()
 
-        // Only now does A's lookup come back.
         gate.complete(Unit)
         advanceUntilIdle()
 
@@ -158,7 +152,6 @@ class SubtitleControllerTest {
 
         assertEquals("embedded line", controller.text.value)
 
-        // Cues are not re-delivered after a seek, so the timeline is dropped.
         controller.onSeek()
         advanceUntilIdle()
         assertNull(controller.text.value)
@@ -178,7 +171,7 @@ class SubtitleControllerTest {
         advanceUntilIdle()
         assertNull(controller.text.value)
 
-        controller.setOffset(-5_000L)
+        controller.setOffset(5_000L)
         advanceUntilIdle()
         assertEquals("line A", controller.text.value)
 

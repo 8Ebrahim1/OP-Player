@@ -8,9 +8,8 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-/** Interface language chosen by the user. */
 enum class AppLanguage(val storageKey: String) {
-    /** Follow whatever the device is configured with. */
+
     SYSTEM("system"),
     PERSIAN("fa"),
     ENGLISH("en");
@@ -21,7 +20,6 @@ enum class AppLanguage(val storageKey: String) {
     }
 }
 
-/** Layout direction override. [AUTO] derives the direction from the language. */
 enum class AppLayoutDirection(val storageKey: String) {
     AUTO("auto"),
     RTL("rtl"),
@@ -33,12 +31,6 @@ enum class AppLayoutDirection(val storageKey: String) {
     }
 }
 
-/**
- * Application wide preferences that are not tied to a single video.
- *
- * [onboardingCompleted] is deliberately part of the same store so that the very
- * first composition can decide, from one read, whether the intro slides are due.
- */
 data class AppSettings(
     val language: AppLanguage = AppLanguage.SYSTEM,
     val layoutDirection: AppLayoutDirection = AppLayoutDirection.AUTO,

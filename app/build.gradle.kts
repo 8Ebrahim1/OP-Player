@@ -6,10 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
-    // Requested without a version on purpose: parcelize ships inside the Kotlin
-    // Gradle plugin jar, which is already on the build classpath via
-    // kotlin.android. Asking for it with a version makes Gradle fail with
-    // "already on the classpath with an unknown version".
+
     id("org.jetbrains.kotlin.plugin.parcelize")
 }
 
@@ -94,8 +91,7 @@ android {
     }
 
     lint {
-        // A lint error must break the build; warnings stay advisory until the
-        // whole project is warning free.
+
         abortOnError = true
         warningsAsErrors = false
         checkReleaseBuilds = true
@@ -113,8 +109,6 @@ android {
     }
 }
 
-// Replaces the deprecated `android.kotlinOptions` block. The Kotlin Gradle
-// plugin 2.x exposes the compiler settings through `kotlin.compilerOptions`.
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)

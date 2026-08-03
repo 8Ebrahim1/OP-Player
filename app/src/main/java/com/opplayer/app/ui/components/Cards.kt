@@ -126,8 +126,6 @@ fun LibraryVideoCard(
             }
         }
 
-        // The description used to be the static word "favourite", which told a
-        // screen reader nothing about the state or about what the tap does.
         val favoriteAction = if (item.isFavorite) {
             stringResource(R.string.remove_from_favorites)
         } else {

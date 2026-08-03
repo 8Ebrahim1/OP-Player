@@ -34,11 +34,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.opplayer.app.R
 
-/**
- * Overlay bar with the title and the actions that media3's own controls do not
- * cover: episode navigation, scale mode, picture in picture, fullscreen,
- * subtitles and settings.
- */
 @Composable
 fun PlayerTopBar(
     title: String,
@@ -93,11 +88,7 @@ fun PlayerTopBar(
             } else {
                 IconButton(onClick = onNextEpisode) {
                     Icon(
-                        // Episode navigation follows the reading direction, so
-                        // the arrow is mirrored in a right to left layout just
-                        // like the Back arrow above. There is no auto mirrored
-                        // variant of this icon, so the mirrored twin is picked
-                        // explicitly from the current layout direction.
+
                         imageVector = if (LocalLayoutDirection.current == LayoutDirection.Rtl) {
                             Icons.Filled.KeyboardDoubleArrowLeft
                         } else {

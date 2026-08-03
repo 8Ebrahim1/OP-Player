@@ -79,14 +79,6 @@ private const val PAGE_SUBTITLE_BACKGROUND = 7
 private const val PAGE_READY = 8
 private const val PAGE_COUNT = 9
 
-/**
- * First run tour.
- *
- * The tour is not a passive slideshow: the language, the layout direction and
- * the subtitle colours are chosen on the slide that introduces them, and every
- * choice is applied immediately, so the following slides are already shown the
- * way the user asked for.
- */
 @Composable
 fun OnboardingScreen(
     settings: AppSettings,
@@ -342,7 +334,6 @@ private fun SlideHeader(
     }
 }
 
-/** Live preview so a colour choice can be judged before it is confirmed. */
 @Composable
 private fun SubtitlePreview(settings: SubtitleStyleSettings) {
     Box(

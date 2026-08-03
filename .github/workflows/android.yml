@@ -34,15 +34,12 @@ jobs:
         with:
           gradle-version: '8.10.2'
 
-      - name: Generate Gradle wrapper
-        run: |
-          gradle wrapper --gradle-version 8.10.2
-          chmod +x ./gradlew
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
       - name: Wrapper sanity check
         run: ./gradlew --version
 
-      # Cheapest signal first: unit tests, then lint, then the two builds.
       - name: Unit tests
         run: ./gradlew testDebugUnitTest --no-daemon
 
@@ -52,8 +49,6 @@ jobs:
       - name: Assemble debug APK
         run: ./gradlew assembleDebug --no-daemon
 
-      # Minify, resource shrinking and the ProGuard/Media3 keep rules only apply
-      # to release, so the release build must be part of every CI run.
       - name: Assemble release APK
         run: ./gradlew assembleRelease --no-daemon
 
@@ -96,7 +91,6 @@ jobs:
   instrumentation:
     name: Instrumented tests
     runs-on: ubuntu-latest
-    # Emulator runs are slow, so they are kept off the pull-request path.
     if: github.event_name != 'pull_request'
 
     steps:
@@ -114,10 +108,8 @@ jobs:
         with:
           gradle-version: '8.10.2'
 
-      - name: Generate Gradle wrapper
-        run: |
-          gradle wrapper --gradle-version 8.10.2
-          chmod +x ./gradlew
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
       - name: Enable KVM
         run: |

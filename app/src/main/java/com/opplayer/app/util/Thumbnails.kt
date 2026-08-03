@@ -26,15 +26,6 @@ object ThumbnailLoader {
         override fun sizeOf(key: String, value: Bitmap): Int = value.byteCount
     }
 
-    /**
-     * Decodes a thumbnail, honouring cancellation.
-     *
-     * `loadThumbnail` blocks until the decode finishes and ignores coroutine
-     * cancellation, so a fast scroll used to keep decoding frames for rows that
-     * had already left the screen. A real [CancellationSignal] is passed in and
-     * cancelled as soon as the coroutine is, which aborts the decode inside the
-     * media provider.
-     */
     suspend fun loadThumbnail(context: Context, video: LocalVideo): Bitmap? {
         cache.get(video.uri)?.let { return it }
 

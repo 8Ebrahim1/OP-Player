@@ -65,8 +65,6 @@ fun LibraryScreen(
         stringResource(R.string.section_recent)
     )
 
-    // Sorting and filtering are recomputed only when the list or the tab
-    // changes, instead of on every recomposition.
     val visibleVideos by remember(videos, selectedTab) {
         derivedStateOf {
             when (selectedTab) {
@@ -173,9 +171,7 @@ fun LibraryScreen(
     if (deleteTarget != null) {
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            // A dialog is its own window, so the language chosen in the
-            // settings has to be restored inside every slot or the strings
-            // follow the device locale instead.
+
             title = {
                 LocalizedWindow {
                     Text(stringResource(R.string.delete_dialog_title))

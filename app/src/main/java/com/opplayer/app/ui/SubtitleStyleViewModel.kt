@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-/** Holds the persisted subtitle appearance, shared by the player and the tab bar entry. */
 class SubtitleStyleViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = SubtitleStyleRepository(application)

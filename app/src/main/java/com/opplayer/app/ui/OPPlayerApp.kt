@@ -54,9 +54,6 @@ fun OPPlayerApp(
     val settingsLoaded by appSettingsViewModel.loaded.collectAsStateWithLifecycle()
     val subtitleStyle by subtitleStyleViewModel.settings.collectAsStateWithLifecycle()
 
-    // Language and layout direction are applied above everything else, so every
-    // screen, sheet and dialog below resolves its strings and its start/end
-    // edges from the user's choice instead of from the device locale only.
     AppLocalization(
         language = appSettings.language,
         layoutDirection = appSettings.layoutDirection
@@ -67,8 +64,7 @@ fun OPPlayerApp(
                 .background(OpBackground)
         ) {
             when {
-                // Until the stored settings are read, showing nothing is better
-                // than flashing the tour at a user who already completed it.
+
                 !settingsLoaded -> Unit
 
                 !appSettings.onboardingCompleted -> OnboardingScreen(
@@ -112,8 +108,6 @@ private fun MainContent(
 
     var selectedSection by rememberSaveable { mutableIntStateOf(0) }
 
-    // PlaybackRequest is @Parcelize, so the current item, episode and resume
-    // position survive configuration changes and process death.
     var playback by rememberSaveable { mutableStateOf(initialRequest) }
     var showSubtitleStyleSheet by rememberSaveable { mutableStateOf(false) }
     var showAppSettingsSheet by rememberSaveable { mutableStateOf(false) }
@@ -189,9 +183,7 @@ private fun MainContent(
         }
     ) { innerPadding ->
         Box(
-            // Scaffold already reports the navigation bar through
-            // innerPadding; adding navigationBarsPadding() to the bar and
-            // statusBarsPadding() here as well applied the insets twice.
+
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
@@ -259,8 +251,7 @@ private fun MainContent(
             onLanguageChange = appSettingsViewModel::setLanguage,
             onLayoutDirectionChange = appSettingsViewModel::setLayoutDirection,
             onReplayTour = {
-                // Closing the sheet first avoids leaving a modal scrim on top
-                // of the tour that replaces this screen.
+
                 showAppSettingsSheet = false
                 appSettingsViewModel.restartOnboarding()
             },

@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Subtitle section of the player state. */
 data class SubtitleUiState(
     val disabled: Boolean = false,
     val offsetMs: Long = 0L,
@@ -27,13 +26,6 @@ data class SubtitleUiState(
     val embeddedTracks: List<EmbeddedTrackInfo> = emptyList()
 )
 
-/**
- * Owns everything subtitle related: discovery, loading, track selection, offset
- * and the line that is currently due.
- *
- * Extracted from `PlayerViewModel` so this logic can be unit tested on the JVM,
- * and so the view model can stay a coordinator.
- */
 class SubtitleController(
     private val scope: CoroutineScope,
     private val engine: PlayerEngine,
@@ -48,12 +40,6 @@ class SubtitleController(
     private val externalCues = MutableStateFlow<List<SubtitleCue>>(emptyList())
     private val embeddedTimeline = MutableStateFlow(EmbeddedSubtitleTimeline())
 
-    /**
-     * The subtitle line that should be on screen right now.
-     *
-     * Position ticks are collapsed here, so the overlay recomposes when the text
-     * changes instead of on every tick.
-     */
     val text: StateFlow<String?> = combine(
         positionMs,
         externalCues,
@@ -69,17 +55,10 @@ class SubtitleController(
         .distinctUntilChanged()
         .stateIn(scope, SharingStarted.Eagerly, null)
 
-    /**
-     * The request whose subtitles are currently in charge.
-     *
-     * Every asynchronous result is checked against this before it is committed,
-     * so a slow lookup for video A can never land on video B.
-     */
     private var activeRequest: PlaybackRequest? = null
     private var preferEmbedded = false
     private var job: Job? = null
 
-    /** Resets subtitle state for a newly opened [request] and starts discovery. */
     fun onOpen(request: PlaybackRequest) {
         job?.cancel()
 
@@ -102,12 +81,10 @@ class SubtitleController(
         job = scope.launch { loadFor(request) }
     }
 
-    /** Feeds an embedded cue coming from the engine. */
     fun onCue(atMs: Long, text: String?) {
         embeddedTimeline.update { timeline -> timeline.withCueGroup(atMs, text) }
     }
 
-    /** Embedded cues are not re-delivered after a seek, so the timeline is dropped. */
     fun onSeek() {
         embeddedTimeline.value = EmbeddedSubtitleTimeline()
     }
@@ -167,8 +144,6 @@ class SubtitleController(
 
         val loaded = runCatching { source.load(uri) }.getOrNull()
 
-        // The guard is repeated after every suspension point: cancellation alone
-        // is not enough, because a blocking read may not observe it in time.
         if (isStale(request)) return
 
         if (loaded == null) {

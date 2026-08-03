@@ -86,9 +86,7 @@ fun GlassTabs(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // A plain clickable row announced each tab as an unlabeled button. The
-    // group is now a real selectable group, so TalkBack reports the tab role
-    // and the "selected, n of m" position.
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -163,12 +161,6 @@ fun ScreenHeader(
     }
 }
 
-/**
- * Standard entry point to a screen's guide.
- *
- * Every screen exposes the same icon in the same place, so the guide is always
- * found in the same way.
- */
 @Composable
 fun HelpIconButton(
     onClick: () -> Unit,
@@ -183,12 +175,6 @@ fun HelpIconButton(
     }
 }
 
-/**
- * Inline notice with one action.
- *
- * Used for states that are not errors but need a way out, such as partial media
- * access on Android 14+.
- */
 @Composable
 fun InfoBanner(
     text: String,

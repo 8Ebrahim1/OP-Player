@@ -59,15 +59,6 @@ import com.opplayer.app.ui.components.LocalVideoCard
 import com.opplayer.app.ui.components.ScreenHeader
 import com.opplayer.app.ui.components.deviceHelpEntries
 
-/**
- * Browses the videos stored on the device.
- *
- * Media access is re-evaluated on every ON_RESUME, so granting the permission in
- * system settings and coming back shows the library immediately instead of
- * leaving a permanently empty screen. Partial access (Android 14+) is a first
- * class state: the videos the user shared are listed, with a way to widen the
- * selection.
- */
 @Composable
 fun DeviceVideosScreen(
     localPositions: Map<String, Long>,
@@ -94,7 +85,7 @@ fun DeviceVideosScreen(
             if (current != access) {
                 access = current
             } else if (current != MediaAccess.DENIED) {
-                // Partial selections can change without the level changing.
+
                 viewModel.refresh()
             }
         }
@@ -123,7 +114,6 @@ fun DeviceVideosScreen(
         openFolderId?.let { id -> uiState.folders.firstOrNull { it.id == id } }
     }
 
-    // Filtering runs only when the folder or the query really changes.
     val visibleVideos by remember(currentFolder, query) {
         derivedStateOf {
             currentFolder?.videos.orEmpty().filter {
@@ -234,7 +224,7 @@ fun DeviceVideosScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     contentPadding = PaddingValues(bottom = 24.dp)
                 ) {
-                    // Keyed by bucket id: two folders may share a display name.
+
                     items(uiState.folders, key = { it.id }) { folder ->
                         FolderCard(folder = folder, onClick = { openFolderId = folder.id })
                     }
@@ -279,8 +269,6 @@ fun DeviceVideosScreen(
         }
     }
 
-    // Anchored at screen level so help stays reachable in every state,
-    // including while the permission prompt is showing.
     if (showHelp) {
         HelpSheet(
             title = stringResource(R.string.help_device_title),
@@ -290,7 +278,6 @@ fun DeviceVideosScreen(
     }
 }
 
-/** Banner shown when only a hand picked set of videos is visible. */
 @Composable
 private fun PartialAccessNotice(onManage: () -> Unit) {
     com.opplayer.app.ui.components.InfoBanner(

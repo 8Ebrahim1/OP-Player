@@ -3,18 +3,10 @@ package com.opplayer.app.player
 import android.net.Uri
 import com.opplayer.app.data.EpisodePattern
 
-/**
- * Reads and rewrites the season/episode marker inside a media URL.
- *
- * Availability checks are delegated to an [AvailabilityProbe], so the parsing
- * rules here stay pure and unit testable, and a network failure keeps its own
- * identity all the way up to the UI instead of collapsing into "not found".
- */
 object EpisodeNavigator {
 
     private const val MAX_SEASON_LOOKAHEAD = 1
 
-    /** How far back the first episode of a season looks into the previous one. */
     const val MAX_PREVIOUS_SEASON_EPISODE = 24
 
     private val defaultProbe: AvailabilityProbe by lazy { HttpAvailabilityProbe() }
@@ -34,17 +26,14 @@ object EpisodeNavigator {
         val episode: Int
     )
 
-    /** Outcome of walking a list of candidates. */
     sealed interface Resolution {
         data class Found(val candidate: Candidate) : Resolution
         data object NotFound : Resolution
         data object NetworkUnavailable : Resolution
     }
 
-    // S01E02 / s1.e2 / S01 - E02
     private val seasonEpisodeRegex = Regex("""[Ss](\d{1,3})[._\-\s]{0,4}[Ee](\d{1,3})""")
 
-    // Episode 07 / episode.7
     private val episodeWordRegex = Regex("""(?i)episode[._\-\s]{0,3}(\d{1,3})""")
 
     private val episodeShortRegex =
@@ -131,14 +120,6 @@ object EpisodeNavigator {
         return candidates
     }
 
-    /**
-     * Candidates for the previous episode.
-     *
-     * The first episode of a season is no longer a dead end: S02E01 walks back
-     * into the last episode of season one, trying the highest plausible number
-     * first. The list is bounded by [MAX_PREVIOUS_SEASON_EPISODE] and probing
-     * stops at the first hit.
-     */
     fun previousCandidates(url: String): List<Candidate> {
         val marker = findMarker(url) ?: return emptyList()
 
@@ -175,12 +156,6 @@ object EpisodeNavigator {
         probe: AvailabilityProbe = defaultProbe
     ): Resolution = resolveFirstAvailable(previousCandidates(url), probe)
 
-    /**
-     * Probes candidates in order.
-     *
-     * A network failure is remembered and reported only when no candidate could
-     * be confirmed, so one flaky URL does not mask a working one.
-     */
     private suspend fun resolveFirstAvailable(
         candidates: List<Candidate>,
         probe: AvailabilityProbe
@@ -201,7 +176,6 @@ object EpisodeNavigator {
     suspend fun isAvailable(url: String, probe: AvailabilityProbe = defaultProbe): Boolean =
         probe.probe(url) == AvailabilityResult.Available
 
-    /** Resolves the neighbouring episode of a stored [EpisodePattern]. */
     suspend fun resolvePattern(
         pattern: EpisodePattern,
         forward: Boolean,
@@ -217,7 +191,6 @@ object EpisodeNavigator {
         }
     }
 
-    /** Outcome of [resolvePattern]. */
     sealed interface PatternResolution {
         data class Found(val pattern: EpisodePattern) : PatternResolution
         data object NotFound : PatternResolution

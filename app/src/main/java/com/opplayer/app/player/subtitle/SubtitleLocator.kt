@@ -9,14 +9,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-/**
- * Finds "sidecar" subtitle files that sit next to an offline video
- * (for example `Movie.mkv` + `Movie.fa.srt`).
- *
- * Offline videos come from MediaStore as `content://` URIs, so the plain file
- * system is usually not readable on Android 10+. We therefore search MediaStore
- * itself and only fall back to direct file access on older devices.
- */
 object SubtitleLocator {
 
     private val EXTENSIONS = listOf("srt", "vtt", "ass", "ssa", "sub", "ttml", "dfxp", "smi")

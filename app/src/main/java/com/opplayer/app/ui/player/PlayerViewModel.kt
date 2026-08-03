@@ -40,20 +40,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-/**
- * Coordinates the player screen.
- *
- * The heavy lifting lives in four collaborators - [PlaybackController],
- * [SubtitleController], [EpisodeController] and [ProgressManager] - and this
- * class only routes user intent to them and folds their results into
- * [uiState]. Every collaborator is injectable, so the whole coordination layer
- * runs under plain JUnit with fakes.
- */
 class PlayerViewModel(
     initialRequest: PlaybackRequest,
     engine: PlayerEngine,
@@ -63,10 +55,6 @@ class PlayerViewModel(
     episodeTimeoutMs: Long = EpisodeController.DEFAULT_TIMEOUT_MS
 ) : ViewModel() {
 
-    /**
-     * Production entry point: builds the engine and the subtitle source from the
-     * application context. Tests use the primary constructor with fakes instead.
-     */
     constructor(
         application: Application,
         initialRequest: PlaybackRequest,
@@ -82,10 +70,6 @@ class PlayerViewModel(
     private val playbackController = PlaybackController(engine)
     private val episodeController = EpisodeController(episodeResolver, episodeTimeoutMs)
 
-    /**
-     * The underlying ExoPlayer, or null when the engine is not ExoPlayer backed
-     * (unit tests). Only the video surface and Picture-in-Picture need it.
-     */
     val player: ExoPlayer? = (engine as? ExoPlayerEngine)?.exoPlayer
 
     private val _uiState = MutableStateFlow(
@@ -99,7 +83,6 @@ class PlayerViewModel(
 
     private val messageChannel = Channel<PlayerMessage>(Channel.BUFFERED)
 
-    /** One-shot messages (toasts). Collect once, from the screen. */
     val messages: Flow<PlayerMessage> = messageChannel.receiveAsFlow()
 
     private val positionMs = MutableStateFlow(0L)
@@ -115,7 +98,6 @@ class PlayerViewModel(
 
     val subtitleState: StateFlow<SubtitleUiState> = subtitleController.state
 
-    /** The subtitle line that is currently due. */
     val subtitleText: StateFlow<String?> = subtitleController.text
 
     private var episodeJob: Job? = null
@@ -159,17 +141,14 @@ class PlayerViewModel(
         open(initialRequest)
     }
 
-    /** Registers the callback that persists the resume position. */
     fun setProgressSaver(saver: (PlaybackRequest, Long) -> Unit) {
         progressManager.setSaver(ProgressSaver { request, position -> saver(request, position) })
     }
 
-    /** Detaches the saver, so a disposed screen is never called back into. */
     fun clearProgressSaver() {
         progressManager.clearSaver()
     }
 
-    /** Switches to another request; a no-op when it is the one already playing. */
     fun onRequest(request: PlaybackRequest) {
         if (request.isSameItemAs(_uiState.value.request)) return
         saveProgress()
@@ -185,7 +164,6 @@ class PlayerViewModel(
         _uiState.update { it.copy(scaleMode = mode) }
     }
 
-    /** Cycles to the next scale mode and returns it, so the caller can show a hint. */
     fun cycleScaleMode(): VideoScaleMode {
         val next = _uiState.value.scaleMode.next()
         setScaleMode(next)
@@ -212,7 +190,6 @@ class PlayerViewModel(
 
     fun playPause() = playbackController.togglePlayPause()
 
-    /** Pauses without touching UI state, used when the app goes to the background. */
     fun pauseForBackground() {
         playbackController.pause()
         saveProgress()
@@ -229,7 +206,6 @@ class PlayerViewModel(
         playbackController.retry()
     }
 
-    /** Persists the resume position through the saver registered by the screen. */
     fun saveProgress() {
         progressManager.save(
             request = _uiState.value.request,
@@ -286,17 +262,9 @@ class PlayerViewModel(
         super.onCleared()
     }
 
-    /**
-     * Same teardown as [onCleared], exposed so tests can assert that releasing
-     * twice still releases the engine exactly once.
-     */
     @VisibleForTesting
     fun releaseResources() = release()
 
-    /**
-     * Saves the position and tears the engine down. Idempotent, so a double
-     * clear cannot release ExoPlayer twice.
-     */
     private fun release() {
         if (released) return
         released = true
@@ -342,15 +310,6 @@ class PlayerViewModel(
         open(next)
     }
 
-    /**
-     * Carries the subtitle over to the next episode when it can be rewritten.
-     *
-     * Dropping it unconditionally left every episode after the first without
-     * subtitles. When the subtitle URL contains the same episode marker as the
-     * video, the marker is rewritten the same way; otherwise the subtitle is
-     * dropped, because keeping the previous episode's file would be worse than
-     * having none.
-     */
     private fun nextSubtitleUrl(current: PlaybackRequest, target: EpisodeTarget): String? {
         val subtitle = current.subtitleUrl?.takeIf { it.isNotBlank() } ?: return null
         if (!subtitle.startsWith("http", ignoreCase = true)) return null
@@ -386,16 +345,9 @@ class PlayerViewModel(
         }
     }
 
-    /**
-     * Periodic autosave while playing, plus one save when playback stops.
-     *
-     * The interval is thirty seconds rather than five: progress now lives in its
-     * own small store, but a write is still a write, and the important moments
-     * (pause, seek, episode change, leaving the screen) are saved explicitly.
-     */
     private fun startProgressAutoSave() {
         viewModelScope.launch {
-            isPlaying.collectLatest { playing ->
+            isPlaying.drop(1).collectLatest { playing ->
                 if (!playing) {
                     saveProgress()
                     return@collectLatest

@@ -9,15 +9,6 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-/**
- * A numbered episode link: [prefix] + zero padded number + [suffix].
- *
- * The constructor rejects values that cannot describe a real series, most
- * importantly `step == 0`, which used to make [next] return the very same
- * episode forever. Persisted data is repaired before construction by
- * [EpisodePatternSerializer], so an old or hand edited file can never crash the
- * app while decoding.
- */
 @Serializable(with = EpisodePatternSerializer::class)
 @Parcelize
 data class EpisodePattern(
@@ -53,10 +44,6 @@ data class EpisodePattern(
     companion object {
         const val MAX_EPISODE = 9999
 
-        /**
-         * Builds a pattern from untrusted values, clamping them into the valid
-         * range instead of throwing.
-         */
         fun normalized(
             prefix: String,
             suffix: String,
@@ -83,13 +70,6 @@ private data class EpisodePatternSurrogate(
     val step: Int = 1
 )
 
-/**
- * Serializer that normalizes on the way in.
- *
- * Legacy libraries contain patterns with `step = 0` or `pad = 0`; decoding them
- * through the validating constructor would throw and take the whole library
- * with it, so the values are repaired first.
- */
 object EpisodePatternSerializer : KSerializer<EpisodePattern> {
 
     private val delegate = EpisodePatternSurrogate.serializer()

@@ -13,13 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-/**
- * Holds the persisted application preferences (language, layout direction and
- * whether the intro slides were already seen).
- *
- * [loaded] stays false until the first read from DataStore finishes, so the UI
- * can avoid flashing the onboarding slides at users who already dismissed them.
- */
 class AppSettingsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = AppSettingsRepository(application)

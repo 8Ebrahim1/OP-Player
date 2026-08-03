@@ -19,7 +19,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.opplayer.app.R
 
-/** Playback error card with retry and, when available, skip to next episode. */
 @Composable
 fun PlayerErrorState(
     message: String,

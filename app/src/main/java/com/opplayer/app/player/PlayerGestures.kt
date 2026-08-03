@@ -29,13 +29,7 @@ class PlayerGestures(
     private val onTap: () -> Unit,
     private val onSeek: (forward: Boolean) -> Unit,
     private val onIndicator: (PlayerGestureKind, Float) -> Unit,
-    /**
-     * Monotonic time source for the double tap chain.
-     *
-     * `System.currentTimeMillis()` can jump backwards or forwards when the clock
-     * is corrected or the time zone changes, which either froze the chain or
-     * kept it open forever. Elapsed realtime cannot.
-     */
+
     private val elapsedRealtimeMs: () -> Long = { SystemClock.elapsedRealtime() }
 ) : View.OnTouchListener {
 
@@ -52,7 +46,6 @@ class PlayerGestures(
     private var startValue = 0f
     private var lastSeekAt = 0L
 
-    /** Set once a gesture actually changes the brightness of this window. */
     private var brightnessTouched = false
 
     private val detector = GestureDetector(
@@ -151,11 +144,6 @@ class PlayerGestures(
         return true
     }
 
-    /**
-     * Hands the screen brightness back to the system, but only if a gesture ever
-     * took it over. Resetting unconditionally undid a brightness the user had
-     * set elsewhere every time the player closed.
-     */
     fun release() {
         if (!brightnessTouched) return
 

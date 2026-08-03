@@ -12,13 +12,6 @@ import androidx.media3.common.text.CueGroup
 import androidx.media3.exoplayer.ExoPlayer
 import com.opplayer.app.player.subtitle.EmbeddedTrackInfo
 
-/**
- * The production [PlayerEngine]: a thin, event translating wrapper around
- * ExoPlayer.
- *
- * Everything media3 specific lives here, which is what allows the view model
- * and its collaborators to be covered by plain JVM unit tests.
- */
 class ExoPlayerEngine(val exoPlayer: ExoPlayer) : PlayerEngine {
 
     private var listener: PlayerEngineListener? = null

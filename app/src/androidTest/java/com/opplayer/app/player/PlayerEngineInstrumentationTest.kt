@@ -7,7 +7,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -15,13 +14,6 @@ import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-/**
- * On-device checks for the pieces that only behave realistically on Android:
- * engine construction, media item resolution and teardown.
- *
- * Playback of real streams is covered by the manual matrix in
- * `docs/DEVICE_TEST_PLAN.md`, because it depends on the network.
- */
 @RunWith(AndroidJUnit4::class)
 class PlayerEngineInstrumentationTest {
 
@@ -69,7 +61,7 @@ class PlayerEngineInstrumentationTest {
                 engine.prepare(request("file:///android_asset/missing.mp4"))
                 engine.pause()
                 engine.release()
-                // Releasing twice must stay a no-op.
+
                 engine.release()
             }
         }
@@ -107,7 +99,7 @@ class PlayerEngineInstrumentationTest {
         assertEquals(MimeTypes.APPLICATION_M3U8, hls.localConfiguration?.mimeType)
         assertEquals(MimeTypes.APPLICATION_MPD, dash.localConfiguration?.mimeType)
         assertNotNull(rtsp.localConfiguration)
-        assertNull(local.localConfiguration?.mimeType)
+        assertEquals(MimeTypes.VIDEO_MP4, local.localConfiguration?.mimeType)
     }
 
     @Test
@@ -121,7 +113,7 @@ class PlayerEngineInstrumentationTest {
 
     @Test
     fun pictureInPictureSupportIsQueryable() {
-        // Must not throw on devices without the PiP feature.
+
         com.opplayer.app.ui.player.supportsPip(context.packageManager)
     }
 }

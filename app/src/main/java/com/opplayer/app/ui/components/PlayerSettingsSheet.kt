@@ -74,8 +74,7 @@ fun PlayerSettingsSheet(
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface
     ) {
-        // A sheet is its own window, so the language chosen in the settings has
-        // to be restored here or its strings follow the device locale.
+
         LocalizedWindow {
         Column(
             modifier = Modifier
@@ -296,20 +295,13 @@ fun parseSpeed(input: String): Float? {
     return (Math.round(value * 100f) / 100f)
 }
 
-/**
- * Formats a playback speed such as `1٫25`.
- *
- * Digit shaping is opt in: the sheet passes the value of the active interface
- * language, so the English interface no longer shows Persian numerals.
- */
 fun formatSpeed(speed: Float, persianDigits: Boolean = false): String {
     val text = if (speed % 1f == 0f) {
         speed.toInt().toString()
     } else {
         speed.toString().trimEnd('0').trimEnd('.')
     }
-    // Digit conversion lives in util.Formatters; this file used to carry its
-    // own private copy of the same mapping.
+
     return text.localizeDigits(persianDigits)
 }
 

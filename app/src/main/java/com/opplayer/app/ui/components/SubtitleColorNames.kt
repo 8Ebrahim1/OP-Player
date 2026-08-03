@@ -6,12 +6,6 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.res.stringResource
 import com.opplayer.app.R
 
-/*
- * Colour swatches are drawn as bare circles. Without a name they are announced
- * as an unlabeled control, so every offered value is mapped to a translated
- * name here and exposed through the semantics of the swatch.
- */
-
 @StringRes
 private fun textColorNameRes(argb: Long): Int = when (argb) {
     0xFFFFFFFFL -> R.string.color_white
@@ -34,12 +28,10 @@ private fun backgroundColorNameRes(argb: Long): Int = when (argb) {
     else -> R.string.subtitle_background
 }
 
-/** Translated name of a subtitle text colour. */
 @Composable
 @ReadOnlyComposable
 fun textColorName(argb: Long): String = stringResource(textColorNameRes(argb))
 
-/** Translated name of a subtitle background colour. */
 @Composable
 @ReadOnlyComposable
 fun backgroundColorName(argb: Long): String = stringResource(backgroundColorNameRes(argb))

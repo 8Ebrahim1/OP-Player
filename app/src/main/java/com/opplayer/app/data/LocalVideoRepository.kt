@@ -8,13 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-/**
- * Reads the device video library through MediaStore.
- *
- * Folders are identified by their MediaStore bucket id, never by their display
- * name: two different directories may share a name, and grouping by name merged
- * their contents and produced duplicate keys in the folder list.
- */
 class LocalVideoRepository(private val context: Context) {
 
     suspend fun loadFolders(): List<VideoFolder> = withContext(Dispatchers.IO) {
@@ -88,7 +81,6 @@ class LocalVideoRepository(private val context: Context) {
                 val id = cursor.getLong(idCol)
                 val name = cursor.getString(nameCol) ?: continue
 
-                // Pre-Q has no bucket id, so the parent path stands in for it.
                 val parentPath = if (
                     Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && bucketNameCol >= 0
                 ) {

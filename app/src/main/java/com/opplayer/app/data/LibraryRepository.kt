@@ -24,24 +24,6 @@ private val Context.libraryDataStore: DataStore<Preferences> by preferencesDataS
     name = "op_player_library"
 )
 
-/**
- * Persistence for the online library, its playback progress and the resume
- * positions of device videos.
- *
- * Two rules shape this class:
- *
- * 1. **A corrupt blob is never overwritten.** Reading distinguishes "nothing
- *    stored" from "could not be parsed" ([StoredValue]). On a parse failure the
- *    raw JSON is copied to a backup key, the failure is logged, and every write
- *    to that key is refused. Previously a single unreadable byte turned into an
- *    empty list and the next autosave made the loss permanent.
- * 2. **Progress is stored apart from the static library.** Saving a resume
- *    position rewrites a small id to position map instead of encoding every
- *    item in the library.
- *
- * The [DataStore] is a constructor parameter so the whole class can be covered
- * by unit tests with an in-memory store.
- */
 class LibraryRepository(private val dataStore: DataStore<Preferences>) {
 
     constructor(context: Context) : this(context.applicationContext.libraryDataStore)
@@ -57,7 +39,6 @@ class LibraryRepository(private val dataStore: DataStore<Preferences>) {
     private val progressSerializer = MapSerializer(String.serializer(), LocalProgress.serializer())
     private val legacyPositionsSerializer = MapSerializer(String.serializer(), Long.serializer())
 
-    /** Library items with their progress merged back in, ready for the UI. */
     val library: Flow<List<VideoItem>> = dataStore.data
         .map { prefs ->
             val items = readLibrary(prefs).valueOr(emptyList()) ?: return@map emptyList()
@@ -68,7 +49,6 @@ class LibraryRepository(private val dataStore: DataStore<Preferences>) {
         .distinctUntilChanged()
         .flowOn(Dispatchers.IO)
 
-    /** Resume positions of device videos, keyed by content URI. */
     val localPositions: Flow<Map<String, Long>> = dataStore.data
         .map { prefs ->
             readLocalProgress(prefs)
@@ -79,13 +59,6 @@ class LibraryRepository(private val dataStore: DataStore<Preferences>) {
         .distinctUntilChanged()
         .flowOn(Dispatchers.IO)
 
-    /**
-     * Applies [transform] to the static part of the library.
-     *
-     * Progress fields are stripped before writing; they live in their own key
-     * and are merged back by [library]. Returns false when the write was refused
-     * because the stored data is unreadable.
-     */
     suspend fun updateLibrary(transform: (List<VideoItem>) -> List<VideoItem>): Boolean {
         var written = false
 
@@ -106,25 +79,6 @@ class LibraryRepository(private val dataStore: DataStore<Preferences>) {
         return written
     }
 
-    /**
-     * One-off migration of data written by older versions.
-     *
-     * Older builds kept the resume position inside each [VideoItem]. The static
-     * library and the progress map are separate stores now, so that progress has
-     * to be carried across, not dropped. Everything happens inside a single
-     * `edit` block, which DataStore applies atomically:
-     *
-     * 1. the old library is decoded and normalised (stable ids, repaired patterns),
-     * 2. the progress of every item is extracted,
-     * 3. it is merged into the progress store, where an already migrated entry
-     *    wins over the legacy copy,
-     * 4. the library is rewritten without its progress fields,
-     * 5. only then is the migration recorded.
-     *
-     * If either store is unreadable, nothing is written and the marker is not
-     * set, so the migration is retried on the next launch instead of turning a
-     * damaged file into permanent data loss.
-     */
     suspend fun migrateLegacyDataIfNeeded(): Boolean {
         var migrated = false
 
@@ -157,7 +111,6 @@ class LibraryRepository(private val dataStore: DataStore<Preferences>) {
                 .associate { item -> item.id to item.progress() }
                 .filterValues { !it.isEmpty }
 
-            // Legacy first, so an entry already written in the new format wins.
             val mergedProgress = legacyProgress + currentProgress
 
             prefs[LIBRARY_KEY] = json.encodeToString(
@@ -177,7 +130,6 @@ class LibraryRepository(private val dataStore: DataStore<Preferences>) {
         return migrated
     }
 
-    /** Stores the resume position of a library item without touching the library itself. */
     suspend fun saveLibraryProgress(
         request: PlaybackRequest,
         positionMs: Long,
@@ -193,11 +145,9 @@ class LibraryRepository(private val dataStore: DataStore<Preferences>) {
             )
     }
 
-    /** Clears the stored progress of one library item. */
     suspend fun resetLibraryProgress(id: String): Boolean =
         updateLibraryProgress { current -> current - id }
 
-    /** Drops progress for items that no longer exist, e.g. after a delete. */
     suspend fun forgetLibraryProgress(ids: Set<String>): Boolean =
         updateLibraryProgress { current -> current.filterKeys { it !in ids } }
 
@@ -226,7 +176,6 @@ class LibraryRepository(private val dataStore: DataStore<Preferences>) {
         return written
     }
 
-    /** Stores (or clears, when [positionMs] is not positive) a device video position. */
     suspend fun saveLocalPosition(
         uri: String,
         positionMs: Long,
@@ -260,8 +209,6 @@ class LibraryRepository(private val dataStore: DataStore<Preferences>) {
         return written
     }
 
-    // ---------------------------------------------------------------- reading
-
     private fun readLibrary(prefs: Preferences): StoredValue<List<VideoItem>> {
         val raw = prefs[LIBRARY_KEY]
         if (raw.isNullOrBlank()) return StoredValue.Missing
@@ -291,7 +238,6 @@ class LibraryRepository(private val dataStore: DataStore<Preferences>) {
         runCatching { json.decodeFromString(progressSerializer, raw) }
             .onSuccess { return StoredValue.Loaded(it) }
 
-        // The pre-1.3 format stored plain numbers; that is a migration, not damage.
         return runCatching { json.decodeFromString(legacyPositionsSerializer, raw) }
             .fold(
                 onSuccess = { legacy ->
@@ -303,10 +249,6 @@ class LibraryRepository(private val dataStore: DataStore<Preferences>) {
             )
     }
 
-    /**
-     * Copies unreadable JSON aside once, so a support dump can recover it, and
-     * logs the failure instead of silently dropping the data.
-     */
     private fun backupCorrupt(
         prefs: androidx.datastore.preferences.core.MutablePreferences,
         key: Preferences.Key<String>,
@@ -341,7 +283,6 @@ class LibraryRepository(private val dataStore: DataStore<Preferences>) {
         val CORRUPTION_AT_KEY = longPreferencesKey("store_corruption_detected_at")
         val MIGRATION_VERSION_KEY = intPreferencesKey("library_migration_version")
 
-        /** Bump when a new one-off repair is added to [migrateLegacyDataIfNeeded]. */
         const val CURRENT_MIGRATION_VERSION = 1
 
         const val MAX_TRACKED_POSITIONS = 300

@@ -14,7 +14,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.opplayer.app.R
 
-/** Label shown at the edge of the screen after a double tap seek. */
 @Composable
 fun PlayerSeekHint(forward: Boolean, modifier: Modifier = Modifier) {
     Text(
@@ -33,7 +32,6 @@ fun PlayerSeekHint(forward: Boolean, modifier: Modifier = Modifier) {
     )
 }
 
-/** Spinner shown while the player is buffering. */
 @Composable
 fun PlayerBufferingIndicator(modifier: Modifier = Modifier) {
     CircularProgressIndicator(

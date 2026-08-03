@@ -56,14 +56,12 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import java.util.Locale
 
-/** One selectable subtitle source: off, an external file, or an embedded track. */
 data class SubtitleOption(
     val id: String,
     val label: String,
     val selected: Boolean
 )
 
-/** Playback related controls, only available while a video is open. */
 data class SubtitlePlaybackControls(
     val offsetMs: Long,
     val onOffsetChange: (Long) -> Unit,
@@ -73,7 +71,6 @@ data class SubtitlePlaybackControls(
     val embeddedOnly: Boolean = false
 )
 
-/** Offsets offered as one tap shortcuts, in milliseconds. */
 private val offsetSteps = listOf(-500L, -100L, 100L, 500L)
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
@@ -90,8 +87,7 @@ fun SubtitleSettingsSheet(
     var showHelp by remember { mutableStateOf(false) }
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
-        // A sheet is its own window, so the language chosen in the settings has
-        // to be restored here or its strings follow the device locale.
+
         LocalizedWindow {
         Column(
             modifier = Modifier
@@ -139,8 +135,7 @@ fun SubtitleSettingsSheet(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // The step labels used to be hardcoded Persian literals, so
-                    // they stayed Persian inside the English interface.
+
                     offsetSteps.forEach { step ->
                         OutlinedButton(
                             onClick = { playback.onOffsetChange(playback.offsetMs + step) },
@@ -342,8 +337,7 @@ private fun ColorRow(
     ) {
         colors.forEach { value ->
             val isSelected = value == selected
-            // A bare colour circle announced nothing but "button"; the swatch
-            // name and its state are now exposed to screen readers.
+
             val name = nameOf(value)
 
             Box(
@@ -375,10 +369,6 @@ private fun ColorRow(
     }
 }
 
-/**
- * Formats a subtitle offset in seconds with one decimal, using the digits and
- * the decimal separator of the active interface language.
- */
 private fun formatOffset(offsetMs: Long, persianDigits: Boolean): String {
     val seconds = offsetMs / 1000.0
     val sign = when {

@@ -4,13 +4,6 @@ import com.opplayer.app.player.PlaybackRequest
 import com.opplayer.app.player.PlayerEngine
 import com.opplayer.app.player.PlayerEngineListener
 
-/**
- * Playback commands, isolated from state.
- *
- * A very thin layer on purpose: it keeps the view model free of engine details
- * (clamping, seek steps, release bookkeeping) without adding a second source of
- * truth for UI state.
- */
 class PlaybackController(private val engine: PlayerEngine) {
 
     var isReleased: Boolean = false
@@ -18,7 +11,6 @@ class PlaybackController(private val engine: PlayerEngine) {
 
     val currentPosition: Long get() = if (isReleased) 0L else engine.currentPosition
 
-    /** Duration in ms, or 0 when it is still unknown. */
     val duration: Long
         get() = if (isReleased) 0L else engine.duration.let { if (it > 0L) it else 0L }
 
@@ -49,7 +41,6 @@ class PlaybackController(private val engine: PlayerEngine) {
         if (!isReleased) engine.seekTo(positionMs.coerceAtLeast(0L))
     }
 
-    /** Seeks relative to the current position, clamped to the media bounds. */
     fun seekBy(deltaMs: Long) {
         if (isReleased) return
 
@@ -74,7 +65,6 @@ class PlaybackController(private val engine: PlayerEngine) {
         if (!isReleased) engine.selectEmbeddedTextTrack(index)
     }
 
-    /** Idempotent: releasing twice is a no-op, which the ownership tests rely on. */
     fun release() {
         if (isReleased) return
 

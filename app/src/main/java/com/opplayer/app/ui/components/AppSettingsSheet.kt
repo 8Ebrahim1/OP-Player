@@ -39,10 +39,6 @@ import com.opplayer.app.data.AppLayoutDirection
 import com.opplayer.app.data.AppSettings
 import com.opplayer.app.ui.localization.LocalizedWindow
 
-/**
- * Application wide settings: interface language, layout direction and a way to
- * replay the introduction tour.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppSettingsSheet(
@@ -62,8 +58,7 @@ fun AppSettingsSheet(
         containerColor = MaterialTheme.colorScheme.surface,
         modifier = modifier
     ) {
-        // A sheet is its own window, so the language chosen in the settings has
-        // to be restored here or its strings follow the device locale.
+
         LocalizedWindow {
         Column(
             modifier = Modifier
@@ -178,12 +173,6 @@ private fun SettingSection(
     }
 }
 
-/**
- * Vertical list of mutually exclusive options.
- *
- * The whole row is the touch target and the group is exposed as a radio group,
- * so TalkBack announces "selected, 2 of 3" instead of three unrelated buttons.
- */
 @Composable
 private fun <T> OptionRow(
     options: List<Pair<T, String>>,

@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  Default (fallback) locale: English.
 
-  Every locale that is not explicitly translated falls back to this file, so a
-  French, Turkish or German device now gets English instead of Persian.
-  Persian lives in values-fa/strings.xml.
--->
 <resources>
     <string name="app_name">OP Player</string>
     <string name="brand">OP Player</string>
@@ -143,7 +137,6 @@
     <string name="subtitle_style_reset">Back to the default</string>
     <string name="subtitle_preview_text">Subtitle preview text</string>
 
-    <!-- Colour names, used as accessibility labels for the swatch buttons. -->
     <string name="color_white">White</string>
     <string name="color_yellow">Yellow</string>
     <string name="color_cyan">Cyan</string>
@@ -158,7 +151,6 @@
     <string name="color_white_box">Light box</string>
     <string name="color_selected">Selected</string>
 
-    <!-- Application settings -->
     <string name="app_settings_title">App settings</string>
     <string name="language_label">App language</string>
     <string name="language_body">Choose the language of the interface. \"System\" follows your device setting.</string>
@@ -174,7 +166,6 @@
     <string name="replay_tour_body">Walk through the slides and set the language and subtitle colours once more.</string>
     <string name="close">Close</string>
 
-    <!-- Onboarding -->
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_next">Next</string>
     <string name="onboarding_previous">Previous</string>
@@ -208,7 +199,6 @@
     <string name="onboarding_ready_title">You are all set</string>
     <string name="onboarding_ready_body">Every screen has a question mark button that explains each icon and option. You can reopen this tour any time from Settings.</string>
 
-    <!-- Contextual help -->
     <string name="help">Help</string>
     <string name="help_library_title">Guide to the links library</string>
     <string name="help_device_title">Guide to device videos</string>

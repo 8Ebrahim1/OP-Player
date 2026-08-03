@@ -7,14 +7,6 @@ import com.opplayer.app.player.supportsEpisodeNavigation
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.IOException
 
-/**
- * Episode navigation with a hard deadline.
- *
- * A resolver that probes the network can stall indefinitely; without the
- * timeout the UI would sit on its "looking for the next episode" spinner
- * forever. An I/O failure that escapes the resolver is reported as a network
- * problem rather than as a missing episode.
- */
 class EpisodeController(
     private val resolver: EpisodeResolver,
     private val timeoutMs: Long = DEFAULT_TIMEOUT_MS

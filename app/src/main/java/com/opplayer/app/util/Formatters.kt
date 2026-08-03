@@ -2,15 +2,8 @@ package com.opplayer.app.util
 
 import java.util.Locale
 
-/** Decimal separator used by Persian text. */
 private const val DECIMAL_SEPARATOR_FA = '\u066b'
 
-/**
- * Formats a duration as `mm:ss` or `h:mm:ss`.
- *
- * Digit shaping is opt in. The formatters used to always emit Persian digits,
- * which leaked Persian numerals into the English interface.
- */
 fun formatDuration(durationMs: Long, persianDigits: Boolean = false): String {
     if (durationMs <= 0L) return "00:00".localizeDigits(persianDigits)
 
@@ -28,7 +21,6 @@ fun formatDuration(durationMs: Long, persianDigits: Boolean = false): String {
     return text.localizeDigits(persianDigits)
 }
 
-/** Formats a file size in MB or GB. Returns an empty string for unknown sizes. */
 fun formatSize(sizeBytes: Long, persianDigits: Boolean = false): String {
     if (sizeBytes <= 0L) return ""
 
@@ -42,15 +34,9 @@ fun formatSize(sizeBytes: Long, persianDigits: Boolean = false): String {
     return text.localizeDigits(persianDigits)
 }
 
-/** Formats a plain integer with the digits of the active interface language. */
 fun formatCount(value: Int, persianDigits: Boolean = false): String =
     value.toString().localizeDigits(persianDigits)
 
-/**
- * Converts Latin digits to Persian digits when [persian] is true, and also maps
- * the decimal point to the Persian decimal separator. Returns the receiver
- * untouched otherwise.
- */
 fun String.localizeDigits(persian: Boolean): String {
     if (!persian) return this
 
@@ -74,11 +60,6 @@ fun String.toPersianDigits(): String = map { ch ->
 
 fun Int.toPersianDigits(): String = toString().toPersianDigits()
 
-/**
- * Normalises Persian and Arabic digits back to Latin, including the Persian
- * decimal separator and thousands comma, so parsing user input never depends on
- * the interface language.
- */
 fun String.toLatinDigits(): String = map { ch ->
     when (ch) {
         in '\u06f0'..'\u06f9' -> '0' + (ch - '\u06f0')

@@ -2,13 +2,6 @@ package com.opplayer.app.data
 
 import kotlinx.serialization.Serializable
 
-/**
- * Playback progress of one library item.
- *
- * Stored separately from [VideoItem] on purpose: a resume position changes every
- * few seconds while title, URL and favourite flag almost never do. Keeping the
- * two apart means an autosave rewrites a small map instead of the whole library.
- */
 @Serializable
 data class LibraryProgress(
     val positionMs: Long = 0L,
@@ -25,7 +18,6 @@ data class LibraryProgress(
             currentLabel == null
 }
 
-/** Progress fields of this item, as they are persisted. */
 fun VideoItem.progress(): LibraryProgress = LibraryProgress(
     positionMs = positionMs,
     lastPlayedAt = lastPlayedAt,
@@ -34,7 +26,6 @@ fun VideoItem.progress(): LibraryProgress = LibraryProgress(
     currentLabel = currentLabel
 )
 
-/** The same item with every progress field cleared, ready for the static store. */
 fun VideoItem.withoutProgress(): VideoItem = copy(
     positionMs = 0L,
     lastPlayedAt = 0L,
@@ -43,7 +34,6 @@ fun VideoItem.withoutProgress(): VideoItem = copy(
     currentLabel = null
 )
 
-/** The same item with [progress] applied, as the UI expects to see it. */
 fun VideoItem.withProgress(progress: LibraryProgress?): VideoItem {
     if (progress == null) return this
 
@@ -56,11 +46,6 @@ fun VideoItem.withProgress(progress: LibraryProgress?): VideoItem {
     )
 }
 
-/**
- * Keeps the [limit] most recently played entries.
- *
- * Mirrors [trimProgress] for device videos so neither store can grow forever.
- */
 fun trimLibraryProgress(
     entries: Map<String, LibraryProgress>,
     limit: Int
