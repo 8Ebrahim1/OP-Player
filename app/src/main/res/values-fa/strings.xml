@@ -23,6 +23,9 @@
     <string name="save_and_play">ذخیره و پخش</string>
     <string name="cancel">انصراف</string>
     <string name="default_video_name">ویدیوی بدون نام</string>
+    <string name="folder_other">سایر</string>
+    <string name="library_write_failed">اطلاعات ذخیره‌شده‌ی کتابخانه خوانده نشد، پس تغییر شما ذخیره نشد. یک نسخه‌ی پشتیبان از داده‌ی قبلی نگه داشته شد.</string>
+    <string name="insecure_link_warning">این لینک از http استفاده می‌کند، پس ویدیو بدون رمزنگاری منتقل می‌شود. اگر سرور https دارد، همان را ترجیح بدهید.</string>
 
     <string name="link_mode_simple">ساده</string>
     <string name="link_mode_advanced">پیشرفته</string>
@@ -47,7 +50,6 @@
 
     <string name="continue_playback">ادامه از %1$s</string>
     <string name="online_link">لینک آنلاین</string>
-    <string name="favorite">علاقه‌مندی</string>
     <string name="add_to_favorites">افزودن به علاقه‌مندی‌ها</string>
     <string name="remove_from_favorites">حذف از علاقه‌مندی‌ها</string>
     <string name="favorite_state_on">در علاقه‌مندی‌ها</string>
@@ -65,6 +67,8 @@
     <string name="permission_partial_body">فقط به ویدیوهای انتخاب‌شده دسترسی داریم. برای دیدن همهٔ ویدیوها می‌توانید انتخاب را گسترش دهید.</string>
     <string name="permission_partial_action">مدیریت انتخاب</string>
     <string name="no_local_videos">ویدیویی در گوشی پیدا نشد</string>
+    <string name="device_scan_failed_title">اسکن ویدیوهای گوشی کامل نشد</string>
+    <string name="device_scan_failed_body">خواندن ویدیوهای گوشی با خطا روبه‌رو شد. دسترسی را بررسی کنید و دوباره تلاش کنید.</string>
     <string name="refresh">بارگذاری دوباره</string>
     <string name="search_videos">جستجوی ویدیو…</string>
     <string name="folder_summary">%1$s ویدیو</string>
@@ -173,7 +177,7 @@
     <string name="onboarding_step">مرحلهٔ %1$s از %2$s</string>
 
     <string name="onboarding_welcome_title">به OP Player خوش آمدید</string>
-    <string name="onboarding_welcome_body">پخش‌کننده‌ای برای لینک‌های آنلاین و ویدیوهای خود گوشی، با کنترل کامل روی زیرنویس. در چند اسلاید بعدی برنامه را دقیقاً مطابق سلیقهٔ خودتان تنظیم می‌کنید.</string>
+    <string name="onboarding_welcome_body">پخش‌کننده‌ای برای لینک‌های آنلاین و ویدیوهای خود گوشی، با کنترل کامل روی زیرنویس. در چند اسلاید بعدی برنامه را د��یقاً مطابق سلیقهٔ خودتان تنظیم می‌کنید.</string>
 
     <string name="onboarding_language_title">زبان خود را انتخاب کنید</string>
     <string name="onboarding_language_body">کل محیط برنامه بلافاصله تغییر می‌کند. بعداً هم از بخش تنظیمات قابل تغییر است.</string>
@@ -182,13 +186,13 @@
     <string name="onboarding_direction_body">فارسی راست‌به‌چپ و انگلیسی چپ‌به‌راست خوانده می‌شود. گزینهٔ «خودکار» حالت درست را خودش انتخاب می‌کند؛ فقط اگر حالت دیگر را ترجیح می‌دهید آن را تغییر دهید.</string>
 
     <string name="onboarding_library_title">کتابخانهٔ لینک‌ها</string>
-    <string name="onboarding_library_body">هر لینک مستقیمی (mp4، mkv، m3u8، mpd) را اضافه کنید و همان‌جا پخش کنید. حالت پیشرفته از روی دو لینک پشت‌سرهم، الگوی شماره‌گذاری سریال را یاد می‌گیرد و قسمت‌های بعدی را خودش می‌سازد.</string>
+    <string name="onboarding_library_body">هر لینک مستقیمی (mp4، mkv، m3u8، mpd) را اضافه کنید و همان‌جا پخش کنید. حالت پیشرفته از روی دو لینک پشت‌سرهم، الگوی شماره‌گذاری سریال را یاد می‌گیرد و قسمت‌های بعدی را خودش می���سازد.</string>
 
     <string name="onboarding_device_title">ویدیوهای گوشی</string>
-    <string name="onboarding_device_body">ویدیوهای داخل گوشی پوشه‌بندی می‌شوند و همراه با تصویر بندانگشتی، مدت زمان، حجم و نقطهٔ ادامهٔ پخش نمایش داده می‌شوند. فقط از اجازهٔ خواندن ویدیوها استفاده می‌شود.</string>
+    <string name="onboarding_device_body">ویدیوهای داخل گوشی پوشه‌بندی می‌شوند و همراه با تصویر بندانگشتی، مدت زمان، حجم و نقطه�� ادامهٔ پخش نمایش داده می‌شوند. فقط از اجازهٔ خواندن ویدیوها استفاده می‌شود.</string>
 
     <string name="onboarding_player_title">پخش‌کننده‌ای برای کنترل با انگشت</string>
-    <string name="onboarding_player_body">در نیمهٔ راست برای صدا و در نیمهٔ چپ برای روشنایی انگشت را بالا و پایین بکشید، با دو ضربه ۱۵ ثانیه جلو یا عقب بروید، و از نوار بالا به تصویر در تصویر، حالت‌های بزرگ‌نمایی، سرعت پخش و چرخش خودکار دسترسی داشته باشید.</string>
+    <string name="onboarding_player_body">در نیمهٔ راست برای صدا و در نیمهٔ چپ برای روشنایی انگشت را بالا و پایین بکشید، با دو ضربه ۱۵ ثانیه جلو یا ع��ب بروید، و از نوار بالا به تصویر در تصویر، حالت‌های بزرگ‌نمایی، سرعت پخش و چرخش خودکار دسترسی داشته باشید.</string>
 
     <string name="onboarding_subtitle_color_title">رنگ زیرنویس</string>
     <string name="onboarding_subtitle_color_body">رنگ متن زیرنویس را انتخاب کنید. پیش‌نمایش پایین همزمان به‌روز می‌شود.</string>

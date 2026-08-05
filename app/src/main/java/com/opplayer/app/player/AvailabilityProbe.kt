@@ -6,7 +6,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.io.InterruptedIOException
 import java.net.HttpURLConnection
+import java.net.SocketTimeoutException
 import java.net.URL
 
 sealed interface AvailabilityResult {
@@ -33,19 +35,14 @@ class HttpAvailabilityProbe(
     }
 
     private fun probeBlocking(url: String): AvailabilityResult = try {
-        when (val code = statusCode(url, "HEAD", range = false)) {
-            in 200..299 -> AvailabilityResult.Available
-            403, 405, 501 -> probeWithRange(url)
-            else -> if (code < 0) probeWithRange(url) else AvailabilityResult.NotAvailable
-        }
+        classify(statusCode(url, "HEAD", range = false)) ?: probeWithRange(url)
     } catch (error: IOException) {
 
         AvailabilityResult.NetworkUnavailable
     }
 
     private fun probeWithRange(url: String): AvailabilityResult = try {
-        val code = statusCode(url, "GET", range = true)
-        if (code in 200..299) AvailabilityResult.Available else AvailabilityResult.NotAvailable
+        classify(statusCode(url, "GET", range = true)) ?: AvailabilityResult.NotAvailable
     } catch (error: IOException) {
         AvailabilityResult.NetworkUnavailable
     }
@@ -65,7 +62,13 @@ class HttpAvailabilityProbe(
 
             code
         } catch (interrupted: InterruptedException) {
+            Thread.currentThread().interrupt()
+            throw CancellationException("Availability probe was cancelled")
+        } catch (interrupted: InterruptedIOException) {
 
+            if (interrupted is SocketTimeoutException || !Thread.interrupted()) throw interrupted
+
+            Thread.currentThread().interrupt()
             throw CancellationException("Availability probe was cancelled")
         } finally {
             runCatching { connection?.disconnect() }
@@ -83,7 +86,26 @@ class HttpAvailabilityProbe(
         }
 
     companion object {
-        const val DEFAULT_TIMEOUT_MS = 8_000
+        const val DEFAULT_TIMEOUT_MS = 5_000
+
+        private val RETRYABLE_CODES = setOf(408, 425, 429)
+
+        private val RANGE_FALLBACK_CODES = setOf(403, 405, 501)
+
+        /**
+         * Maps an HTTP status onto an availability answer. `null` means the answer is
+         * inconclusive, so the same URL has to be retried with a ranged GET.
+         *
+         * Server-side or throttling failures must never be reported as "episode does not
+         * exist", otherwise a temporary 5xx/429 looks like the end of a series.
+         */
+        internal fun classify(code: Int): AvailabilityResult? = when {
+            code in 200..299 -> AvailabilityResult.Available
+            code < 0 || code in RANGE_FALLBACK_CODES -> null
+            code in 500..599 || code in RETRYABLE_CODES -> AvailabilityResult.NetworkUnavailable
+            else -> AvailabilityResult.NotAvailable
+        }
+
         val DEFAULT_USER_AGENT: String = "OPPlayer/" + BuildConfig.VERSION_NAME + " (Android)"
     }
 }

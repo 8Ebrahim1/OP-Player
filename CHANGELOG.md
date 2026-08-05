@@ -5,7 +5,98 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.4.1] - 2026-08-05
+
+### Added
+
+- **Picture in picture arms itself and lands smoothly.** On Android 12 and later
+  `setAutoEnterEnabled(true)` is set before the home gesture is made, and the real on
+  screen bounds of the video surface are passed as `setSourceRectHint(...)`, so the
+  window animates out of the video instead of jumping into place.
+- **An unencrypted link is called out before it is saved.** The add-link dialog now warns
+  when the address uses `http://`, in both simple and advanced mode. Plain HTTP keeps
+  working, because most of these links need it, but the risk is no longer invisible.
+- **Tests for the behaviour that changed.** `AvailabilityProbeClassificationTest` pins the
+  HTTP status mapping (2xx available, 4xx missing, 5xx/408/425/429 network problem,
+  403/405/501 ranged retry), `EpisodeNavigatorProbeTest` covers batched probing (candidate
+  order still wins, a later batch is still searched, offline is not "not found"),
+  `EpisodePatternParcelTest` (instrumented) round trips a parcel and repairs a legacy one,
+  and `PlayerViewModelTest` covers the subtitle shift for pattern based links.
+
+### Removed
+
+- **The duplicated legacy `ui/PlayerViewModel.kt` and `ui/VideoItem.kt`.** The
+  legacy file declared a second `preferencesDataStore(name = "op_player_library")`
+  for the same file already owned by `data/LibraryRepository.kt`. Two DataStore
+  instances over one file throw `IllegalStateException` as soon as both are
+  touched, so the dead code was a crash waiting for its first import.
+
+### Fixed
+
+- **A refused library write is no longer silent.** `LibraryRepository.updateLibrary` returns
+  `false` when the stored library cannot be read (it backs the old data up instead of
+  overwriting it), but `LibraryViewModel` threw that result away, so adding, favouriting or
+  deleting an item looked like it had been saved. The failure now reaches the user as a
+  snackbar.
+- **That snackbar is visible while a video is open.** The player branch returned early,
+  above the `SnackbarHost`, so a refused write during playback produced a message nobody
+  could see. The player now sits in a `Box` with the host drawn over it.
+- **A failed device scan no longer looks like an empty phone.** `DeviceVideosUiState`
+  carries a `failed` flag, and the device tab shows an error state with a retry action
+  instead of the "no video found" placeholder when the MediaStore query throws.
+- **The build no longer warns on every Kotlin task.** The compiler flag
+  `-opt-in=androidx.media3.common.util.UnstableApi` was passed even though `UnstableApi`
+  is not an opt-in requirement marker, so the warning was printed once per compile task.
+  The opt-in now lives in `lint.xml`, where the `UnsafeOptInUsageError` check reads it.
+- **`buildConfig` is no longer switched off and on at the same time.** `gradle.properties`
+  set `android.defaults.buildfeatures.buildconfig=false` while the app module enables
+  `buildConfig = true`; the contradiction was one Gradle upgrade away from breaking the
+  `BuildConfig.VERSION_NAME` that the availability probe puts in its User-Agent.
+- **A server error no longer looks like the end of a series.** `HttpAvailabilityProbe`
+  mapped every non 2xx status except 403/405/501 to "episode does not exist", so a
+  5xx, 429 or 408 answer produced "next episode not found" instead of a network
+  warning. 5xx, 408, 425 and 429 now report `NetworkUnavailable`.
+- **Cancelling an episode lookup really cancels it.** `statusCode` only translated
+  `InterruptedException` into a `CancellationException`; a blocking socket raises
+  `InterruptedIOException` instead, which was reported as a network failure. Real
+  read timeouts (`SocketTimeoutException`) keep their old meaning.
+- **Previous season lookups can finish.** Candidates are probed in concurrent
+  batches of four instead of one by one, so up to 24 previous season probes fit
+  inside the timeout. The probe timeout drops to 5 s and the episode timeout rises
+  to 12 s, and the candidate order still decides which episode wins.
+- **A subtitle at 00:00:00 stays at 00:00:00.** An embedded cue with
+  `presentationTimeUs == 0` was remapped to the current playback position.
+- **Pattern based links keep their subtitle.** Episode navigation dropped the
+  subtitle whenever the URL had no `SxxExx` marker; the subtitle episode number is
+  now shifted by the same amount as the pattern.
+- **A corrupt or legacy parcel no longer crashes the player.** `EpisodePattern`
+  restores through `normalized(...)` via a `Parceler`, instead of throwing from
+  `require(...)` while the state is being restored after process death.
+- **Subtitle search handles `%` and `_` in file names.** The MediaStore
+  `DISPLAY_NAME LIKE ?` queries escape SQL wildcards and pass `ESCAPE '\'`.
+- **Playback from another app survives process death** when the sender granted a
+  persistable URI permission, which is now taken for `content://` VIEW intents.
+- **Settings and subtitle style are observed, not read once.** Both view models
+  collect their DataStore flow, so a value written elsewhere is reflected.
+- **"Other" folder name is localized** through `R.string.folder_other` instead of a
+  hardcoded Persian literal inside `LocalVideoRepository`.
+
+### Changed
+
+- **In app language switching survives an app bundle.** `bundle { language { enableSplit
+  = false } }` keeps every language inside the base APK, so changing the language from
+  the settings sheet cannot hit a missing resource in an AAB install.
+- **Lint is clean apart from the dependency updates.** The redundant activity label, the
+  `screenOrientation="unspecified"` attribute, two obsolete `SDK_INT >= 26` guards and
+  three unused resources are gone, `tools:targetApi` moved to 33 for `localeConfig`, and
+  the deliberate cleartext base config is documented with `tools:ignore`.
+- Version bumped to 1.4.1 (versionCode 9).
+
+### Fixed (documentation)
+
+- Corrected the 1.4.0 claim about a `values-en/strings.xml` file, the 1.3.3 claim
+  that the legacy `ui/PlayerViewModel.kt` and `ui/VideoItem.kt` had been removed,
+  and the stale README badge version note.
 
 ## [1.4.0] - 2026-08-02
 
@@ -85,8 +176,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `values-en/strings.xml`: the full English translation, Persian stays the
-  default.
+- `values/strings.xml`: the full English translation as the default fallback,
+  with the Persian strings in `values-fa/strings.xml`.
 - The `com.opplayer.app.player.fakes` package (`FakePlayerEngine`,
   `FakeEpisodeResolver`, `FakeProgressSaver`, `FakeSubtitleSource`), which the
   unit test source set referenced but did not contain.
@@ -166,8 +257,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Dead code: `ui/PlayerViewModel.kt`, `ui/VideoItem.kt` and the unused
-  `PlayerGestureOverlay` composable.
+- Dead code: the unused `PlayerGestureOverlay` composable. (`ui/PlayerViewModel.kt`
+  and `ui/VideoItem.kt` were only removed in 1.4.1; this entry was inaccurate.)
 - Unused `media3-datasource-okhttp` entry from the version catalog.
 
 ### Added (documentation and tests)
@@ -179,7 +270,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed (documentation)
 
-- README version badges now match `versionName` 1.3.2.
+- README version badges now match the `versionName` of this release.
 
 ## [1.3.2] - 2026-07-31
 
@@ -237,7 +328,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[1.4.0]: https://github.com/8Ebrahim1/OPPlayer/releases/tag/v1.4.0
-[1.3.2]: https://github.com/8Ebrahim1/OPPlayer/releases/tag/v1.3.2
-[1.3.1]: https://github.com/8Ebrahim1/OPPlayer/releases/tag/v1.3.1
+[1.4.1]: https://github.com/8Ebrahim1/OP-Player/releases/tag/v1.4.1
+[1.4.0]: https://github.com/8Ebrahim1/OP-Player/releases/tag/v1.4.0
+[1.3.2]: https://github.com/8Ebrahim1/OP-Player/releases/tag/v1.3.2
+[1.3.1]: https://github.com/8Ebrahim1/OP-Player/releases/tag/v1.3.1
 

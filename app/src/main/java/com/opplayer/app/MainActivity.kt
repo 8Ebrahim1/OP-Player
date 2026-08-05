@@ -2,12 +2,10 @@ package com.opplayer.app
 
 import android.content.Intent
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.opplayer.app.player.PlaybackRequest
@@ -53,7 +51,6 @@ class MainActivity : ComponentActivity() {
         onUserLeaveAction?.invoke()
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,
         newConfig: Configuration
@@ -65,6 +62,17 @@ class MainActivity : ComponentActivity() {
     private fun intentToPlaybackRequest(intent: Intent?): PlaybackRequest? {
         val data = intent?.takeIf { it.action == Intent.ACTION_VIEW }?.data ?: return null
         val name = data.lastPathSegment ?: getString(R.string.default_video_name)
+
+        // A one-shot grant dies with the process, which breaks resume after process death.
+        // Persist it when the sender allows it; ignore the failure otherwise.
+        if (data.scheme.equals("content", ignoreCase = true)) {
+            runCatching {
+                contentResolver.takePersistableUriPermission(
+                    data,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+        }
 
         return PlaybackRequest(
             key = data.toString(),

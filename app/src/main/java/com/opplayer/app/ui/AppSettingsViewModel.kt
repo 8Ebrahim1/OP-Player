@@ -10,7 +10,7 @@ import com.opplayer.app.data.AppSettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class AppSettingsViewModel(application: Application) : AndroidViewModel(application) {
@@ -24,10 +24,16 @@ class AppSettingsViewModel(application: Application) : AndroidViewModel(applicat
     val loaded: StateFlow<Boolean> = _loaded.asStateFlow()
 
     init {
+
+        // Collected continuously so changes written elsewhere are reflected instead of
+        // reading the stored value only once at startup.
         viewModelScope.launch {
-            _settings.value = runCatching { repository.settings.first() }
-                .getOrDefault(AppSettings())
-            _loaded.value = true
+            repository.settings
+                .catch { emit(AppSettings()) }
+                .collect { stored ->
+                    _settings.value = stored
+                    _loaded.value = true
+                }
         }
     }
 

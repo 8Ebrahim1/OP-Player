@@ -23,6 +23,9 @@
     <string name="save_and_play">Save and play</string>
     <string name="cancel">Cancel</string>
     <string name="default_video_name">Untitled video</string>
+    <string name="folder_other">Other</string>
+    <string name="library_write_failed">The saved library could not be read, so the change was not stored. A backup of the old data was kept.</string>
+    <string name="insecure_link_warning">This link uses http, so the video travels unencrypted. Prefer https when the server offers it.</string>
 
     <string name="link_mode_simple">Simple</string>
     <string name="link_mode_advanced">Advanced</string>
@@ -47,7 +50,6 @@
 
     <string name="continue_playback">Resume from %1$s</string>
     <string name="online_link">Online link</string>
-    <string name="favorite">Favourite</string>
     <string name="add_to_favorites">Add to favourites</string>
     <string name="remove_from_favorites">Remove from favourites</string>
     <string name="favorite_state_on">In favourites</string>
@@ -65,6 +67,8 @@
     <string name="permission_partial_body">Only the videos you selected are visible. You can widen the selection to see everything.</string>
     <string name="permission_partial_action">Manage selection</string>
     <string name="no_local_videos">No videos found on this device</string>
+    <string name="device_scan_failed_title">The device scan did not finish</string>
+    <string name="device_scan_failed_body">Reading the videos on this device failed. Check the permission and try again.</string>
     <string name="refresh">Reload</string>
     <string name="search_videos">Search videos…</string>
     <string name="folder_summary">%1$s videos</string>

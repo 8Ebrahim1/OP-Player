@@ -112,13 +112,15 @@ object SubtitleLocator {
         val selection: String
         val arguments: Array<String>
 
+        val namePrefix = escapeLike(baseName) + "%"
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && info.relativePath != null) {
             selection = "${MediaStore.Files.FileColumns.RELATIVE_PATH} = ? AND " +
-                "${MediaStore.Files.FileColumns.DISPLAY_NAME} LIKE ?"
-            arguments = arrayOf(info.relativePath, "$baseName%")
+                "${MediaStore.Files.FileColumns.DISPLAY_NAME} LIKE ? ESCAPE '\\'"
+            arguments = arrayOf(info.relativePath, namePrefix)
         } else {
-            selection = "${MediaStore.Files.FileColumns.DISPLAY_NAME} LIKE ?"
-            arguments = arrayOf("$baseName%")
+            selection = "${MediaStore.Files.FileColumns.DISPLAY_NAME} LIKE ? ESCAPE '\\'"
+            arguments = arrayOf(namePrefix)
         }
 
         val results = mutableListOf<SubtitleFileCandidate>()
@@ -160,6 +162,12 @@ object SubtitleLocator {
             .filter { it.name.startsWith(baseName, ignoreCase = true) }
             .map { SubtitleFileCandidate(uri = Uri.fromFile(it).toString(), name = it.name) }
     }
+
+    /** File names may contain `%` or `_`, which would otherwise act as SQL wildcards. */
+    private fun escapeLike(value: String): String = value
+        .replace("\\", "\\\\")
+        .replace("%", "\\%")
+        .replace("_", "\\_")
 
     private fun isSubtitleName(name: String): Boolean =
         name.substringAfterLast('.', "").lowercase() in EXTENSIONS

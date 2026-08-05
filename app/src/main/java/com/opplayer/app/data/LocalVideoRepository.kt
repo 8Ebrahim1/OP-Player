@@ -4,6 +4,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.os.Build
 import android.provider.MediaStore
+import com.opplayer.app.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -93,9 +94,9 @@ class LocalVideoRepository(private val context: Context) {
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ->
                         bucketNameCol.takeIf { it >= 0 }
                             ?.let { cursor.getString(it) }
-                            ?: UNKNOWN_FOLDER
+                            ?: unknownFolderName()
 
-                    else -> parentPath?.let { File(it).name } ?: UNKNOWN_FOLDER
+                    else -> parentPath?.let { File(it).name } ?: unknownFolderName()
                 }
 
                 val bucketId = when {
@@ -121,8 +122,10 @@ class LocalVideoRepository(private val context: Context) {
         return result
     }
 
+    /** Localized instead of a hardcoded Persian literal in the data layer. */
+    private fun unknownFolderName(): String = context.getString(R.string.folder_other)
+
     private companion object {
-        const val UNKNOWN_FOLDER = "\u0633\u0627\u06cc\u0631"
         const val UNKNOWN_BUCKET_ID = -1L
     }
 }

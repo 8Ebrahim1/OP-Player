@@ -1,6 +1,8 @@
 package com.opplayer.app.data
 
+import android.os.Parcel
 import android.os.Parcelable
+import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
@@ -41,8 +43,28 @@ data class EpisodePattern(
 
     fun label(): String = "E" + episode.toString().padStart(2, '0')
 
-    companion object {
+    /**
+     * Parcelling goes through [normalized] as well, so a legacy or corrupt parcel restored after
+     * process death repairs itself instead of throwing from `init`.
+     */
+    companion object : Parceler<EpisodePattern> {
         const val MAX_EPISODE = 9999
+
+        override fun create(parcel: Parcel): EpisodePattern = normalized(
+            prefix = parcel.readString().orEmpty(),
+            suffix = parcel.readString().orEmpty(),
+            episode = parcel.readInt(),
+            pad = parcel.readInt(),
+            step = parcel.readInt()
+        )
+
+        override fun EpisodePattern.write(parcel: Parcel, flags: Int) {
+            parcel.writeString(prefix)
+            parcel.writeString(suffix)
+            parcel.writeInt(episode)
+            parcel.writeInt(pad)
+            parcel.writeInt(step)
+        }
 
         fun normalized(
             prefix: String,

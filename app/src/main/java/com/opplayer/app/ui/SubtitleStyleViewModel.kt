@@ -8,7 +8,7 @@ import com.opplayer.app.data.SubtitleStyleSettings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class SubtitleStyleViewModel(application: Application) : AndroidViewModel(application) {
@@ -19,9 +19,12 @@ class SubtitleStyleViewModel(application: Application) : AndroidViewModel(applic
     val settings: StateFlow<SubtitleStyleSettings> = _settings.asStateFlow()
 
     init {
+
+        // Collected continuously so a style saved from another screen stays in sync.
         viewModelScope.launch {
-            _settings.value = runCatching { repository.settings.first() }
-                .getOrDefault(SubtitleStyleSettings())
+            repository.settings
+                .catch { emit(SubtitleStyleSettings()) }
+                .collect { stored -> _settings.value = stored }
         }
     }
 

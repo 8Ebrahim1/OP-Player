@@ -57,6 +57,13 @@ fun AddLinkDialog(
 
     val detectedPattern = (detection as? LinkPatternDetector.Result.Detected)?.pattern
 
+    // Plain HTTP still has to be allowed (that is what most of these links are), but the user
+    // deserves to know that such a stream travels unencrypted.
+    val insecureLink = remember(selectedMode, url, firstUrl) {
+        val candidate = if (selectedMode == 0) url else firstUrl
+        candidate.trim().startsWith("http://", ignoreCase = true)
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
 
@@ -139,6 +146,16 @@ fun AddLinkDialog(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     PatternFeedback(detection = detection)
+                }
+
+                if (insecureLink) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = stringResource(R.string.insecure_link_warning),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
 
                 OutlinedTextField(

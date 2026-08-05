@@ -2,12 +2,23 @@ package com.opplayer.app.player
 
 import android.net.Uri
 import com.opplayer.app.data.EpisodePattern
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
 object EpisodeNavigator {
 
     private const val MAX_SEASON_LOOKAHEAD = 1
 
     const val MAX_PREVIOUS_SEASON_EPISODE = 24
+
+    /**
+     * Candidates are probed in concurrent batches instead of one by one, otherwise a
+     * previous-season lookup (up to [MAX_PREVIOUS_SEASON_EPISODE] requests) can never finish
+     * inside the caller's timeout budget. Four keeps the burst small enough not to look like
+     * abuse to a CDN that throttles.
+     */
+    private const val PROBE_BATCH_SIZE = 4
 
     private val defaultProbe: AvailabilityProbe by lazy { HttpAvailabilityProbe() }
 
@@ -159,18 +170,23 @@ object EpisodeNavigator {
     private suspend fun resolveFirstAvailable(
         candidates: List<Candidate>,
         probe: AvailabilityProbe
-    ): Resolution {
+    ): Resolution = coroutineScope {
         var offline = false
 
-        for (candidate in candidates) {
-            when (probe.probe(candidate.url)) {
-                AvailabilityResult.Available -> return Resolution.Found(candidate)
-                AvailabilityResult.NetworkUnavailable -> offline = true
-                AvailabilityResult.NotAvailable -> Unit
+        candidates.chunked(PROBE_BATCH_SIZE).forEach { batch ->
+            val results = batch
+                .map { candidate -> async { candidate to probe.probe(candidate.url) } }
+                .awaitAll()
+
+            results.firstOrNull { (_, result) -> result == AvailabilityResult.Available }
+                ?.let { (candidate, _) -> return@coroutineScope Resolution.Found(candidate) }
+
+            if (results.any { (_, result) -> result == AvailabilityResult.NetworkUnavailable }) {
+                offline = true
             }
         }
 
-        return if (offline) Resolution.NetworkUnavailable else Resolution.NotFound
+        if (offline) Resolution.NetworkUnavailable else Resolution.NotFound
     }
 
     suspend fun isAvailable(url: String, probe: AvailabilityProbe = defaultProbe): Boolean =

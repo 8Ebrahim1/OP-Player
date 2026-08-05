@@ -476,4 +476,76 @@ class PlayerViewModelTest {
 
         viewModel.releaseResources()
     }
+
+    @Test
+    fun `a pattern link without a season marker still shifts the subtitle`() =
+        runTest(dispatcher) {
+            val pattern = EpisodePattern(
+                prefix = "https://cdn.test/video-",
+                suffix = ".mp4",
+                episode = 1,
+                pad = 2
+            )
+            val next = pattern.next()!!
+
+            val request = PlaybackRequest(
+                key = "item-3",
+                title = "Show",
+                uri = pattern.url,
+                subtitleUrl = "https://cdn.test/sub.E01.srt",
+                source = PlaybackRequest.Source.LIBRARY,
+                pattern = pattern,
+                episodeLabel = pattern.label()
+            )
+
+            resolver.result = EpisodeResolutionResult.Found(
+                EpisodeTarget(url = next.url, label = next.label(), pattern = next)
+            )
+
+            val viewModel = createViewModel(request = request)
+
+            viewModel.navigateEpisode(forward = true)
+            advanceUntilIdle()
+
+            assertEquals(next.url, viewModel.uiState.value.request.uri)
+            assertEquals(
+                "https://cdn.test/sub.E02.srt",
+                viewModel.uiState.value.request.subtitleUrl
+            )
+
+            viewModel.releaseResources()
+        }
+
+    @Test
+    fun `a subtitle without an episode marker is kept as it is`() = runTest(dispatcher) {
+        val pattern = EpisodePattern(
+            prefix = "https://cdn.test/video-",
+            suffix = ".mp4",
+            episode = 1,
+            pad = 2
+        )
+        val next = pattern.next()!!
+
+        val request = PlaybackRequest(
+            key = "item-4",
+            title = "Show",
+            uri = pattern.url,
+            subtitleUrl = "https://cdn.test/subtitles.srt",
+            source = PlaybackRequest.Source.LIBRARY,
+            pattern = pattern
+        )
+
+        resolver.result = EpisodeResolutionResult.Found(
+            EpisodeTarget(url = next.url, label = next.label(), pattern = next)
+        )
+
+        val viewModel = createViewModel(request = request)
+
+        viewModel.navigateEpisode(forward = true)
+        advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.request.subtitleUrl)
+
+        viewModel.releaseResources()
+    }
 }

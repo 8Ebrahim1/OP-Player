@@ -3,6 +3,7 @@ package com.opplayer.app.ui.screens
 import android.app.Application
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.graphics.Rect
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -23,6 +24,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowInsetsCompat
@@ -61,6 +64,7 @@ import com.opplayer.app.ui.player.PlayerViewModel
 import com.opplayer.app.ui.player.enterPip
 import com.opplayer.app.ui.player.rememberPlayerControlsState
 import com.opplayer.app.ui.player.supportsPip
+import com.opplayer.app.ui.player.updatePipParams
 import com.opplayer.app.util.findActivity
 import kotlinx.coroutines.delay
 
@@ -199,6 +203,8 @@ fun PlayerScreen(
         }
     }
 
+    var videoBounds by remember { mutableStateOf<Rect?>(null) }
+
     DisposableEffect(lifecycleOwner, mainActivity, playerViewModel) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP && mainActivity?.isInPipMode?.value != true) {
@@ -213,9 +219,14 @@ fun PlayerScreen(
     DisposableEffect(mainActivity, playerViewModel) {
         mainActivity?.onUserLeaveAction = {
             val player = playerViewModel.player
-            if (player != null && player.isPlaying) enterPip(mainActivity, player)
+            if (player != null && player.isPlaying) enterPip(mainActivity, player, videoBounds)
         }
         onDispose { mainActivity?.onUserLeaveAction = null }
+    }
+
+    LaunchedEffect(mainActivity, videoBounds, playerViewModel.player) {
+        val player = playerViewModel.player
+        if (player != null) updatePipParams(mainActivity, player, videoBounds)
     }
 
     val orientation = OrientationPolicy.resolve(
@@ -277,7 +288,17 @@ fun PlayerScreen(
                 controlsEnabled = !isInPip,
                 controls = controls,
                 touchListener = gestures,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onGloballyPositioned { coordinates ->
+                        val bounds = coordinates.boundsInWindow()
+                        videoBounds = Rect(
+                            bounds.left.toInt(),
+                            bounds.top.toInt(),
+                            bounds.right.toInt(),
+                            bounds.bottom.toInt()
+                        )
+                    }
             )
         }
 
@@ -305,7 +326,7 @@ fun PlayerScreen(
                 onPip = {
                     val player = playerViewModel.player
                     if (supportsPip(context.packageManager) && player != null) {
-                        enterPip(mainActivity, player)
+                        enterPip(mainActivity, player, videoBounds)
                     } else {
                         Toast.makeText(context, R.string.pip_unavailable, Toast.LENGTH_SHORT).show()
                     }

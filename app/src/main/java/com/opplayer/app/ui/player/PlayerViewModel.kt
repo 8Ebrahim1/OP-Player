@@ -317,13 +317,28 @@ class PlayerViewModel(
         if (!subtitle.startsWith("http", ignoreCase = true)) return null
 
         val subtitleMarker = EpisodeNavigator.findMarker(subtitle) ?: return null
-        val targetMarker = EpisodeNavigator.findMarker(target.url) ?: return null
+
+        EpisodeNavigator.findMarker(target.url)?.let { targetMarker ->
+            return EpisodeNavigator.buildUrl(
+                url = subtitle,
+                marker = subtitleMarker,
+                season = targetMarker.seasonValue,
+                episode = targetMarker.episodeValue
+            )
+        }
+
+        // Pattern based links carry no SxxExx marker in the URL, so shift the subtitle episode
+        // by the same amount the pattern moved instead of dropping the subtitle entirely.
+        val fromEpisode = current.pattern?.episode ?: return null
+        val toEpisode = target.pattern?.episode ?: return null
+        val shifted = subtitleMarker.episodeValue + (toEpisode - fromEpisode)
+        if (shifted < 0) return null
 
         return EpisodeNavigator.buildUrl(
             url = subtitle,
             marker = subtitleMarker,
-            season = targetMarker.seasonValue,
-            episode = targetMarker.episodeValue
+            season = null,
+            episode = shifted
         )
     }
 

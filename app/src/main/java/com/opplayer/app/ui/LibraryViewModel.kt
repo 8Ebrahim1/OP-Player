@@ -3,14 +3,19 @@ package com.opplayer.app.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.opplayer.app.R
 import com.opplayer.app.data.EpisodePattern
 import com.opplayer.app.data.LibraryProgressUpdater
 import com.opplayer.app.data.LibraryRepository
 import com.opplayer.app.data.VideoItem
 import com.opplayer.app.player.Clock
 import com.opplayer.app.player.PlaybackRequest
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -22,6 +27,14 @@ class LibraryViewModel(
     constructor(application: Application) : this(application, Clock.SYSTEM)
 
     private val repository = LibraryRepository(application)
+
+    private val messageChannel = Channel<Int>(
+        capacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** String resources describing a failed write, so the UI can tell the user about it. */
+    val messages: Flow<Int> = messageChannel.receiveAsFlow()
 
     init {
 
@@ -41,7 +54,7 @@ class LibraryViewModel(
         pattern: EpisodePattern? = null
     ) {
         viewModelScope.launch {
-            repository.updateLibrary { current ->
+            val written = repository.updateLibrary { current ->
                 current + VideoItem.create(
                     title = title.ifBlank { url.substringAfterLast('/') },
                     url = url.trim(),
@@ -50,23 +63,39 @@ class LibraryViewModel(
                     pattern = pattern
                 )
             }
+
+            reportWriteResult(written)
         }
     }
 
     fun toggleFavorite(id: String) {
         viewModelScope.launch {
-            repository.updateLibrary { current ->
+            val written = repository.updateLibrary { current ->
                 current.map { if (it.id == id) it.copy(isFavorite = !it.isFavorite) else it }
             }
+
+            reportWriteResult(written)
         }
     }
 
     fun removeVideo(id: String) {
         viewModelScope.launch {
-            repository.updateLibrary { current -> current.filterNot { it.id == id } }
+            val written = repository.updateLibrary { current ->
+                current.filterNot { it.id == id }
+            }
 
             repository.forgetLibraryProgress(setOf(id))
+            reportWriteResult(written)
         }
+    }
+
+    /**
+     * A refused write means the stored library was unreadable and got backed up instead of
+     * being overwritten. Silently swallowing that made the app look like it had saved the
+     * change, so the failure is surfaced to the UI instead.
+     */
+    private suspend fun reportWriteResult(written: Boolean) {
+        if (!written) messageChannel.send(R.string.library_write_failed)
     }
 
     fun saveLibraryProgress(request: PlaybackRequest, positionMs: Long) {

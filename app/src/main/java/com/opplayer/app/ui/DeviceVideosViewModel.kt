@@ -14,7 +14,8 @@ import kotlinx.coroutines.launch
 data class DeviceVideosUiState(
     val isLoading: Boolean = false,
     val hasLoadedOnce: Boolean = false,
-    val folders: List<VideoFolder> = emptyList()
+    val folders: List<VideoFolder> = emptyList(),
+    val failed: Boolean = false
 )
 
 class DeviceVideosViewModel(application: Application) : AndroidViewModel(application) {
@@ -27,12 +28,17 @@ class DeviceVideosViewModel(application: Application) : AndroidViewModel(applica
     fun refresh() {
         if (_uiState.value.isLoading) return
 
-        _uiState.update { it.copy(isLoading = true) }
+        _uiState.update { it.copy(isLoading = true, failed = false) }
 
         viewModelScope.launch {
-            val folders = runCatching { repository.loadFolders() }.getOrDefault(emptyList())
-            _uiState.update {
-                it.copy(isLoading = false, hasLoadedOnce = true, folders = folders)
+            val result = runCatching { repository.loadFolders() }
+            _uiState.update { state ->
+                state.copy(
+                    isLoading = false,
+                    hasLoadedOnce = true,
+                    folders = result.getOrDefault(state.folders),
+                    failed = result.isFailure
+                )
             }
         }
     }

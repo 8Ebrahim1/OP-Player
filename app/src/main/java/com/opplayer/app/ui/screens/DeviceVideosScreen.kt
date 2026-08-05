@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Refresh
@@ -184,6 +185,18 @@ fun DeviceVideosScreen(
             uiState.isLoading && uiState.folders.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
+                }
+            }
+
+            uiState.failed && uiState.folders.isEmpty() -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    EmptyState(
+                        icon = Icons.Default.ErrorOutline,
+                        title = stringResource(R.string.device_scan_failed_title),
+                        body = stringResource(R.string.device_scan_failed_body),
+                        actionLabel = stringResource(R.string.refresh),
+                        onAction = { viewModel.refresh() }
+                    )
                 }
             }
 

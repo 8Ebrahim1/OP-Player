@@ -4,6 +4,7 @@ package com.opplayer.app.ui.player
 
 import android.app.PictureInPictureParams
 import android.content.pm.PackageManager
+import android.graphics.Rect
 import android.os.Build
 import android.util.Rational
 import androidx.media3.common.Player
@@ -14,25 +15,41 @@ private const val MAX_PIP_RATIO = 2.35f
 private const val RATIO_PRECISION = 1000
 
 fun supportsPip(packageManager: PackageManager): Boolean =
-    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-        packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+    packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
 
-fun enterPip(activity: MainActivity?, player: Player) {
+private fun aspectRatio(player: Player): Rational {
+    val videoSize = player.videoSize
+    if (videoSize.width <= 0 || videoSize.height <= 0) return Rational(16, 9)
+
+    val raw = videoSize.width.toFloat() / videoSize.height.toFloat()
+    val clamped = raw.coerceIn(MIN_PIP_RATIO, MAX_PIP_RATIO)
+    return Rational((clamped * RATIO_PRECISION).toInt(), RATIO_PRECISION)
+}
+
+private fun pipParams(player: Player, sourceRect: Rect?): PictureInPictureParams {
+    val builder = PictureInPictureParams.Builder().setAspectRatio(aspectRatio(player))
+
+    if (sourceRect != null && !sourceRect.isEmpty) {
+        builder.setSourceRectHint(sourceRect)
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        builder.setAutoEnterEnabled(true)
+    }
+
+    return builder.build()
+}
+
+fun updatePipParams(activity: MainActivity?, player: Player, sourceRect: Rect?) {
     if (activity == null) return
     if (!supportsPip(activity.packageManager)) return
 
-    val videoSize = player.videoSize
-    val ratio = if (videoSize.width > 0 && videoSize.height > 0) {
-        val raw = videoSize.width.toFloat() / videoSize.height.toFloat()
-        val clamped = raw.coerceIn(MIN_PIP_RATIO, MAX_PIP_RATIO)
-        Rational((clamped * RATIO_PRECISION).toInt(), RATIO_PRECISION)
-    } else {
-        Rational(16, 9)
-    }
+    runCatching { activity.setPictureInPictureParams(pipParams(player, sourceRect)) }
+}
 
-    runCatching {
-        activity.enterPictureInPictureMode(
-            PictureInPictureParams.Builder().setAspectRatio(ratio).build()
-        )
-    }
+fun enterPip(activity: MainActivity?, player: Player, sourceRect: Rect? = null) {
+    if (activity == null) return
+    if (!supportsPip(activity.packageManager)) return
+
+    runCatching { activity.enterPictureInPictureMode(pipParams(player, sourceRect)) }
 }

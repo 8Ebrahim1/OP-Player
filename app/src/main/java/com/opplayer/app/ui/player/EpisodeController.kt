@@ -27,6 +27,11 @@ class EpisodeController(
     }
 
     companion object {
-        const val DEFAULT_TIMEOUT_MS = 8_000L
+
+        /**
+         * Season rollovers and previous-season lookups need more than a single probe timeout,
+         * even though candidates are now probed concurrently.
+         */
+        const val DEFAULT_TIMEOUT_MS = 12_000L
     }
 }

@@ -66,8 +66,12 @@ class ExoPlayerEngine(val exoPlayer: ExoPlayer) : PlayerEngine {
                 .joinToString("\n")
                 .takeIf { it.isNotEmpty() }
 
-            val atMs = if (cueGroup.presentationTimeUs > 0L) {
-                cueGroup.presentationTimeUs / 1_000L
+            val presentationTimeUs = cueGroup.presentationTimeUs
+
+            // A cue that legitimately starts at 0 must not be pushed to the current position,
+            // so only an unset presentation time falls back to the player clock.
+            val atMs = if (presentationTimeUs != C.TIME_UNSET && presentationTimeUs >= 0L) {
+                presentationTimeUs / 1_000L
             } else {
                 currentPosition
             }
