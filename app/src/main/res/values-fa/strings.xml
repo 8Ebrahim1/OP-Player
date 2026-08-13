@@ -95,17 +95,19 @@
     <string name="auto_rotate_label">چرخش خودکار صفحه</string>
     <string name="auto_rotate_body">ویدیوی افقی (مثل ۱۹۲۰×۱۰۸۰) افقی و ویدیوی عمودی (مثل استوری و ریلز) عمودی پخش شود</string>
     <string name="gestures_label">کنترل با کشیدن انگشت</string>
-    <string name="gestures_body">سمت راست صدا، سمت چپ روشنایی؛ دو ضربه برای جابه‌جایی ۱۵ ثانیه‌ای</string>
+    <string name="gestures_body">سمت راست صدا، سمت چپ روشنایی؛ دو ضربه برای جابه‌جایی ۱۵ ثانیه‌ای و کشیدن افقی برای جلو و عقب بردن</string>
     <string name="gesture_volume">صدا</string>
     <string name="gesture_brightness">روشنایی</string>
     <string name="seek_forward">۱۵ ثانیه جلو</string>
     <string name="seek_backward">۱۵ ثانیه عقب</string>
 
     <string name="next_episode">قسمت بعدی</string>
+    <string name="next_video">ویدیوی بعدی</string>
     <string name="now_playing_episode">در حال پخش: %1$s</string>
     <string name="episode_resolve_timeout">جست‌وجوی قسمت بعد بیش از حد طول کشید</string>
     <string name="episode_network_unavailable">اتصال شبکه برقرار نیست؛ قسمت بعد بررسی نشد</string>
     <string name="next_episode_not_found">قسمت بعدی روی سرور پیدا نشد؛ احتمالاً این آخرین قسمت است</string>
+    <string name="next_video_not_found">این آخرین ویدیوی این پوشه است</string>
     <string name="episode_pattern_missing">در این لینک نشانهٔ قسمت یا فصل (مانند S01E02) پیدا نشد</string>
     <string name="auto_next_label">پخش خودکار قسمت بعدی</string>
     <string name="auto_next_body">پس از پایان ویدیو، خودکار برو به قسمت بعد</string>
@@ -192,7 +194,7 @@
     <string name="onboarding_device_body">ویدیوهای داخل گوشی پوشه‌بندی می‌شوند و همراه با تصویر بندانگشتی، مدت زمان، حجم و نقطه�� ادامهٔ پخش نمایش داده می‌شوند. فقط از اجازهٔ خواندن ویدیوها استفاده می‌شود.</string>
 
     <string name="onboarding_player_title">پخش‌کننده‌ای برای کنترل با انگشت</string>
-    <string name="onboarding_player_body">در نیمهٔ راست برای صدا و در نیمهٔ چپ برای روشنایی انگشت را بالا و پایین بکشید، با دو ضربه ۱۵ ثانیه جلو یا ع��ب بروید، و از نوار بالا به تصویر در تصویر، حالت‌های بزرگ‌نمایی، سرعت پخش و چرخش خودکار دسترسی داشته باشید.</string>
+    <string name="onboarding_player_body">با دو ضربه ۱۵ ثانیه جابه‌جا شوید، با کشیدن افقی ویدیو را جلو و عقب ببرید و با کشیدن عمودی صدا و روشنایی را تنظیم کنید</string>
 
     <string name="onboarding_subtitle_color_title">رنگ زیرنویس</string>
     <string name="onboarding_subtitle_color_body">رنگ متن زیرنویس را انتخاب کنید. پیش‌نمایش پایین همزمان به‌روز می‌شود.</string>
@@ -241,7 +243,7 @@
     <string name="help_player_back_title">آیکون بازگشت</string>
     <string name="help_player_back_body">اول از حالت تمام‌صفحه خارج می‌شود؛ اگر قبلاً خارج شده باشید، پخش‌کننده را می‌بندد و محل پخش را ذخیره می‌کند.</string>
     <string name="help_player_next_title">آیکون دو پیکانی</string>
-    <string name="help_player_next_body">به قسمت بعدی می‌رود. فقط برای لینک‌هایی که الگویشان شناسایی شده نمایش داده می‌شود و حلقهٔ چرخان یعنی قسمت بعدی روی سرور در حال بررسی است.</string>
+    <string name="help_player_next_body">به مورد بعدی می‌رود؛ برای ویدیوهای گوشی فایل بعدی همان پوشه و برای لینک‌ها قسمت بعدی. حلقهٔ چرخان یعنی قسمت بعدی روی سرور در حال بررسی است.</string>
     <string name="help_player_scale_title">آیکون نسبت تصویر</string>
     <string name="help_player_scale_body">بین متناسب (کل تصویر)، بزرگ‌نمایی (پر کردن صفحه با برش) و کشیده (پر کردن صفحه با تغییر نسبت) می‌چرخد.</string>
     <string name="help_player_pip_title">آیکون تصویر در تصویر</string>
@@ -253,13 +255,13 @@
     <string name="help_player_settings_title">آیکون تنظیمات</string>
     <string name="help_player_settings_body">سرعت پخش، نسبت تصویر، چرخش خودکار، کنترل با انگشت و پخش خودکار قسمت بعدی.</string>
     <string name="help_player_gestures_title">کنترل با انگشت</string>
-    <string name="help_player_gestures_body">در نیمهٔ راست برای صدا و در نیمهٔ چپ برای روشنایی، عمودی بکشید. دو ضربه روی سمت راست یا چپ، ۱۵ ثانیه جلو یا عقب می‌برد و یک ضربه کنترل‌ها را نشان یا پنهان می‌کند.</string>
+    <string name="help_player_gestures_body">در نیمهٔ راست برای صدا و در نیمهٔ چپ برای روشنایی، عمودی بکشید. کشیدن افقی ویدیو را جلو و عقب می‌برد، دو ضربه روی سمت راست یا چپ ۱۵ ثانیه جابه‌جا می‌کند و یک ضربه کنترل‌ها را نشان یا پنهان می‌کند.</string>
     <string name="help_player_speed_title">سرعت پخش</string>
     <string name="help_player_speed_body">یکی از مقادیر آماده را انتخاب کنید یا هر عددی بین ۰٫۱ تا ۶ را بنویسید و دکمهٔ اعمال را بزنید.</string>
     <string name="help_player_rotate_title">چرخش خودکار</string>
     <string name="help_player_rotate_body">براساس نسبت واقعی فایل، ویدیوی افقی به حالت افقی می‌چرخد و ویدیوی عمودی عمودی می‌ماند.</string>
     <string name="help_player_autonext_title">پخش خودکار قسمت بعدی</string>
-    <string name="help_player_autonext_body">با تمام شدن ویدیو، قسمت بعدی الگو خودبه‌خود شروع می‌شود.</string>
+    <string name="help_player_autonext_body">با تمام شدن ویدیو، قسمت بعدی یا فایل بعدی همان پوشه خودبه‌خود شروع می‌شود.</string>
 
     <string name="help_subtitle_enable_title">نمایش زیرنویس</string>
     <string name="help_subtitle_enable_body">کلید اصلی. وقتی خاموش باشد، حتی با وجود ترک بارگذاری‌شده هیچ زیرنویسی رسم نمی‌شود.</string>

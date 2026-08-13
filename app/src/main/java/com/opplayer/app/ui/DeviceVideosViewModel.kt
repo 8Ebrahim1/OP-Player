@@ -15,7 +15,9 @@ data class DeviceVideosUiState(
     val isLoading: Boolean = false,
     val hasLoadedOnce: Boolean = false,
     val folders: List<VideoFolder> = emptyList(),
-    val failed: Boolean = false
+    val failed: Boolean = false,
+    val openFolderId: Long? = null,
+    val query: String = ""
 )
 
 class DeviceVideosViewModel(application: Application) : AndroidViewModel(application) {
@@ -41,5 +43,20 @@ class DeviceVideosViewModel(application: Application) : AndroidViewModel(applica
                 )
             }
         }
+    }
+
+    // The open folder and its search text live here instead of in the composable, because the
+    // player replaces the whole screen: remembered state would be dropped on the way in and the
+    // user would land back on the folder list after closing the video.
+    fun openFolder(folderId: Long) {
+        _uiState.update { it.copy(openFolderId = folderId, query = "") }
+    }
+
+    fun closeFolder() {
+        _uiState.update { it.copy(openFolderId = null, query = "") }
+    }
+
+    fun setQuery(value: String) {
+        _uiState.update { it.copy(query = value) }
     }
 }

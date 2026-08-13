@@ -31,7 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,9 +71,10 @@ fun DeviceVideosScreen(
 
     var access by remember { mutableStateOf(context.currentMediaAccess()) }
     var permissionRequested by remember { mutableStateOf(false) }
-    var openFolderId by remember { mutableStateOf<Long?>(null) }
-    var query by remember { mutableStateOf("") }
     var showHelp by remember { mutableStateOf(false) }
+
+    val openFolderId = uiState.openFolderId
+    val query = uiState.query
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -107,19 +107,16 @@ fun DeviceVideosScreen(
     }
 
     BackHandler(enabled = openFolderId != null) {
-        openFolderId = null
-        query = ""
+        viewModel.closeFolder()
     }
 
     val currentFolder = remember(uiState.folders, openFolderId) {
         openFolderId?.let { id -> uiState.folders.firstOrNull { it.id == id } }
     }
 
-    val visibleVideos by remember(currentFolder, query) {
-        derivedStateOf {
-            currentFolder?.videos.orEmpty().filter {
-                query.isBlank() || it.name.contains(query, ignoreCase = true)
-            }
+    val visibleVideos = remember(currentFolder, query) {
+        currentFolder?.videos.orEmpty().filter {
+            query.isBlank() || it.name.contains(query, ignoreCase = true)
         }
     }
 
@@ -134,12 +131,7 @@ fun DeviceVideosScreen(
             action = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (currentFolder != null) {
-                        IconButton(
-                            onClick = {
-                                openFolderId = null
-                                query = ""
-                            }
-                        ) {
+                        IconButton(onClick = { viewModel.closeFolder() }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = stringResource(R.string.back)
@@ -239,7 +231,7 @@ fun DeviceVideosScreen(
                 ) {
 
                     items(uiState.folders, key = { it.id }) { folder ->
-                        FolderCard(folder = folder, onClick = { openFolderId = folder.id })
+                        FolderCard(folder = folder, onClick = { viewModel.openFolder(folder.id) })
                     }
                 }
             }
@@ -247,7 +239,7 @@ fun DeviceVideosScreen(
             else -> {
                 OutlinedTextField(
                     value = query,
-                    onValueChange = { query = it },
+                    onValueChange = { viewModel.setQuery(it) },
                     singleLine = true,
                     label = { Text(stringResource(R.string.search_videos)) },
                     modifier = Modifier

@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-08-11
+
+### Added
+- Manual next/previous video for offline files: the double arrow now walks the folder the video was opened from in My device.
+- Horizontal drag on the player seeks the video, with a live preview and a standard span of two minutes across the full screen width.
+
+### Changed
+- Fit is the default video scale mode.
+- Speed, scale mode, auto next, auto rotate and gestures are saved and restored on the next launch.
+
+### Fixed
+- Closing the player returns to the device folder the video was opened from instead of the folder list.
+
 ## [1.4.1] - 2026-08-05
 
 ### Added
@@ -328,6 +341,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+[1.5.0]: https://github.com/8Ebrahim1/OP-Player/releases/tag/v1.5.0
 [1.4.1]: https://github.com/8Ebrahim1/OP-Player/releases/tag/v1.4.1
 [1.4.0]: https://github.com/8Ebrahim1/OP-Player/releases/tag/v1.4.0
 [1.3.2]: https://github.com/8Ebrahim1/OP-Player/releases/tag/v1.3.2

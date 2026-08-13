@@ -247,7 +247,8 @@ private fun MainContent(
                             title = video.name,
                             uri = video.uri,
                             startPositionMs = resumePosition,
-                            source = PlaybackRequest.Source.DEVICE
+                            source = PlaybackRequest.Source.DEVICE,
+                            folderId = video.bucketId
                         )
                     }
                 )

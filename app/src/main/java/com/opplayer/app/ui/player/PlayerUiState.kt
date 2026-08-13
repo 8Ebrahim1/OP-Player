@@ -5,18 +5,26 @@ import com.opplayer.app.player.PlaybackRequest
 import com.opplayer.app.player.PlaybackStatus
 import com.opplayer.app.player.VideoScaleMode
 
+/** Live preview shown while the user drags horizontally to seek. */
+data class SeekPreview(
+    val positionMs: Long,
+    val deltaMs: Long,
+    val durationMs: Long
+)
+
 data class PlayerUiState(
     val request: PlaybackRequest,
     val status: PlaybackStatus = PlaybackStatus.Idle,
     val isFullscreen: Boolean = false,
-    val scaleMode: VideoScaleMode = VideoScaleMode.ZOOM,
+    val scaleMode: VideoScaleMode = VideoScaleMode.FIT,
     val speed: Float = DEFAULT_SPEED,
     val autoNextEnabled: Boolean = true,
     val autoRotateEnabled: Boolean = true,
     val gesturesEnabled: Boolean = true,
     val isResolvingEpisode: Boolean = false,
     val canNavigateEpisodes: Boolean = false,
-    val videoAspect: Float = 0f
+    val videoAspect: Float = 0f,
+    val seekPreview: SeekPreview? = null
 ) {
 
     val isBuffering: Boolean get() = status.isLoading

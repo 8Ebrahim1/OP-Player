@@ -13,7 +13,9 @@ data class PlaybackRequest(
     val startPositionMs: Long = 0L,
     val source: Source,
     val pattern: EpisodePattern? = null,
-    val episodeLabel: String? = null
+    val episodeLabel: String? = null,
+    /** Media store bucket the device video was opened from, used to walk the folder queue. */
+    val folderId: Long? = null
 ) : Parcelable {
 
     enum class Source { LIBRARY, DEVICE }

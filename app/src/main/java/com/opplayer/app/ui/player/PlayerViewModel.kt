@@ -11,6 +11,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.media3.exoplayer.ExoPlayer
 import com.opplayer.app.R
+import com.opplayer.app.data.PlayerPreferences
+import com.opplayer.app.data.PlayerPreferencesRepository
+import com.opplayer.app.data.PlayerPreferencesStore
 import com.opplayer.app.player.DefaultPlayerFactory
 import com.opplayer.app.player.EpisodeNavigator
 import com.opplayer.app.player.EpisodeResolutionResult
@@ -25,6 +28,7 @@ import com.opplayer.app.player.PlayerEngineListener
 import com.opplayer.app.player.PlayerFactory
 import com.opplayer.app.player.PlayerMessage
 import com.opplayer.app.player.ProgressSaver
+import com.opplayer.app.player.SourceAwareEpisodeResolver
 import com.opplayer.app.player.VideoScaleMode
 import com.opplayer.app.player.subtitle.AndroidSubtitleSource
 import com.opplayer.app.player.subtitle.EmbeddedTrackInfo
@@ -41,8 +45,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
@@ -54,19 +60,21 @@ class PlayerViewModel(
     subtitleSource: SubtitleSource,
     episodeResolver: EpisodeResolver = NetworkEpisodeResolver.Default,
     private val progressManager: ProgressManager = ProgressManager(),
-    episodeTimeoutMs: Long = EpisodeController.DEFAULT_TIMEOUT_MS
+    episodeTimeoutMs: Long = EpisodeController.DEFAULT_TIMEOUT_MS,
+    private val preferencesStore: PlayerPreferencesStore? = null
 ) : ViewModel() {
 
     constructor(
         application: Application,
         initialRequest: PlaybackRequest,
         playerFactory: PlayerFactory = DefaultPlayerFactory,
-        episodeResolver: EpisodeResolver = NetworkEpisodeResolver.Default
+        episodeResolver: EpisodeResolver = SourceAwareEpisodeResolver.create(application)
     ) : this(
         initialRequest = initialRequest,
         engine = playerFactory.create(application),
         subtitleSource = AndroidSubtitleSource(application),
-        episodeResolver = episodeResolver
+        episodeResolver = episodeResolver,
+        preferencesStore = PlayerPreferencesRepository(application)
     )
 
     private val playbackController = PlaybackController(engine)
@@ -104,6 +112,7 @@ class PlayerViewModel(
 
     private var episodeJob: Job? = null
     private var released = false
+    private var seekDragBaseMs = 0L
 
     private val engineListener = object : PlayerEngineListener {
 
@@ -138,6 +147,7 @@ class PlayerViewModel(
 
     init {
         playbackController.setListener(engineListener)
+        restorePreferences()
         startPositionTicker()
         startProgressAutoSave()
         open(initialRequest)
@@ -160,10 +170,12 @@ class PlayerViewModel(
     fun setSpeed(value: Float) {
         _uiState.update { it.copy(speed = value) }
         playbackController.setSpeed(value)
+        persistPreferences()
     }
 
     fun setScaleMode(mode: VideoScaleMode) {
         _uiState.update { it.copy(scaleMode = mode) }
+        persistPreferences()
     }
 
     fun cycleScaleMode(): VideoScaleMode {
@@ -180,14 +192,17 @@ class PlayerViewModel(
 
     fun setAutoNextEnabled(value: Boolean) {
         _uiState.update { it.copy(autoNextEnabled = value) }
+        persistPreferences()
     }
 
     fun setAutoRotateEnabled(value: Boolean) {
         _uiState.update { it.copy(autoRotateEnabled = value) }
+        persistPreferences()
     }
 
     fun setGesturesEnabled(value: Boolean) {
         _uiState.update { it.copy(gesturesEnabled = value) }
+        persistPreferences()
     }
 
     fun playPause() = playbackController.togglePlayPause()
@@ -201,6 +216,45 @@ class PlayerViewModel(
         playbackController.seekBy(if (forward) SEEK_STEP_MS else -SEEK_STEP_MS)
         syncPosition()
         saveProgress()
+    }
+
+    /** Horizontal drag start: anchor the preview to the position the finger went down on. */
+    fun startSeekDrag() {
+        seekDragBaseMs = playbackController.currentPosition.coerceAtLeast(0L)
+        _uiState.update { it.copy(seekPreview = seekPreviewFor(0f)) }
+    }
+
+    /** @param fraction how far the finger travelled, as a share of the screen width. */
+    fun updateSeekDrag(fraction: Float) {
+        if (_uiState.value.seekPreview == null) startSeekDrag()
+        _uiState.update { it.copy(seekPreview = seekPreviewFor(fraction)) }
+    }
+
+    fun commitSeekDrag() {
+        val preview = _uiState.value.seekPreview ?: return
+        _uiState.update { it.copy(seekPreview = null) }
+
+        playbackController.seekTo(preview.positionMs)
+        syncPosition()
+        saveProgress()
+    }
+
+    fun cancelSeekDrag() {
+        if (_uiState.value.seekPreview == null) return
+        _uiState.update { it.copy(seekPreview = null) }
+    }
+
+    private fun seekPreviewFor(fraction: Float): SeekPreview {
+        val duration = playbackController.duration.coerceAtLeast(0L)
+        val span = dragSeekSpanMs(duration)
+        val upperBound = if (duration > 0L) duration else Long.MAX_VALUE
+        val target = (seekDragBaseMs + (fraction * span).toLong()).coerceIn(0L, upperBound)
+
+        return SeekPreview(
+            positionMs = target,
+            deltaMs = target - seekDragBaseMs,
+            durationMs = duration
+        )
     }
 
     fun retry() {
@@ -238,8 +292,16 @@ class PlayerViewModel(
             when (result) {
                 is EpisodeResolutionResult.Found -> playEpisode(request, result.target)
 
-                EpisodeResolutionResult.NotFound ->
-                    send(PlayerMessage(R.string.next_episode_not_found, long = true))
+                EpisodeResolutionResult.NotFound -> send(
+                    PlayerMessage(
+                        if (request.source == PlaybackRequest.Source.DEVICE) {
+                            R.string.next_video_not_found
+                        } else {
+                            R.string.next_episode_not_found
+                        },
+                        long = true
+                    )
+                )
 
                 EpisodeResolutionResult.Timeout ->
                     send(PlayerMessage(R.string.episode_resolve_timeout, long = true))
@@ -278,6 +340,47 @@ class PlayerViewModel(
         playbackController.release()
     }
 
+    private fun restorePreferences() {
+        val store = preferencesStore ?: return
+
+        viewModelScope.launch {
+            val stored = store.preferences
+                .catch { emit(PlayerPreferences()) }
+                .first()
+
+            _uiState.update {
+                it.copy(
+                    scaleMode = stored.scaleMode,
+                    speed = stored.speed,
+                    autoNextEnabled = stored.autoNextEnabled,
+                    autoRotateEnabled = stored.autoRotateEnabled,
+                    gesturesEnabled = stored.gesturesEnabled
+                )
+            }
+
+            playbackController.setSpeed(stored.speed)
+        }
+    }
+
+    private fun persistPreferences() {
+        val store = preferencesStore ?: return
+        val state = _uiState.value
+
+        viewModelScope.launch {
+            runCatching {
+                store.save(
+                    PlayerPreferences(
+                        scaleMode = state.scaleMode,
+                        speed = state.speed,
+                        autoNextEnabled = state.autoNextEnabled,
+                        autoRotateEnabled = state.autoRotateEnabled,
+                        gesturesEnabled = state.gesturesEnabled
+                    )
+                )
+            }
+        }
+    }
+
     private fun open(request: PlaybackRequest) {
         episodeJob?.cancel()
         positionMs.value = request.startPositionMs.coerceAtLeast(0L)
@@ -299,13 +402,27 @@ class PlayerViewModel(
     }
 
     private fun playEpisode(current: PlaybackRequest, target: EpisodeTarget) {
-        val next = current.copy(
-            uri = target.url,
-            subtitleUrl = nextSubtitleUrl(current, target),
-            startPositionMs = 0L,
-            pattern = target.pattern,
-            episodeLabel = target.label
-        )
+        // Device files are separate library entries, so the key and the title move with the file
+        // and the link only metadata is dropped.
+        val next = if (current.source == PlaybackRequest.Source.DEVICE) {
+            current.copy(
+                key = target.url,
+                title = target.label,
+                uri = target.url,
+                subtitleUrl = null,
+                startPositionMs = 0L,
+                pattern = null,
+                episodeLabel = null
+            )
+        } else {
+            current.copy(
+                uri = target.url,
+                subtitleUrl = nextSubtitleUrl(current, target),
+                startPositionMs = 0L,
+                pattern = target.pattern,
+                episodeLabel = target.label
+            )
+        }
 
         progressManager.saveExact(next, 0L)
         send(PlayerMessage(R.string.now_playing_episode, argument = target.label))
@@ -389,6 +506,17 @@ class PlayerViewModel(
     companion object {
         const val SEEK_STEP_MS = 15_000L
         const val SUBTITLE_OFFSET_LIMIT_MS = SubtitleController.OFFSET_LIMIT_MS
+
+        /** A full width drag moves two minutes, roughly 8 seconds per centimetre in landscape. */
+        const val DRAG_SEEK_SPAN_MS = 120_000L
+        private const val DRAG_SEEK_MIN_SPAN_MS = 30_000L
+
+        /** Short clips get a smaller span so the whole video is not crossed in one swipe. */
+        @VisibleForTesting
+        fun dragSeekSpanMs(durationMs: Long): Long = when {
+            durationMs <= 0L -> DRAG_SEEK_SPAN_MS
+            else -> (durationMs / 2).coerceIn(DRAG_SEEK_MIN_SPAN_MS, DRAG_SEEK_SPAN_MS)
+        }
 
         private const val POSITION_TICK_MS = 100L
         private const val PROGRESS_SAVE_INTERVAL_MS = 30_000L

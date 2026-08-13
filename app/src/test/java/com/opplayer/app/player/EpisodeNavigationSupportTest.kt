@@ -34,6 +34,33 @@ class EpisodeNavigationSupportTest {
     }
 
     @Test
+    fun `a device video opened from a folder supports navigation`() {
+        val uri = "content://media/external/video/media/1204"
+        val request = PlaybackRequest(
+            key = uri,
+            title = "clip",
+            uri = uri,
+            source = PlaybackRequest.Source.DEVICE,
+            folderId = 42L
+        )
+
+        assertTrue(request.supportsEpisodeNavigation())
+    }
+
+    @Test
+    fun `a device video without a folder does not support navigation`() {
+        val uri = "content://media/external/video/media/1204"
+        val request = PlaybackRequest(
+            key = uri,
+            title = "clip",
+            uri = uri,
+            source = PlaybackRequest.Source.DEVICE
+        )
+
+        assertFalse(request.supportsEpisodeNavigation())
+    }
+
+    @Test
     fun `the scheme check is case insensitive`() {
         assertTrue(request("HTTP://cdn.example.com/show/E05.mkv").supportsEpisodeNavigation())
     }

@@ -95,17 +95,19 @@
     <string name="auto_rotate_label">Rotate the screen automatically</string>
     <string name="auto_rotate_body">Play landscape videos (such as 1920×1080) in landscape and portrait videos (stories, reels) in portrait</string>
     <string name="gestures_label">Swipe controls</string>
-    <string name="gestures_body">Volume on the right, brightness on the left; double tap to jump 15 seconds</string>
+    <string name="gestures_body">Right side volume, left side brightness; double tap to skip 15 seconds, drag sideways to seek</string>
     <string name="gesture_volume">Volume</string>
     <string name="gesture_brightness">Brightness</string>
     <string name="seek_forward">15 seconds forward</string>
     <string name="seek_backward">15 seconds back</string>
 
     <string name="next_episode">Next episode</string>
+    <string name="next_video">Next video</string>
     <string name="now_playing_episode">Now playing: %1$s</string>
     <string name="episode_resolve_timeout">Looking for the next episode took too long</string>
     <string name="episode_network_unavailable">No network connection, so the next episode could not be checked</string>
     <string name="next_episode_not_found">The next episode was not found on the server; this is probably the last one</string>
+    <string name="next_video_not_found">This is the last video in this folder</string>
     <string name="episode_pattern_missing">This link carries no episode or season marker (such as S01E02)</string>
     <string name="auto_next_label">Play the next episode automatically</string>
     <string name="auto_next_body">When a video ends, move straight on to the next episode</string>
@@ -192,7 +194,7 @@
     <string name="onboarding_device_body">Your local videos are grouped by folder, with thumbnails, duration, size and a resume point. Only the read permission for videos is used.</string>
 
     <string name="onboarding_player_title">A player built for gestures</string>
-    <string name="onboarding_player_body">Swipe up and down on the right for volume and on the left for brightness, double tap to jump 15 seconds, and use picture in picture, zoom modes, playback speed and auto rotation from the top bar.</string>
+    <string name="onboarding_player_body">Double tap to skip 15 seconds, drag sideways to seek, drag up and down for volume and brightness</string>
 
     <string name="onboarding_subtitle_color_title">Subtitle colour</string>
     <string name="onboarding_subtitle_color_body">Pick the text colour. The preview below updates as you choose.</string>
@@ -241,7 +243,7 @@
     <string name="help_player_back_title">Back icon</string>
     <string name="help_player_back_body">Leaves full screen first; if you are already windowed it closes the player and saves your position.</string>
     <string name="help_player_next_title">Double arrow icon</string>
-    <string name="help_player_next_body">Jumps to the next episode. It only appears for links with a detected pattern, and the spinner means the next episode is being checked on the server.</string>
+    <string name="help_player_next_body">Plays the next item. For device videos it moves to the next file in the same folder; for links it moves to the next episode and the spinner means the server is being checked.</string>
     <string name="help_player_scale_title">Aspect ratio icon</string>
     <string name="help_player_scale_body">Cycles between Fit (whole image), Zoom (fills the screen and crops) and Stretch (fills the screen and distorts).</string>
     <string name="help_player_pip_title">Picture in picture icon</string>
@@ -253,13 +255,13 @@
     <string name="help_player_settings_title">Settings icon</string>
     <string name="help_player_settings_body">Playback speed, aspect ratio, auto rotation, swipe controls and automatic next episode.</string>
     <string name="help_player_gestures_title">Swipe controls</string>
-    <string name="help_player_gestures_body">Drag vertically on the right half for volume and on the left half for brightness. Double tap the right or left side to jump 15 seconds. One tap shows or hides the controls.</string>
+    <string name="help_player_gestures_body">Drag vertically on the right half for volume and on the left half for brightness. Drag sideways to scrub the video, double tap the right or left side to jump 15 seconds, and single tap to show or hide the controls.</string>
     <string name="help_player_speed_title">Playback speed</string>
     <string name="help_player_speed_body">Pick a preset or type any value between 0.1 and 6 and press Apply.</string>
     <string name="help_player_rotate_title">Automatic rotation</string>
     <string name="help_player_rotate_body">Landscape videos rotate to landscape and portrait videos stay portrait, based on the real aspect ratio of the file.</string>
     <string name="help_player_autonext_title">Automatic next episode</string>
-    <string name="help_player_autonext_body">When a video ends, the next episode of the pattern starts on its own.</string>
+    <string name="help_player_autonext_body">When a video ends, the next episode or the next file in the folder starts automatically.</string>
 
     <string name="help_subtitle_enable_title">Show subtitles</string>
     <string name="help_subtitle_enable_body">The master switch. When it is off no subtitle is drawn, even if a track is loaded.</string>

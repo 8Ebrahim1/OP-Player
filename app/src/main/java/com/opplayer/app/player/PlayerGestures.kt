@@ -29,6 +29,9 @@ class PlayerGestures(
     private val onTap: () -> Unit,
     private val onSeek: (forward: Boolean) -> Unit,
     private val onIndicator: (PlayerGestureKind, Float) -> Unit,
+    private val onSeekDragStart: () -> Unit = {},
+    private val onSeekDrag: (fraction: Float) -> Unit = {},
+    private val onSeekDragEnd: (commit: Boolean) -> Unit = {},
 
     private val elapsedRealtimeMs: () -> Long = { SystemClock.elapsedRealtime() }
 ) : View.OnTouchListener {
@@ -42,6 +45,7 @@ class PlayerGestures(
     private var viewHeight = 0f
     private var directionDecided = false
     private var isVerticalDrag = false
+    private var isSeekDrag = false
     private var activeKind = PlayerGestureKind.VOLUME
     private var startValue = 0f
     private var lastSeekAt = 0L
@@ -104,7 +108,15 @@ class PlayerGestures(
                             PlayerGestureKind.VOLUME -> volumeFraction()
                             PlayerGestureKind.BRIGHTNESS -> brightnessFraction()
                         }
+                    } else {
+                        isSeekDrag = true
+                        onSeekDragStart()
                     }
+                }
+
+                if (isSeekDrag) {
+                    onSeekDrag(dx / viewWidth.coerceAtLeast(1f))
+                    return true
                 }
 
                 if (!isVerticalDrag) return false
@@ -130,6 +142,7 @@ class PlayerGestures(
         if (event.actionMasked == MotionEvent.ACTION_DOWN) {
             directionDecided = false
             isVerticalDrag = false
+            isSeekDrag = false
         }
 
         detector.onTouchEvent(event)
@@ -137,8 +150,13 @@ class PlayerGestures(
         if (event.actionMasked == MotionEvent.ACTION_UP ||
             event.actionMasked == MotionEvent.ACTION_CANCEL
         ) {
+            if (isSeekDrag) {
+                onSeekDragEnd(event.actionMasked == MotionEvent.ACTION_UP)
+            }
+
             directionDecided = false
             isVerticalDrag = false
+            isSeekDrag = false
         }
 
         return true

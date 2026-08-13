@@ -21,6 +21,7 @@ interface EpisodeResolver {
 }
 
 fun PlaybackRequest.supportsEpisodeNavigation(): Boolean {
+    if (source == PlaybackRequest.Source.DEVICE) return folderId != null
     if (pattern != null) return true
     if (!uri.startsWith("http", ignoreCase = true)) return false
     return EpisodeNavigator.hasMarker(uri)

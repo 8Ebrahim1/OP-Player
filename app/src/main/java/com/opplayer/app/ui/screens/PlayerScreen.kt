@@ -49,6 +49,7 @@ import com.opplayer.app.player.subtitle.SubtitleOptions
 import com.opplayer.app.ui.SubtitleStyleViewModel
 import com.opplayer.app.ui.components.HelpSheet
 import com.opplayer.app.ui.components.PlayerGestureHud
+import com.opplayer.app.ui.components.PlayerSeekPreviewHud
 import com.opplayer.app.ui.components.PlayerSettingsSheet
 import com.opplayer.app.ui.components.SubtitleOption
 import com.opplayer.app.ui.components.SubtitleOverlay
@@ -181,6 +182,12 @@ fun PlayerScreen(
             onIndicator = { kind, value ->
                 hudState = GestureHudState(kind, value)
                 hudTick++
+            },
+            onSeekDragStart = { playerViewModel.startSeekDrag() },
+            onSeekDrag = { fraction -> playerViewModel.updateSeekDrag(fraction) },
+            onSeekDragEnd = { commit ->
+                if (commit) playerViewModel.commitSeekDrag() else playerViewModel.cancelSeekDrag()
+                controls.show()
             }
         )
     }
@@ -316,6 +323,7 @@ fun PlayerScreen(
                 isFullscreen = state.isFullscreen,
                 showEpisodeButton = state.canNavigateEpisodes,
                 isResolvingEpisode = state.isResolvingEpisode,
+                isLocalQueue = state.request.source == PlaybackRequest.Source.DEVICE,
                 onBack = handleBack,
                 onNextEpisode = { playerViewModel.navigateEpisode(forward = true) },
                 onCycleScale = {
@@ -354,8 +362,18 @@ fun PlayerScreen(
             )
         }
 
+        val seekPreview = state.seekPreview
+        if (seekPreview != null && !isInPip) {
+            PlayerSeekPreviewHud(
+                positionMs = seekPreview.positionMs,
+                deltaMs = seekPreview.deltaMs,
+                durationMs = seekPreview.durationMs,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+
         val hint = seekHint
-        if (hint != null && !isInPip && hud == null) {
+        if (hint != null && !isInPip && hud == null && seekPreview == null) {
             PlayerSeekHint(
                 forward = hint,
                 modifier = Modifier.align(

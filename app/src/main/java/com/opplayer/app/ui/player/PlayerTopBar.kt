@@ -40,6 +40,7 @@ fun PlayerTopBar(
     isFullscreen: Boolean,
     showEpisodeButton: Boolean,
     isResolvingEpisode: Boolean,
+    isLocalQueue: Boolean = false,
     onBack: () -> Unit,
     onNextEpisode: () -> Unit,
     onCycleScale: () -> Unit,
@@ -94,7 +95,11 @@ fun PlayerTopBar(
                         } else {
                             Icons.Filled.KeyboardDoubleArrowRight
                         },
-                        contentDescription = stringResource(R.string.next_episode),
+                        contentDescription = if (isLocalQueue) {
+                            stringResource(R.string.next_video)
+                        } else {
+                            stringResource(R.string.next_episode)
+                        },
                         tint = Color.White
                     )
                 }
