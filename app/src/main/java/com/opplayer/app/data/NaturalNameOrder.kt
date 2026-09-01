@@ -7,6 +7,21 @@ package com.opplayer.app.data
 object NaturalNameOrder : Comparator<String> {
 
     override fun compare(left: String, right: String): Int {
+        val leftDot = left.lastIndexOf('.')
+        val rightDot = right.lastIndexOf('.')
+
+        // Compare the name stems first: a shorter stem sorts before a longer name that
+        // extends it ("clip.mkv" before "clip part 2.mkv") instead of letting the
+        // extension dot order them ('.' > ' '). Equal stems fall back to the full name.
+        if (leftDot > 0 && rightDot > 0) {
+            val stemDiff = compareNames(left.substring(0, leftDot), right.substring(0, rightDot))
+            if (stemDiff != 0) return stemDiff
+        }
+
+        return compareNames(left, right)
+    }
+
+    private fun compareNames(left: String, right: String): Int {
         var leftIndex = 0
         var rightIndex = 0
 
