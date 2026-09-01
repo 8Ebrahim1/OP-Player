@@ -29,7 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -45,7 +45,6 @@ import com.opplayer.app.ui.screens.LibraryScreen
 import com.opplayer.app.ui.screens.PlayerScreen
 import com.opplayer.app.ui.theme.OpBackground
 import com.opplayer.app.ui.theme.OpSurface
-import com.opplayer.app.util.findActivity
 
 @Composable
 fun OPPlayerApp(
@@ -113,25 +112,17 @@ private fun MainContent(
 
     var selectedSection by rememberSaveable { mutableIntStateOf(0) }
 
-    // The initial request is only applied once its resume position has been read, so the
-    // player never opens the raw, unpositioned request first.
-    var playback by rememberSaveable { mutableStateOf<PlaybackRequest?>(null) }
-
-    /** True while the open playback session was started by another app's VIEW intent. */
-    var externalPlayback by rememberSaveable { mutableStateOf(initialRequest != null) }
-
+    var playback by rememberSaveable { mutableStateOf(initialRequest) }
     var showSubtitleStyleSheet by rememberSaveable { mutableStateOf(false) }
     var showAppSettingsSheet by rememberSaveable { mutableStateOf(false) }
 
     val handledCallback by rememberUpdatedState(onInitialRequestHandled)
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
+    val resources = LocalResources.current
 
     LaunchedEffect(initialRequest) {
         val request = initialRequest ?: return@LaunchedEffect
-
-        externalPlayback = true
 
         playback = when {
             request.startPositionMs > 0L -> request
@@ -142,9 +133,9 @@ private fun MainContent(
         handledCallback()
     }
 
-    LaunchedEffect(libraryViewModel, context) {
+    LaunchedEffect(libraryViewModel, resources) {
         libraryViewModel.messages.collect { textRes ->
-            snackbarHostState.showSnackbar(context.getString(textRes))
+            snackbarHostState.showSnackbar(resources.getString(textRes))
         }
     }
 
@@ -159,15 +150,7 @@ private fun MainContent(
             PlayerScreen(
                 request = currentPlayback,
                 onSavePosition = onSavePosition,
-                onClose = {
-                    // A session another app started closes straight back to that app instead of
-                    // landing on the OP Player home screen.
-                    if (externalPlayback) {
-                        context.findActivity()?.finish()
-                    } else {
-                        playback = null
-                    }
-                }
+                onClose = { playback = null }
             )
 
             SnackbarHost(
@@ -177,10 +160,6 @@ private fun MainContent(
         }
         return
     }
-
-    // While the positioned request for an incoming VIEW intent is prepared, hold the blank
-    // background instead of flashing the home tabs.
-    if (initialRequest != null) return
 
     GlassBackground()
 
@@ -240,8 +219,6 @@ private fun MainContent(
                 0 -> LibraryScreen(
                     videos = library,
                     onPlay = { item ->
-                        externalPlayback = false
-
                         val resumeUrl = item.currentUrl ?: item.url
                         val resumePattern = if (item.currentUrl != null) {
                             item.currentPattern ?: item.pattern
@@ -271,8 +248,6 @@ private fun MainContent(
                 else -> DeviceVideosScreen(
                     localPositions = localPositions,
                     onPlay = { video, resumePosition ->
-                        externalPlayback = false
-
                         playback = PlaybackRequest(
                             key = video.uri,
                             title = video.name,

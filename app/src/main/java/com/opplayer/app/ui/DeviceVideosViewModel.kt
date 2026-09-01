@@ -3,16 +3,11 @@ package com.opplayer.app.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.opplayer.app.data.AppSettings
-import com.opplayer.app.data.AppSettingsRepository
 import com.opplayer.app.data.LocalVideoRepository
 import com.opplayer.app.data.VideoFolder
-import com.opplayer.app.data.VideoSortOrder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -22,27 +17,15 @@ data class DeviceVideosUiState(
     val folders: List<VideoFolder> = emptyList(),
     val failed: Boolean = false,
     val openFolderId: Long? = null,
-    val query: String = "",
-    val sortOrder: VideoSortOrder = VideoSortOrder.NAME_ASC
+    val query: String = ""
 )
 
 class DeviceVideosViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = LocalVideoRepository(application)
-    private val settingsRepository = AppSettingsRepository(application)
 
     private val _uiState = MutableStateFlow(DeviceVideosUiState())
     val uiState: StateFlow<DeviceVideosUiState> = _uiState.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            settingsRepository.settings
-                .catch { emit(AppSettings()) }
-                .collect { stored ->
-                    _uiState.update { it.copy(sortOrder = stored.videoSortOrder) }
-                }
-        }
-    }
 
     // Scroll offsets are plain fields rather than part of the ui state: the player replaces the
     // whole screen, so remembered list state is dropped, while folding them into the state flow
@@ -108,19 +91,5 @@ class DeviceVideosViewModel(application: Application) : AndroidViewModel(applica
 
     fun setQuery(value: String) {
         _uiState.update { it.copy(query = value) }
-    }
-
-    fun setSortOrder(order: VideoSortOrder) {
-        if (order == _uiState.value.sortOrder) return
-
-        _uiState.update { it.copy(sortOrder = order) }
-        viewModelScope.launch {
-            runCatching {
-                settingsRepository.save(
-                    settingsRepository.settings.first().copy(videoSortOrder = order)
-                )
-            }
-            refresh()
-        }
     }
 }

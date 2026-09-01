@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -96,6 +97,7 @@ fun PlayerScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val activity = remember(context) { context.findActivity() }
     val mainActivity = activity as? MainActivity
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -144,8 +146,8 @@ fun PlayerScreen(
     LaunchedEffect(playerViewModel, context) {
         playerViewModel.messages.collect { message ->
             val text = message.argument
-                ?.let { context.getString(message.textRes, it) }
-                ?: context.getString(message.textRes)
+                ?.let { resources.getString(message.textRes, it) }
+                ?: resources.getString(message.textRes)
 
             Toast.makeText(
                 context,
@@ -334,7 +336,7 @@ fun PlayerScreen(
                 onBack = handleBack,
                 onCycleScale = {
                     val next = playerViewModel.cycleScaleMode()
-                    Toast.makeText(context, context.getString(next.labelRes), Toast.LENGTH_SHORT)
+                    Toast.makeText(context, next.labelRes, Toast.LENGTH_SHORT)
                         .show()
                 },
                 onPip = {

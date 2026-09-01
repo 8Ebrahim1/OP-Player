@@ -31,23 +31,10 @@ enum class AppLayoutDirection(val storageKey: String) {
     }
 }
 
-enum class VideoSortOrder(val storageKey: String) {
-    NAME_ASC("name_asc"),
-    NAME_DESC("name_desc"),
-    DATE_NEWEST("date_newest"),
-    DATE_OLDEST("date_oldest");
-
-    companion object {
-        fun fromStorageKey(value: String?): VideoSortOrder =
-            entries.firstOrNull { it.storageKey == value } ?: NAME_ASC
-    }
-}
-
 data class AppSettings(
     val language: AppLanguage = AppLanguage.SYSTEM,
     val layoutDirection: AppLayoutDirection = AppLayoutDirection.AUTO,
-    val onboardingCompleted: Boolean = false,
-    val videoSortOrder: VideoSortOrder = VideoSortOrder.NAME_ASC
+    val onboardingCompleted: Boolean = false
 )
 
 private val Context.appSettingsStore by preferencesDataStore(name = "op_player_app_settings")
@@ -61,8 +48,7 @@ class AppSettingsRepository(private val context: Context) {
             language = AppLanguage.fromStorageKey(preferences[KEY_LANGUAGE]),
             layoutDirection = AppLayoutDirection.fromStorageKey(preferences[KEY_DIRECTION]),
             onboardingCompleted = preferences[KEY_ONBOARDING_COMPLETED]
-                ?: defaults.onboardingCompleted,
-            videoSortOrder = VideoSortOrder.fromStorageKey(preferences[KEY_VIDEO_SORT_ORDER])
+                ?: defaults.onboardingCompleted
         )
     }
 
@@ -71,7 +57,6 @@ class AppSettingsRepository(private val context: Context) {
             preferences[KEY_LANGUAGE] = settings.language.storageKey
             preferences[KEY_DIRECTION] = settings.layoutDirection.storageKey
             preferences[KEY_ONBOARDING_COMPLETED] = settings.onboardingCompleted
-            preferences[KEY_VIDEO_SORT_ORDER] = settings.videoSortOrder.storageKey
         }
     }
 
@@ -79,6 +64,5 @@ class AppSettingsRepository(private val context: Context) {
         val KEY_LANGUAGE = stringPreferencesKey("app_language")
         val KEY_DIRECTION = stringPreferencesKey("app_layout_direction")
         val KEY_ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
-        val KEY_VIDEO_SORT_ORDER = stringPreferencesKey("video_sort_order")
     }
 }

@@ -12,9 +12,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
-import com.opplayer.app.data.DeviceVideoKeys
-import com.opplayer.app.data.LocalVideoRepository
-import com.opplayer.app.data.currentMediaAccess
 import com.opplayer.app.player.PlaybackRequest
 import com.opplayer.app.ui.OPPlayerApp
 import com.opplayer.app.ui.theme.OPPlayerTheme
@@ -89,6 +86,7 @@ class MainActivity : ComponentActivity() {
 
     private fun intentToPlaybackRequest(intent: Intent?): PlaybackRequest? {
         val data = intent?.takeIf { it.action == Intent.ACTION_VIEW }?.data ?: return null
+        val name = data.lastPathSegment ?: getString(R.string.default_video_name)
 
         // A one-shot grant dies with the process, which breaks resume after process death.
         // Persist it when the sender allows it; ignore the failure otherwise.
@@ -101,29 +99,11 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Providers that only hand out a numbered uri are still asked for the real file name,
-        // so the player top bar shows it instead of the uri's trailing id.
-        val repository = LocalVideoRepository(this)
-        val shared = repository.readSharedVideoInfo(data)
-        val displayName = shared?.displayName?.takeIf { it.isNotBlank() } ?: data.lastPathSegment
-        val name = displayName ?: getString(R.string.default_video_name)
-
-        // Matching the shared file against the media store keys progress and the folder queue
-        // to the same video no matter which gallery app handed it over.
-        val match = if (currentMediaAccess().canReadAnything) {
-            runCatching {
-                repository.findVideo(displayName, shared?.sizeBytes)
-            }.getOrNull()
-        } else {
-            null
-        }
-
         return PlaybackRequest(
-            key = match?.uri ?: DeviceVideoKeys.canonical(data.toString()),
+            key = data.toString(),
             title = name,
             uri = data.toString(),
-            source = PlaybackRequest.Source.DEVICE,
-            folderId = match?.bucketId
+            source = PlaybackRequest.Source.DEVICE
         )
     }
 

@@ -111,13 +111,6 @@
     <string name="episode_network_unavailable">No network connection, so the next episode could not be checked</string>
     <string name="next_episode_not_found">The next episode was not found on the server; this is probably the last one</string>
     <string name="next_video_not_found">This is the last video in this folder</string>
-    <string name="previous_episode_not_found">The previous episode was not found on the server; this is probably the first one</string>
-    <string name="previous_video_not_found">This is the first video in this folder</string>
-    <string name="sort_videos">Sort videos</string>
-    <string name="sort_name_asc">Name (A to Z)</string>
-    <string name="sort_name_desc">Name (Z to A)</string>
-    <string name="sort_date_newest">Date added (newest first)</string>
-    <string name="sort_date_oldest">Date added (oldest first)</string>
     <string name="episode_pattern_missing">This link carries no episode or season marker (such as S01E02)</string>
     <string name="auto_next_label">Play the next episode automatically</string>
     <string name="auto_next_body">When a video ends, move straight on to the next episode</string>

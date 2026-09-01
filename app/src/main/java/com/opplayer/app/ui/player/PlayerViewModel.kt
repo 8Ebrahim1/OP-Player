@@ -297,16 +297,10 @@ class PlayerViewModel(
 
                 EpisodeResolutionResult.NotFound -> send(
                     PlayerMessage(
-                        when {
-                            request.source == PlaybackRequest.Source.DEVICE && forward ->
-                                R.string.next_video_not_found
-
-                            request.source == PlaybackRequest.Source.DEVICE ->
-                                R.string.previous_video_not_found
-
-                            forward -> R.string.next_episode_not_found
-
-                            else -> R.string.previous_episode_not_found
+                        if (request.source == PlaybackRequest.Source.DEVICE) {
+                            R.string.next_video_not_found
+                        } else {
+                            R.string.next_episode_not_found
                         },
                         long = true
                     )

@@ -79,15 +79,6 @@ fun PlayerSurface(
                     )
                     .build()
 
-            // ForwardingPlayer delegates this straight to the wrapped player, bypassing the
-            // commands added above, so the episode buttons could be left disabled without it.
-            override fun isCommandAvailable(command: Int): Boolean =
-                command == Player.COMMAND_SEEK_TO_NEXT ||
-                    command == Player.COMMAND_SEEK_TO_PREVIOUS ||
-                    command == Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM ||
-                    command == Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM ||
-                    super.isCommandAvailable(command)
-
             override fun hasNextMediaItem(): Boolean = true
 
             override fun hasPreviousMediaItem(): Boolean = true
@@ -105,9 +96,6 @@ fun PlayerSurface(
     AndroidView(
         factory = { viewContext ->
             PlayerView(viewContext).apply {
-                // The controller mirrors in RTL locales; pin it LTR so previous stays on the
-                // left and next on the right.
-                layoutDirection = View.LAYOUT_DIRECTION_LTR
                 this.player = navigablePlayer
                 useController = true
                 controllerAutoShow = true

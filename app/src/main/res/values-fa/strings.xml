@@ -111,13 +111,6 @@
     <string name="episode_network_unavailable">اتصال شبکه برقرار نیست؛ قسمت بعد بررسی نشد</string>
     <string name="next_episode_not_found">قسمت بعدی روی سرور پیدا نشد؛ احتمالاً این آخرین قسمت است</string>
     <string name="next_video_not_found">این آخرین ویدیوی این پوشه است</string>
-    <string name="previous_episode_not_found">قسمت قبلی روی سرور پیدا نشد؛ احتمالاً این اولین قسمت است</string>
-    <string name="previous_video_not_found">این اولین ویدیوی این پوشه است</string>
-    <string name="sort_videos">مرتب‌سازی ویدیوها</string>
-    <string name="sort_name_asc">نام (الف تا ی)</string>
-    <string name="sort_name_desc">نام (ی تا الف)</string>
-    <string name="sort_date_newest">زمان اضافه شدن (جدیدترین)</string>
-    <string name="sort_date_oldest">زمان اضافه شدن (قدیمی‌ترین)</string>
     <string name="episode_pattern_missing">در این لینک نشانهٔ قسمت یا فصل (مانند S01E02) پیدا نشد</string>
     <string name="auto_next_label">پخش خودکار قسمت بعدی</string>
     <string name="auto_next_body">پس از پایان ویدیو، خودکار برو به قسمت بعد</string>

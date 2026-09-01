@@ -3,7 +3,6 @@ package com.opplayer.app.ui.screens
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import androidx.annotation.StringRes
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,19 +19,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.VideocamOff
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,7 +50,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.opplayer.app.R
 import com.opplayer.app.data.LocalVideo
 import com.opplayer.app.data.MediaAccess
-import com.opplayer.app.data.VideoSortOrder
 import com.opplayer.app.data.currentMediaAccess
 import com.opplayer.app.data.mediaPermissionRequest
 import com.opplayer.app.ui.DeviceVideosViewModel
@@ -67,7 +60,6 @@ import com.opplayer.app.ui.components.HelpSheet
 import com.opplayer.app.ui.components.LocalVideoCard
 import com.opplayer.app.ui.components.ScreenHeader
 import com.opplayer.app.ui.components.deviceHelpEntries
-import com.opplayer.app.ui.localization.LocalizedWindow
 
 @Composable
 fun DeviceVideosScreen(
@@ -82,7 +74,6 @@ fun DeviceVideosScreen(
     var access by remember { mutableStateOf(context.currentMediaAccess()) }
     var permissionRequested by remember { mutableStateOf(false) }
     var showHelp by remember { mutableStateOf(false) }
-    var showSortMenu by remember { mutableStateOf(false) }
 
     val openFolderId = uiState.openFolderId
     val query = uiState.query
@@ -169,53 +160,14 @@ fun DeviceVideosScreen(
                         IconButton(onClick = { viewModel.closeFolder() }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                                tint = MaterialTheme.colorScheme.primary
+                                contentDescription = stringResource(R.string.back)
                             )
-                        }
-
-                        Box {
-                            IconButton(onClick = { showSortMenu = true }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.Sort,
-                                    contentDescription = stringResource(R.string.sort_videos),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-
-                            DropdownMenu(
-                                expanded = showSortMenu,
-                                onDismissRequest = { showSortMenu = false }
-                            ) {
-                                LocalizedWindow {
-                                    VideoSortOrder.entries.forEach { order ->
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(order.labelRes())) },
-                                            onClick = {
-                                                viewModel.setSortOrder(order)
-                                                showSortMenu = false
-                                            },
-                                            trailingIcon = if (order == uiState.sortOrder) {
-                                                {
-                                                    Icon(
-                                                        Icons.Default.Check,
-                                                        contentDescription = null
-                                                    )
-                                                }
-                                            } else {
-                                                null
-                                            }
-                                        )
-                                    }
-                                }
-                            }
                         }
                     } else if (access.canReadAnything) {
                         IconButton(onClick = { viewModel.refresh() }) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
-                                contentDescription = stringResource(R.string.refresh),
-                                tint = MaterialTheme.colorScheme.primary
+                                contentDescription = stringResource(R.string.refresh)
                             )
                         }
                     }
@@ -369,14 +321,6 @@ private fun PartialAccessNotice(onManage: () -> Unit) {
             .fillMaxWidth()
             .padding(bottom = 10.dp)
     )
-}
-
-@StringRes
-private fun VideoSortOrder.labelRes(): Int = when (this) {
-    VideoSortOrder.NAME_ASC -> R.string.sort_name_asc
-    VideoSortOrder.NAME_DESC -> R.string.sort_name_desc
-    VideoSortOrder.DATE_NEWEST -> R.string.sort_date_newest
-    VideoSortOrder.DATE_OLDEST -> R.string.sort_date_oldest
 }
 
 private fun android.content.Context.openAppSettings() {

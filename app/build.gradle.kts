@@ -3,9 +3,11 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.kotlin.parcelize)
+
+    id("org.jetbrains.kotlin.plugin.parcelize")
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -103,7 +105,6 @@ android {
         }
     }
 
-    @Suppress("UnstableApiUsage")
     bundle {
         language {
             enableSplit = false
@@ -161,7 +162,6 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.kotlin.parcelize.runtime)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
