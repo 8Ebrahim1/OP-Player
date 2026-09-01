@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -13,12 +12,9 @@ import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.FullscreenExit
-import androidx.compose.material.icons.filled.KeyboardDoubleArrowLeft
-import androidx.compose.material.icons.filled.KeyboardDoubleArrowRight
 import androidx.compose.material.icons.filled.PictureInPictureAlt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Subtitles
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,10 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.opplayer.app.R
 
@@ -38,11 +32,7 @@ import com.opplayer.app.R
 fun PlayerTopBar(
     title: String,
     isFullscreen: Boolean,
-    showEpisodeButton: Boolean,
-    isResolvingEpisode: Boolean,
-    isLocalQueue: Boolean = false,
     onBack: () -> Unit,
-    onNextEpisode: () -> Unit,
     onCycleScale: () -> Unit,
     onPip: () -> Unit,
     onToggleFullscreen: () -> Unit,
@@ -76,35 +66,6 @@ fun PlayerTopBar(
             color = Color.White,
             style = MaterialTheme.typography.titleMedium
         )
-
-        if (showEpisodeButton) {
-            if (isResolvingEpisode) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(22.dp)
-                        .padding(end = 4.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 2.dp
-                )
-            } else {
-                IconButton(onClick = onNextEpisode) {
-                    Icon(
-
-                        imageVector = if (LocalLayoutDirection.current == LayoutDirection.Rtl) {
-                            Icons.Filled.KeyboardDoubleArrowLeft
-                        } else {
-                            Icons.Filled.KeyboardDoubleArrowRight
-                        },
-                        contentDescription = if (isLocalQueue) {
-                            stringResource(R.string.next_video)
-                        } else {
-                            stringResource(R.string.next_episode)
-                        },
-                        tint = Color.White
-                    )
-                }
-            }
-        }
 
         IconButton(onClick = onCycleScale) {
             Icon(

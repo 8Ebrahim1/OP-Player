@@ -21,7 +21,14 @@ interface EpisodeResolver {
 }
 
 fun PlaybackRequest.supportsEpisodeNavigation(): Boolean {
-    if (source == PlaybackRequest.Source.DEVICE) return folderId != null
+    if (source == PlaybackRequest.Source.DEVICE) {
+        // In-app opens carry the folder id; videos shared from another app are matched against
+        // the media store by canonical uri or display name, so any local video qualifies.
+        if (folderId != null) return true
+        val scheme = uri.substringBefore("://", "")
+        return scheme.equals("content", ignoreCase = true) ||
+            scheme.equals("file", ignoreCase = true)
+    }
     if (pattern != null) return true
     if (!uri.startsWith("http", ignoreCase = true)) return false
     return EpisodeNavigator.hasMarker(uri)

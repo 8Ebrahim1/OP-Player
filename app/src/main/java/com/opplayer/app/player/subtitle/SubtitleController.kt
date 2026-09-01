@@ -30,7 +30,7 @@ class SubtitleController(
     private val scope: CoroutineScope,
     private val engine: PlayerEngine,
     private val source: SubtitleSource,
-    positionMs: StateFlow<Long>,
+    private val positionMs: StateFlow<Long>,
     private val onMessage: (PlayerMessage) -> Unit
 ) {
 

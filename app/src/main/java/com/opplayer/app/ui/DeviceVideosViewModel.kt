@@ -3,11 +3,16 @@ package com.opplayer.app.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.opplayer.app.data.AppSettings
+import com.opplayer.app.data.AppSettingsRepository
 import com.opplayer.app.data.LocalVideoRepository
 import com.opplayer.app.data.VideoFolder
+import com.opplayer.app.data.VideoSortOrder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -17,15 +22,54 @@ data class DeviceVideosUiState(
     val folders: List<VideoFolder> = emptyList(),
     val failed: Boolean = false,
     val openFolderId: Long? = null,
-    val query: String = ""
+    val query: String = "",
+    val sortOrder: VideoSortOrder = VideoSortOrder.NAME_ASC
 )
 
 class DeviceVideosViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = LocalVideoRepository(application)
+    private val settingsRepository = AppSettingsRepository(application)
 
     private val _uiState = MutableStateFlow(DeviceVideosUiState())
     val uiState: StateFlow<DeviceVideosUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            settingsRepository.settings
+                .catch { emit(AppSettings()) }
+                .collect { stored ->
+                    _uiState.update { it.copy(sortOrder = stored.videoSortOrder) }
+                }
+        }
+    }
+
+    // Scroll offsets are plain fields rather than part of the ui state: the player replaces the
+    // whole screen, so remembered list state is dropped, while folding them into the state flow
+    // would recompose the list on every scrolled pixel.
+    var folderScrollIndex: Int = 0
+        private set
+
+    var folderScrollOffset: Int = 0
+        private set
+
+    var videoScrollIndex: Int = 0
+        private set
+
+    var videoScrollOffset: Int = 0
+        private set
+
+    private var videoScrollFolderId: Long? = null
+
+    fun rememberFolderScroll(index: Int, offset: Int) {
+        folderScrollIndex = index
+        folderScrollOffset = offset
+    }
+
+    fun rememberVideoScroll(index: Int, offset: Int) {
+        videoScrollIndex = index
+        videoScrollOffset = offset
+    }
 
     fun refresh() {
         if (_uiState.value.isLoading) return
@@ -49,6 +93,12 @@ class DeviceVideosViewModel(application: Application) : AndroidViewModel(applica
     // player replaces the whole screen: remembered state would be dropped on the way in and the
     // user would land back on the folder list after closing the video.
     fun openFolder(folderId: Long) {
+        if (videoScrollFolderId != folderId) {
+            videoScrollFolderId = folderId
+            videoScrollIndex = 0
+            videoScrollOffset = 0
+        }
+
         _uiState.update { it.copy(openFolderId = folderId, query = "") }
     }
 
@@ -58,5 +108,19 @@ class DeviceVideosViewModel(application: Application) : AndroidViewModel(applica
 
     fun setQuery(value: String) {
         _uiState.update { it.copy(query = value) }
+    }
+
+    fun setSortOrder(order: VideoSortOrder) {
+        if (order == _uiState.value.sortOrder) return
+
+        _uiState.update { it.copy(sortOrder = order) }
+        viewModelScope.launch {
+            runCatching {
+                settingsRepository.save(
+                    settingsRepository.settings.first().copy(videoSortOrder = order)
+                )
+            }
+            refresh()
+        }
     }
 }

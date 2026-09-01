@@ -3,11 +3,9 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
-
-    id("org.jetbrains.kotlin.plugin.parcelize")
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -31,14 +29,14 @@ val hasReleaseSigning = releaseStoreFile != null &&
 
 android {
     namespace = "com.opplayer.app"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.opplayer.app"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 10
-        versionName = "1.5.0"
+        targetSdk = 37
+        versionCode = 11
+        versionName = "1.6.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -96,9 +94,6 @@ android {
         warningsAsErrors = false
         checkReleaseBuilds = true
         checkDependencies = false
-        htmlReport = true
-        xmlReport = true
-        sarifReport = false
         lintConfig = file("lint.xml")
     }
 
@@ -108,6 +103,7 @@ android {
         }
     }
 
+    @Suppress("UnstableApiUsage")
     bundle {
         language {
             enableSplit = false
@@ -122,9 +118,28 @@ kotlin {
     }
 }
 
-dependencies {
-    implementation(platform(libs.compose.bom))
+val composeAlignedVersion = libs.versions.composeUi.get()
+val composeAlignedGroups = setOf(
+    "androidx.compose.animation",
+    "androidx.compose.foundation",
+    "androidx.compose.runtime",
+    "androidx.compose.ui",
+)
 
+configurations.configureEach {
+    resolutionStrategy.eachDependency {
+        val alignable = when (requested.group) {
+            in composeAlignedGroups -> requested.name != "runtime-annotation"
+            "androidx.compose.material" -> !requested.name.startsWith("material-icons")
+            else -> false
+        }
+        if (alignable) {
+            useVersion(composeAlignedVersion)
+        }
+    }
+}
+
+dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -146,9 +161,9 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlin.parcelize.runtime)
 
     testImplementation(libs.junit)
-    testImplementation(libs.kotlinx.serialization.json)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.test.runner)

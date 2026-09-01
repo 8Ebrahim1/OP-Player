@@ -252,6 +252,44 @@ class PlayerViewModelTest {
     }
 
     @Test
+    fun `a missing previous episode explains it is probably the first one`() = runTest(dispatcher) {
+        resolver.result = EpisodeResolutionResult.NotFound
+
+        val viewModel = createViewModel()
+        val messages = collectMessages(viewModel)
+
+        viewModel.navigateEpisode(forward = false)
+        advanceUntilIdle()
+
+        assertEquals(requestA.uri, viewModel.uiState.value.request.uri)
+        assertEquals(R.string.previous_episode_not_found, messages.last().textRes)
+
+        viewModel.releaseResources()
+    }
+
+    @Test
+    fun `a missing previous video reports the first video in the folder`() = runTest(dispatcher) {
+        resolver.result = EpisodeResolutionResult.NotFound
+
+        val deviceRequest = PlaybackRequest(
+            key = "content://media/external/video/media/1",
+            title = "Clip",
+            uri = "content://media/external/video/media/1",
+            source = PlaybackRequest.Source.DEVICE,
+            folderId = 7L
+        )
+        val viewModel = createViewModel(request = deviceRequest)
+        val messages = collectMessages(viewModel)
+
+        viewModel.navigateEpisode(forward = false)
+        advanceUntilIdle()
+
+        assertEquals(R.string.previous_video_not_found, messages.last().textRes)
+
+        viewModel.releaseResources()
+    }
+
+    @Test
     fun `a stalled lookup reports a timeout instead of spinning forever`() = runTest(dispatcher) {
         val slowResolver = FakeEpisodeResolver(
             result = EpisodeResolutionResult.NotFound,

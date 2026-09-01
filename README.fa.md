@@ -6,9 +6,9 @@
 
 [English](README.md) · [یادداشت‌های توسعه](docs/DEVELOPMENT-fa.md)
 
-![version](https://img.shields.io/badge/version-1.5.0-blue)
+![version](https://img.shields.io/badge/version-1.6.0-blue)
 ![minSdk](https://img.shields.io/badge/minSdk-26-green)
-![targetSdk](https://img.shields.io/badge/targetSdk-35-green)
+![targetSdk](https://img.shields.io/badge/targetSdk-37-green)
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
 </div>

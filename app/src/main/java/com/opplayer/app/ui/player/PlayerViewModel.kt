@@ -98,6 +98,9 @@ class PlayerViewModel(
     private val positionMs = MutableStateFlow(0L)
     private val isPlaying = MutableStateFlow(false)
 
+    /** Exposed for the picture in picture action, which relabels itself when playback toggles. */
+    val playing: StateFlow<Boolean> = isPlaying.asStateFlow()
+
     private val subtitleController = SubtitleController(
         scope = viewModelScope,
         engine = engine,
@@ -294,10 +297,16 @@ class PlayerViewModel(
 
                 EpisodeResolutionResult.NotFound -> send(
                     PlayerMessage(
-                        if (request.source == PlaybackRequest.Source.DEVICE) {
-                            R.string.next_video_not_found
-                        } else {
-                            R.string.next_episode_not_found
+                        when {
+                            request.source == PlaybackRequest.Source.DEVICE && forward ->
+                                R.string.next_video_not_found
+
+                            request.source == PlaybackRequest.Source.DEVICE ->
+                                R.string.previous_video_not_found
+
+                            forward -> R.string.next_episode_not_found
+
+                            else -> R.string.previous_episode_not_found
                         },
                         long = true
                     )

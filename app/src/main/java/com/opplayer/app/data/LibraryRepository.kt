@@ -182,6 +182,7 @@ class LibraryRepository(private val dataStore: DataStore<Preferences>) {
         now: Long = System.currentTimeMillis()
     ): Boolean {
         var written = false
+        val key = DeviceVideoKeys.canonical(uri)
 
         dataStore.edit { prefs ->
             val stored = readLocalProgress(prefs)
@@ -193,10 +194,13 @@ class LibraryRepository(private val dataStore: DataStore<Preferences>) {
             }
 
             val updated = current.toMutableMap()
+            // Older versions keyed external opens by the raw provider uri; drop that alias so a
+            // later rewind is not resurrected by the max-merge on read.
+            if (key != uri) updated.remove(uri)
             if (positionMs <= 0L) {
-                updated.remove(uri)
+                updated.remove(key)
             } else {
-                updated[uri] = LocalProgress(positionMs = positionMs, updatedAt = now)
+                updated[key] = LocalProgress(positionMs = positionMs, updatedAt = now)
             }
 
             prefs[LOCAL_POSITIONS_KEY] = json.encodeToString(

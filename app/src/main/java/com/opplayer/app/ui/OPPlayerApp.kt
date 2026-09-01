@@ -45,6 +45,7 @@ import com.opplayer.app.ui.screens.LibraryScreen
 import com.opplayer.app.ui.screens.PlayerScreen
 import com.opplayer.app.ui.theme.OpBackground
 import com.opplayer.app.ui.theme.OpSurface
+import com.opplayer.app.util.findActivity
 
 @Composable
 fun OPPlayerApp(
@@ -112,7 +113,13 @@ private fun MainContent(
 
     var selectedSection by rememberSaveable { mutableIntStateOf(0) }
 
-    var playback by rememberSaveable { mutableStateOf(initialRequest) }
+    // The initial request is only applied once its resume position has been read, so the
+    // player never opens the raw, unpositioned request first.
+    var playback by rememberSaveable { mutableStateOf<PlaybackRequest?>(null) }
+
+    /** True while the open playback session was started by another app's VIEW intent. */
+    var externalPlayback by rememberSaveable { mutableStateOf(initialRequest != null) }
+
     var showSubtitleStyleSheet by rememberSaveable { mutableStateOf(false) }
     var showAppSettingsSheet by rememberSaveable { mutableStateOf(false) }
 
@@ -123,7 +130,15 @@ private fun MainContent(
 
     LaunchedEffect(initialRequest) {
         val request = initialRequest ?: return@LaunchedEffect
-        playback = request
+
+        externalPlayback = true
+
+        playback = when {
+            request.startPositionMs > 0L -> request
+            request.source != PlaybackRequest.Source.DEVICE -> request
+            else -> request.copy(startPositionMs = libraryViewModel.devicePosition(request.key))
+        }
+
         handledCallback()
     }
 
@@ -144,7 +159,15 @@ private fun MainContent(
             PlayerScreen(
                 request = currentPlayback,
                 onSavePosition = onSavePosition,
-                onClose = { playback = null }
+                onClose = {
+                    // A session another app started closes straight back to that app instead of
+                    // landing on the OP Player home screen.
+                    if (externalPlayback) {
+                        context.findActivity()?.finish()
+                    } else {
+                        playback = null
+                    }
+                }
             )
 
             SnackbarHost(
@@ -154,6 +177,10 @@ private fun MainContent(
         }
         return
     }
+
+    // While the positioned request for an incoming VIEW intent is prepared, hold the blank
+    // background instead of flashing the home tabs.
+    if (initialRequest != null) return
 
     GlassBackground()
 
@@ -213,6 +240,8 @@ private fun MainContent(
                 0 -> LibraryScreen(
                     videos = library,
                     onPlay = { item ->
+                        externalPlayback = false
+
                         val resumeUrl = item.currentUrl ?: item.url
                         val resumePattern = if (item.currentUrl != null) {
                             item.currentPattern ?: item.pattern
@@ -242,6 +271,8 @@ private fun MainContent(
                 else -> DeviceVideosScreen(
                     localPositions = localPositions,
                     onPlay = { video, resumePosition ->
+                        externalPlayback = false
+
                         playback = PlaybackRequest(
                             key = video.uri,
                             title = video.name,

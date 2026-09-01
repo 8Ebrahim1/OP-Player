@@ -1,5 +1,10 @@
 package com.opplayer.app.data
 
+data class SharedVideoInfo(
+    val displayName: String?,
+    val sizeBytes: Long?
+)
+
 data class LocalVideo(
     val id: Long,
     val uri: String,

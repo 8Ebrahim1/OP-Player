@@ -5,7 +5,6 @@ import android.content.ContextWrapper
 import android.content.res.AssetManager
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.text.TextUtils
 import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -17,6 +16,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.core.text.layoutDirection
 import com.opplayer.app.data.AppLanguage
 import com.opplayer.app.data.AppLayoutDirection
 import java.util.Locale
@@ -108,7 +108,7 @@ private fun Configuration.firstLocale(): Locale =
 
 private fun AppLanguage.toLocale(systemLocale: Locale): Locale = when (this) {
     AppLanguage.SYSTEM -> systemLocale
-    AppLanguage.PERSIAN -> Locale(PERSIAN_LANGUAGE)
+    AppLanguage.PERSIAN -> Locale.forLanguageTag(PERSIAN_LANGUAGE)
     AppLanguage.ENGLISH -> Locale.ENGLISH
 }
 
@@ -117,7 +117,7 @@ private fun AppLayoutDirection.toComposeDirection(locale: Locale): LayoutDirecti
     AppLayoutDirection.LTR -> LayoutDirection.Ltr
 
     AppLayoutDirection.AUTO ->
-        if (TextUtils.getLayoutDirectionFromLocale(locale) == View.LAYOUT_DIRECTION_RTL) {
+        if (locale.layoutDirection == View.LAYOUT_DIRECTION_RTL) {
             LayoutDirection.Rtl
         } else {
             LayoutDirection.Ltr

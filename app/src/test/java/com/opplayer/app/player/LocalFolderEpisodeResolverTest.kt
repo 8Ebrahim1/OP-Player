@@ -66,10 +66,53 @@ class LocalFolderEpisodeResolverTest {
     }
 
     @Test
-    fun `a request without a folder is not resolved`() = runTest {
+    fun `a request without a folder is located across all folders`() = runTest {
+        val result = resolver.resolve(request(folder.videos[0].uri, folderId = null), forward = true)
+
+        assertEquals(
+            folder.videos[1].uri,
+            (result as EpisodeResolutionResult.Found).target.url
+        )
+    }
+
+    @Test
+    fun `an unknown video without a folder is not resolved`() = runTest {
         assertEquals(
             EpisodeResolutionResult.NotFound,
-            resolver.resolve(request(folder.videos[0].uri, folderId = null), forward = true)
+            resolver.resolve(
+                request("content://media/external/video/media/99", folderId = null),
+                forward = true
+            )
+        )
+    }
+
+    @Test
+    fun `a documents provider uri from another app matches the media store entry`() = runTest {
+        val shared = "content://com.android.providers.media.documents/document/video:2"
+
+        val result = resolver.resolve(request(shared, folderId = null), forward = false)
+
+        assertEquals(
+            folder.videos[0].uri,
+            (result as EpisodeResolutionResult.Found).target.url
+        )
+    }
+
+    @Test
+    fun `a video from a foreign provider is matched by its display name`() = runTest {
+        val shared = "content://com.example.gallery/shared/55"
+        val named = PlaybackRequest(
+            key = shared,
+            title = "second.mp4",
+            uri = shared,
+            source = PlaybackRequest.Source.DEVICE
+        )
+
+        val result = resolver.resolve(named, forward = true)
+
+        assertEquals(
+            folder.videos[2].uri,
+            (result as EpisodeResolutionResult.Found).target.url
         )
     }
 

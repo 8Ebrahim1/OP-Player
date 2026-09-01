@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.opplayer.app.R
+import com.opplayer.app.data.DeviceVideoKeys
 import com.opplayer.app.data.EpisodePattern
 import com.opplayer.app.data.LibraryProgressUpdater
 import com.opplayer.app.data.LibraryRepository
@@ -14,6 +15,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -107,6 +109,17 @@ class LibraryViewModel(
 
     fun resetProgress(id: String) {
         viewModelScope.launch { repository.resetLibraryProgress(id) }
+    }
+
+    /**
+     * A VIEW intent from another app carries no resume position, and [localPositions] starts out
+     * empty, so the stored value is read straight from the repository instead. Older versions
+     * stored external opens under the raw provider uri, so the furthest position across the raw
+     * and canonical keys wins.
+     */
+    suspend fun devicePosition(uri: String): Long {
+        val positions = repository.localPositions.first()
+        return maxOf(positions[uri] ?: 0L, positions[DeviceVideoKeys.canonical(uri)] ?: 0L)
     }
 
     fun saveDevicePosition(uri: String, positionMs: Long) {

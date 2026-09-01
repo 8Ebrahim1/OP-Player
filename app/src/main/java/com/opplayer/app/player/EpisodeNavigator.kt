@@ -50,6 +50,13 @@ object EpisodeNavigator {
     private val episodeShortRegex =
         Regex("""(?<![A-Za-z0-9])[Ee][Pp]?[._\-\s]{0,2}(\d{1,3})(?![0-9])""")
 
+    private val bareNumberRegex = Regex("""(?<![A-Za-z0-9])(\d{1,4})(?![A-Za-z0-9])""")
+
+    private val resolutionValues =
+        setOf(144, 240, 360, 480, 540, 576, 720, 1080, 1440, 2160, 4320)
+
+    private const val TAG_MASK = ' '
+
     fun hasMarker(url: String): Boolean = findMarker(url) != null
 
     fun findMarker(url: String): Marker? {
@@ -58,38 +65,141 @@ object EpisodeNavigator {
         val fileStart = pathPart.lastIndexOf('/') + 1
         if (fileStart >= pathPart.length) return null
 
-        val fileName = pathPart.substring(fileStart)
+        val name = DecodedName(pathPart.substring(fileStart))
+        val fileName = name.text
 
         seasonEpisodeRegex.findAll(fileName).lastOrNull()?.let { match ->
-            val season = match.groupValues[1]
-            val episode = match.groupValues[2]
             val seasonGroup = match.groups[1] ?: return@let
             val episodeGroup = match.groups[2] ?: return@let
+            val episodeValue = episodeGroup.value.toIntOrNull() ?: return@let
 
             return Marker(
-                seasonRange = seasonGroup.range.shift(fileStart),
-                seasonValue = season.toIntOrNull(),
-                seasonPad = season.length,
-                episodeRange = episodeGroup.range.shift(fileStart),
-                episodeValue = episode.toIntOrNull() ?: return@let,
-                episodePad = episode.length
+                seasonRange = name.rawRange(seasonGroup.range, fileStart),
+                seasonValue = seasonGroup.value.toIntOrNull(),
+                seasonPad = seasonGroup.value.length,
+                episodeRange = name.rawRange(episodeGroup.range, fileStart),
+                episodeValue = episodeValue,
+                episodePad = episodeGroup.value.length
             )
         }
 
-        val fallback = episodeWordRegex.findAll(fileName).lastOrNull()
+        val labelled = episodeWordRegex.findAll(fileName).lastOrNull()
             ?: episodeShortRegex.findAll(fileName).lastOrNull()
 
-        val group = fallback?.groups?.get(1) ?: return null
-        val value = group.value.toIntOrNull() ?: return null
+        val token = labelled?.groups?.get(1)?.let { Token(it.range, it.value) }
+            ?: bareEpisodeToken(fileName)
+            ?: return null
+
+        val value = token.text.toIntOrNull() ?: return null
 
         return Marker(
             seasonRange = null,
             seasonValue = null,
             seasonPad = 0,
-            episodeRange = group.range.shift(fileStart),
+            episodeRange = name.rawRange(token.range, fileStart),
             episodeValue = value,
-            episodePad = group.value.length
+            episodePad = token.text.length
         )
+    }
+
+    /**
+     * Long release names such as "Prince of Tennis - 077.[SS][480][MixFlixTop].mkv" carry no
+     * SxxExx marker, so the trailing standalone number is the episode. Bracketed tags are masked
+     * and resolution or year values skipped, otherwise "[480]" or "2023" wins instead.
+     */
+    private fun bareEpisodeToken(fileName: String): Token? {
+        val base = maskTags(fileName.substringBeforeLast('.'))
+
+        return bareNumberRegex.findAll(base)
+            .mapNotNull { match -> match.groups[1]?.let { Token(it.range, it.value) } }
+            .toList()
+            .lastOrNull { !it.isNoise() }
+    }
+
+    private fun Token.isNoise(): Boolean {
+        val value = text.toIntOrNull() ?: return true
+        if (value in resolutionValues) return true
+        return text.length == 4 && value in 1900..2099
+    }
+
+    private fun maskTags(value: String): String {
+        val chars = value.toCharArray()
+        var depth = 0
+
+        chars.indices.forEach { index ->
+            when (chars[index]) {
+                '[', '(', '{' -> {
+                    depth++
+                    chars[index] = TAG_MASK
+                }
+
+                ']', ')', '}' -> {
+                    if (depth > 0) depth--
+                    chars[index] = TAG_MASK
+                }
+
+                else -> if (depth > 0) chars[index] = TAG_MASK
+            }
+        }
+
+        return String(chars)
+    }
+
+    private data class Token(val range: IntRange, val text: String)
+
+    /**
+     * Percent-encoded names have to be matched decoded, because "%20" hides the separator in
+     * front of the episode number, yet rewritten in place. Every decoded index therefore keeps a
+     * pointer back into the original text.
+     */
+    private class DecodedName(raw: String) {
+
+        val text: String
+
+        private val starts: IntArray
+        private val ends: IntArray
+
+        init {
+            val builder = StringBuilder(raw.length)
+            val startList = ArrayList<Int>(raw.length)
+            val endList = ArrayList<Int>(raw.length)
+
+            var index = 0
+            while (index < raw.length) {
+                val octet = decodeOctet(raw, index)
+                if (octet != null) {
+                    builder.append(octet)
+                    startList += index
+                    endList += index + 2
+                    index += 3
+                } else {
+                    builder.append(raw[index])
+                    startList += index
+                    endList += index
+                    index++
+                }
+            }
+
+            text = builder.toString()
+            starts = startList.toIntArray()
+            ends = endList.toIntArray()
+        }
+
+        fun rawRange(range: IntRange, offset: Int): IntRange {
+            if (range.isEmpty() || range.first < 0 || range.last >= starts.size) {
+                return IntRange(range.first + offset, range.last + offset)
+            }
+            return IntRange(starts[range.first] + offset, ends[range.last] + offset)
+        }
+
+        private fun decodeOctet(raw: String, index: Int): Char? {
+            if (raw[index] != '%' || index + 2 >= raw.length) return null
+
+            val high = raw[index + 1].digitToIntOrNull(16) ?: return null
+            val low = raw[index + 2].digitToIntOrNull(16) ?: return null
+
+            return ((high shl 4) or low).toChar()
+        }
     }
 
     fun buildUrl(url: String, marker: Marker, season: Int?, episode: Int): String {
@@ -227,8 +337,6 @@ object EpisodeNavigator {
             ?.let { "S${it.pad(2)}E$episode" }
             ?: "E$episode"
     }
-
-    private fun IntRange.shift(offset: Int): IntRange = IntRange(first + offset, last + offset)
 
     private fun Int.pad(width: Int): String = toString().padStart(width.coerceAtLeast(1), '0')
 }

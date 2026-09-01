@@ -48,8 +48,32 @@ class EpisodeNavigationSupportTest {
     }
 
     @Test
-    fun `a device video without a folder does not support navigation`() {
-        val uri = "content://media/external/video/media/1204"
+    fun `a local video shared from another app supports navigation without a folder`() {
+        val content = PlaybackRequest(
+            key = "content://com.example.gallery/shared/video/1204",
+            title = "clip",
+            uri = "content://com.example.gallery/shared/video/1204",
+            source = PlaybackRequest.Source.DEVICE
+        )
+        val mediaStore = PlaybackRequest(
+            key = "content://media/external/video/media/1204",
+            title = "clip",
+            uri = "content://media/external/video/media/1204",
+            source = PlaybackRequest.Source.DEVICE
+        )
+        val file = content.copy(
+            key = "file:///storage/emulated/0/a.mkv",
+            uri = "file:///storage/emulated/0/a.mkv"
+        )
+
+        assertTrue(content.supportsEpisodeNavigation())
+        assertTrue(mediaStore.supportsEpisodeNavigation())
+        assertTrue(file.supportsEpisodeNavigation())
+    }
+
+    @Test
+    fun `a remote stream opened as a device video does not support navigation`() {
+        val uri = "https://cdn.example.com/live/stream"
         val request = PlaybackRequest(
             key = uri,
             title = "clip",

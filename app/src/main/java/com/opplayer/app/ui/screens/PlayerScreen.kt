@@ -117,6 +117,7 @@ fun PlayerScreen(
     val subtitle by playerViewModel.subtitleState.collectAsStateWithLifecycle()
     val subtitleText by playerViewModel.subtitleText.collectAsStateWithLifecycle()
     val subtitleStyle by subtitleStyleViewModel.settings.collectAsStateWithLifecycle()
+    val isPlaying by playerViewModel.playing.collectAsStateWithLifecycle()
 
     val isInPip = mainActivity?.isInPipMode?.value ?: false
     val controls = rememberPlayerControlsState()
@@ -228,10 +229,16 @@ fun PlayerScreen(
             val player = playerViewModel.player
             if (player != null && player.isPlaying) enterPip(mainActivity, player, videoBounds)
         }
-        onDispose { mainActivity?.onUserLeaveAction = null }
+        mainActivity?.onPipPlayPauseAction = { playerViewModel.playPause() }
+
+        onDispose {
+            mainActivity?.onUserLeaveAction = null
+            mainActivity?.onPipPlayPauseAction = null
+        }
     }
 
-    LaunchedEffect(mainActivity, videoBounds, playerViewModel.player) {
+    // Re-published on every play/pause so the remote action in the PiP window swaps its icon.
+    LaunchedEffect(mainActivity, videoBounds, playerViewModel.player, isPlaying) {
         val player = playerViewModel.player
         if (player != null) updatePipParams(mainActivity, player, videoBounds)
     }
@@ -293,8 +300,11 @@ fun PlayerScreen(
                 player = player,
                 scaleMode = state.scaleMode,
                 controlsEnabled = !isInPip,
+                showEpisodeButtons = state.canNavigateEpisodes,
                 controls = controls,
                 touchListener = gestures,
+                onNextEpisode = { playerViewModel.navigateEpisode(forward = true) },
+                onPreviousEpisode = { playerViewModel.navigateEpisode(forward = false) },
                 modifier = Modifier
                     .fillMaxSize()
                     .onGloballyPositioned { coordinates ->
@@ -321,11 +331,7 @@ fun PlayerScreen(
             PlayerTopBar(
                 title = state.displayTitle,
                 isFullscreen = state.isFullscreen,
-                showEpisodeButton = state.canNavigateEpisodes,
-                isResolvingEpisode = state.isResolvingEpisode,
-                isLocalQueue = state.request.source == PlaybackRequest.Source.DEVICE,
                 onBack = handleBack,
-                onNextEpisode = { playerViewModel.navigateEpisode(forward = true) },
                 onCycleScale = {
                     val next = playerViewModel.cycleScaleMode()
                     Toast.makeText(context, context.getString(next.labelRes), Toast.LENGTH_SHORT)

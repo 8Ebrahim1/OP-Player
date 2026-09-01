@@ -103,4 +103,60 @@ class EpisodeNavigatorTest {
         assertEquals(7, marker!!.episodeValue)
         assertNull(marker.seasonValue)
     }
+
+    @Test
+    fun markerIsDetectedForTaggedReleaseNames() {
+        val marker = EpisodeNavigator.findMarker(taggedUrl)
+
+        assertNotNull(marker)
+        assertEquals(77, marker!!.episodeValue)
+        assertEquals(3, marker.episodePad)
+        assertNull(marker.seasonValue)
+    }
+
+    @Test
+    fun taggedReleaseNamesStepForwardAndBack() {
+        val marker = EpisodeNavigator.findMarker(taggedUrl)!!
+
+        assertTrue(
+            EpisodeNavigator.buildUrl(taggedUrl, marker, null, 78).endsWith(
+                "Prince of Tennis - 078.[SS][480][MixFlixTop].mkv"
+            )
+        )
+        assertTrue(
+            EpisodeNavigator.buildUrl(taggedUrl, marker, null, 76).endsWith(
+                "Prince of Tennis - 076.[SS][480][MixFlixTop].mkv"
+            )
+        )
+    }
+
+    @Test
+    fun percentEncodedNamesAreRewrittenInPlace() {
+        val marker = EpisodeNavigator.findMarker(encodedUrl)
+
+        assertNotNull(marker)
+        assertEquals(77, marker!!.episodeValue)
+        assertTrue(
+            EpisodeNavigator.buildUrl(encodedUrl, marker, null, 78).endsWith(
+                "Prince%20of%20Tennis%20-%20078.%5BSS%5D%5B480%5D%5BMixFlixTop%5D.mkv"
+            )
+        )
+    }
+
+    @Test
+    fun resolutionAndYearTokensAreNotTreatedAsEpisodes() {
+        assertNull(EpisodeNavigator.findMarker("http://example.com/dl/Interstellar 2014.mkv"))
+        assertNull(EpisodeNavigator.findMarker("http://example.com/dl/Interstellar 1080.mkv"))
+        assertNull(EpisodeNavigator.findMarker("http://example.com/dl/Movie.x264.mkv"))
+    }
+
+    private companion object {
+        const val taggedUrl =
+            "https://dl3.gamenub.ir/Anime Series/2023/the-prince-of-tennis/S1/480/" +
+                "Prince of Tennis - 077.[SS][480][MixFlixTop].mkv"
+
+        const val encodedUrl =
+            "https://dl3.gamenub.ir/Anime%20Series/2023/the-prince-of-tennis/S1/480/" +
+                "Prince%20of%20Tennis%20-%20077.%5BSS%5D%5B480%5D%5BMixFlixTop%5D.mkv"
+    }
 }

@@ -3,6 +3,7 @@ package com.opplayer.app.ui.screens
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.annotation.StringRes
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,16 +17,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.VideocamOff
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -48,6 +56,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.opplayer.app.R
 import com.opplayer.app.data.LocalVideo
 import com.opplayer.app.data.MediaAccess
+import com.opplayer.app.data.VideoSortOrder
 import com.opplayer.app.data.currentMediaAccess
 import com.opplayer.app.data.mediaPermissionRequest
 import com.opplayer.app.ui.DeviceVideosViewModel
@@ -58,6 +67,7 @@ import com.opplayer.app.ui.components.HelpSheet
 import com.opplayer.app.ui.components.LocalVideoCard
 import com.opplayer.app.ui.components.ScreenHeader
 import com.opplayer.app.ui.components.deviceHelpEntries
+import com.opplayer.app.ui.localization.LocalizedWindow
 
 @Composable
 fun DeviceVideosScreen(
@@ -72,9 +82,34 @@ fun DeviceVideosScreen(
     var access by remember { mutableStateOf(context.currentMediaAccess()) }
     var permissionRequested by remember { mutableStateOf(false) }
     var showHelp by remember { mutableStateOf(false) }
+    var showSortMenu by remember { mutableStateOf(false) }
 
     val openFolderId = uiState.openFolderId
     val query = uiState.query
+
+    // Opening a video swaps this screen out for the player, so the last scroll offset is mirrored
+    // into the view model and replayed when the user comes back.
+    val folderListState = rememberLazyListState(
+        initialFirstVisibleItemIndex = viewModel.folderScrollIndex,
+        initialFirstVisibleItemScrollOffset = viewModel.folderScrollOffset
+    )
+
+    val videoListState = rememberLazyListState(
+        initialFirstVisibleItemIndex = viewModel.videoScrollIndex,
+        initialFirstVisibleItemScrollOffset = viewModel.videoScrollOffset
+    )
+
+    LaunchedEffect(folderListState) {
+        snapshotFlow {
+            folderListState.firstVisibleItemIndex to folderListState.firstVisibleItemScrollOffset
+        }.collect { (index, offset) -> viewModel.rememberFolderScroll(index, offset) }
+    }
+
+    LaunchedEffect(videoListState) {
+        snapshotFlow {
+            videoListState.firstVisibleItemIndex to videoListState.firstVisibleItemScrollOffset
+        }.collect { (index, offset) -> viewModel.rememberVideoScroll(index, offset) }
+    }
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -134,14 +169,53 @@ fun DeviceVideosScreen(
                         IconButton(onClick = { viewModel.closeFolder() }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back)
+                                contentDescription = stringResource(R.string.back),
+                                tint = MaterialTheme.colorScheme.primary
                             )
+                        }
+
+                        Box {
+                            IconButton(onClick = { showSortMenu = true }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.Sort,
+                                    contentDescription = stringResource(R.string.sort_videos),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+
+                            DropdownMenu(
+                                expanded = showSortMenu,
+                                onDismissRequest = { showSortMenu = false }
+                            ) {
+                                LocalizedWindow {
+                                    VideoSortOrder.entries.forEach { order ->
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource(order.labelRes())) },
+                                            onClick = {
+                                                viewModel.setSortOrder(order)
+                                                showSortMenu = false
+                                            },
+                                            trailingIcon = if (order == uiState.sortOrder) {
+                                                {
+                                                    Icon(
+                                                        Icons.Default.Check,
+                                                        contentDescription = null
+                                                    )
+                                                }
+                                            } else {
+                                                null
+                                            }
+                                        )
+                                    }
+                                }
+                            }
                         }
                     } else if (access.canReadAnything) {
                         IconButton(onClick = { viewModel.refresh() }) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
-                                contentDescription = stringResource(R.string.refresh)
+                                contentDescription = stringResource(R.string.refresh),
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -226,6 +300,7 @@ fun DeviceVideosScreen(
                 }
 
                 LazyColumn(
+                    state = folderListState,
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     contentPadding = PaddingValues(bottom = 24.dp)
                 ) {
@@ -257,6 +332,7 @@ fun DeviceVideosScreen(
                     }
                 } else {
                     LazyColumn(
+                        state = videoListState,
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                         contentPadding = PaddingValues(bottom = 24.dp)
                     ) {
@@ -293,6 +369,14 @@ private fun PartialAccessNotice(onManage: () -> Unit) {
             .fillMaxWidth()
             .padding(bottom = 10.dp)
     )
+}
+
+@StringRes
+private fun VideoSortOrder.labelRes(): Int = when (this) {
+    VideoSortOrder.NAME_ASC -> R.string.sort_name_asc
+    VideoSortOrder.NAME_DESC -> R.string.sort_name_desc
+    VideoSortOrder.DATE_NEWEST -> R.string.sort_date_newest
+    VideoSortOrder.DATE_OLDEST -> R.string.sort_date_oldest
 }
 
 private fun android.content.Context.openAppSettings() {

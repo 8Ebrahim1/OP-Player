@@ -5,6 +5,22 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-08-27
+
+### Added
+- Previous/next video buttons sit in the player controls next to the 15 second seek buttons, for both device files and online links; the top bar no longer carries the next-episode arrow.
+- The picture in picture window has its own play/pause button.
+
+### Changed
+- Whole toolchain and dependency refresh: Android Gradle Plugin 9.3.1, Gradle 9.7.1, Kotlin 2.4.10, Compose BOM 2026.08.00, Media3 1.11.0, AndroidX Core 1.19.0, Lifecycle 2.11.0, Activity 1.13.0, DataStore 1.2.1, kotlinx-serialization 1.11.0, kotlinx-coroutines 1.11.0, AndroidX Test 1.7.0 / Espresso 3.7.0, `compileSdk`/`targetSdk` 37.
+- Videos inside a device folder are ordered by name with numbers compared numerically, so "076" comes before "077" and "9" before "10".
+
+### Fixed
+- Next episode is found for long release names with no `SxxExx` marker, such as `Prince of Tennis - 077.[SS][480][MixFlixTop].mkv`; bracketed tags, resolutions and years are no longer mistaken for the episode number, and percent-encoded links are rewritten in place.
+- Next video for device files moves forward instead of backwards.
+- A video opened from another app resumes at the stored position.
+- Returning from the player keeps the scroll position in a device folder instead of jumping to the top.
+
 ## [1.5.0] - 2026-08-11
 
 ### Added

@@ -9,9 +9,11 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.ForwardingPlayer
 import androidx.media3.common.Player
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
@@ -51,22 +53,70 @@ fun PlayerSurface(
     player: Player,
     scaleMode: VideoScaleMode,
     controlsEnabled: Boolean,
+    showEpisodeButtons: Boolean,
     controls: PlayerControlsState,
     touchListener: View.OnTouchListener?,
+    onNextEpisode: () -> Unit,
+    onPreviousEpisode: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val next by rememberUpdatedState(onNextEpisode)
+    val previous by rememberUpdatedState(onPreviousEpisode)
+
+    // The controller draws its next/previous buttons right beside the 15 second seek buttons, so
+    // episode navigation is published as a playlist command instead of living in the top bar.
+    val navigablePlayer = remember(player) {
+        object : ForwardingPlayer(player) {
+
+            override fun getAvailableCommands(): Player.Commands =
+                super.getAvailableCommands()
+                    .buildUpon()
+                    .addAll(
+                        Player.COMMAND_SEEK_TO_NEXT,
+                        Player.COMMAND_SEEK_TO_PREVIOUS,
+                        Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM,
+                        Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM
+                    )
+                    .build()
+
+            // ForwardingPlayer delegates this straight to the wrapped player, bypassing the
+            // commands added above, so the episode buttons could be left disabled without it.
+            override fun isCommandAvailable(command: Int): Boolean =
+                command == Player.COMMAND_SEEK_TO_NEXT ||
+                    command == Player.COMMAND_SEEK_TO_PREVIOUS ||
+                    command == Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM ||
+                    command == Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM ||
+                    super.isCommandAvailable(command)
+
+            override fun hasNextMediaItem(): Boolean = true
+
+            override fun hasPreviousMediaItem(): Boolean = true
+
+            override fun seekToNext() = next()
+
+            override fun seekToNextMediaItem() = next()
+
+            override fun seekToPrevious() = previous()
+
+            override fun seekToPreviousMediaItem() = previous()
+        }
+    }
+
     AndroidView(
         factory = { viewContext ->
             PlayerView(viewContext).apply {
-                this.player = player
+                // The controller mirrors in RTL locales; pin it LTR so previous stays on the
+                // left and next on the right.
+                layoutDirection = View.LAYOUT_DIRECTION_LTR
+                this.player = navigablePlayer
                 useController = true
                 controllerAutoShow = true
                 controllerShowTimeoutMs = CONTROLLER_TIMEOUT_MS
                 keepScreenOn = true
 
                 subtitleView?.visibility = View.GONE
-                setShowNextButton(false)
-                setShowPreviousButton(false)
+                setShowNextButton(showEpisodeButtons)
+                setShowPreviousButton(showEpisodeButtons)
                 setShowRewindButton(true)
                 setShowFastForwardButton(true)
                 setResizeMode(scaleMode.toResizeMode())
@@ -87,6 +137,8 @@ fun PlayerSurface(
         update = { view ->
             view.resizeMode = scaleMode.toResizeMode()
             view.useController = controlsEnabled
+            view.setShowNextButton(showEpisodeButtons)
+            view.setShowPreviousButton(showEpisodeButtons)
             if (!controlsEnabled) view.hideController()
         },
         onRelease = { view ->

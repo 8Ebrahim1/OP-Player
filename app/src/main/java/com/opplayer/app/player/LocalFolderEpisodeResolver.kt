@@ -1,6 +1,7 @@
 package com.opplayer.app.player
 
 import android.content.Context
+import com.opplayer.app.data.DeviceVideoKeys
 import com.opplayer.app.data.LocalVideoRepository
 import com.opplayer.app.data.VideoFolder
 
@@ -16,14 +17,26 @@ class LocalFolderEpisodeResolver(
         request: PlaybackRequest,
         forward: Boolean
     ): EpisodeResolutionResult {
-        val folderId = request.folderId ?: return EpisodeResolutionResult.NotFound
-
-        val folder = runCatching { loadFolders() }
-            .getOrNull()
-            ?.firstOrNull { it.id == folderId }
+        val folders = runCatching { loadFolders() }.getOrNull()
             ?: return EpisodeResolutionResult.NotFound
 
-        val index = folder.videos.indexOfFirst { it.uri == request.uri }
+        // Videos shared from another app carry that app's own uri, so matching also falls back
+        // to the display name; without a folder hint the video is located across all folders.
+        val targetKey = DeviceVideoKeys.canonical(request.key)
+        val targetName = request.title
+
+        val folder = request.folderId
+            ?.let { id -> folders.firstOrNull { it.id == id } }
+            ?: folders.firstOrNull { folder ->
+                folder.videos.any {
+                    DeviceVideoKeys.canonical(it.uri) == targetKey || it.name == targetName
+                }
+            }
+            ?: return EpisodeResolutionResult.NotFound
+
+        val index = folder.videos.indexOfFirst {
+            DeviceVideoKeys.canonical(it.uri) == targetKey || it.name == targetName
+        }
         if (index < 0) return EpisodeResolutionResult.NotFound
 
         val target = folder.videos.getOrNull(if (forward) index + 1 else index - 1)
